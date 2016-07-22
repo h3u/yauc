@@ -1,4 +1,4 @@
-package com.bitsailer.yauc;
+package com.bitsailer.yauc.ui;
 
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
