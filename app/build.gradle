@@ -24,10 +24,12 @@ android {
 
 ext {
     // versions for libraries that multiple dependencies
-    supportLibVersion = '24.0.0'
+    supportLibVersion = '24.1.0'
     schematicVersion = '0.6.7'
     playServicesVersion = '9.0.0'
     butterKnifeVersion = '8.2.1'
+    retrofitVersion = '2.1.0'
+    okHttpVersion = '3.4.1'
 }
 
 dependencies {
@@ -44,8 +46,13 @@ dependencies {
     compile "com.jakewharton:butterknife:${butterKnifeVersion}"
     apt "com.jakewharton:butterknife-compiler:${butterKnifeVersion}"
 
-    // REST client
-    compile 'com.squareup.retrofit2:retrofit:2.1.0'
+    // HTTP/REST client
+    compile 'commons-lang:commons-lang:2.6'
+    compile "com.squareup.okhttp3:okhttp:${okHttpVersion}"
+    compile "com.squareup.okhttp3:logging-interceptor:${okHttpVersion}"
+    compile "com.google.code.gson:gson:2.7"
+    compile "com.squareup.retrofit2:retrofit:${retrofitVersion}"
+    compile "com.squareup.retrofit2:converter-gson:${retrofitVersion}"
 
     // Schematic
     apt "net.simonvt.schematic:schematic-compiler:${schematicVersion}"

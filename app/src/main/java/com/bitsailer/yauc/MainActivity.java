@@ -19,6 +19,8 @@ import android.view.ViewGroup;
 
 import android.widget.TextView;
 
+import com.bitsailer.yauc.R;
+
 public class MainActivity extends AppCompatActivity {
 
     /**
