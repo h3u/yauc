@@ -1,6 +1,9 @@
 
 package com.bitsailer.yauc.api.model;
 
+import android.database.Cursor;
+
+import com.bitsailer.yauc.data.PhotoColumns;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -300,4 +303,18 @@ public class SimplePhoto {
         return new EqualsBuilder().append(id, rhs.id).append(createdAt, rhs.createdAt).append(width, rhs.width).append(height, rhs.height).append(color, rhs.color).append(likes, rhs.likes).append(likedByUser, rhs.likedByUser).append(user, rhs.user).append(currentUserCollections, rhs.currentUserCollections).append(urls, rhs.urls).append(categories, rhs.categories).append(links, rhs.links).isEquals();
     }
 
+    public static SimplePhoto fromCursor(Cursor cursor) {
+        SimplePhoto photo = new SimplePhoto();
+        if (cursor != null) {
+            photo.setId(cursor.getString(cursor.getColumnIndex(PhotoColumns.PHOTO_ID)));
+            photo.setColor(cursor.getString(cursor.getColumnIndex(PhotoColumns.PHOTO_COLOR)));
+            photo.setWidth(cursor.getInt(cursor.getColumnIndex(PhotoColumns.PHOTO_WIDTH)));
+            photo.setHeight(cursor.getInt(cursor.getColumnIndex(PhotoColumns.PHOTO_HEIGHT)));
+            Urls urls = new Urls();
+            urls.setSmall(cursor.getString(cursor.getColumnIndex(PhotoColumns.URLS_SMALL)));
+            photo.setUrls(urls);
+        }
+
+        return photo;
+    }
 }

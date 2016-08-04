@@ -1,5 +1,6 @@
 package com.bitsailer.yauc.api;
 
+import com.bitsailer.yauc.api.model.AccessToken;
 import com.bitsailer.yauc.api.model.Photo;
 import com.bitsailer.yauc.api.model.SimplePhoto;
 import com.bitsailer.yauc.api.model.User;
@@ -26,7 +27,29 @@ import retrofit2.http.Query;
 
 public interface UnsplashAPI {
 
-    public static final String URL = "https://api.unsplash.com/";
+    String URL = "https://api.unsplash.com/";
+    String OAUTH_URL = "https://unsplash.com/";
+    String AUTHORIZATION_GRANT_TYPE = "authorization_code";
+    String PERMISSION_SCOPE = "public+read_user+read_photos+write_photos+write_likes";
+    int MAX_PER_PAGE = 30;
+
+    /**
+     * Get access token with authorization code.
+     *
+     * @param client_id client id of yauc
+     * @param client_secret secret given
+     * @param code the given code
+     * @param grantType must be “authorization_code”
+     * @return access token
+     */
+    @FormUrlEncoded
+    @POST("oauth/token")
+    Call<AccessToken> getAccessToken(
+            @Field("client_id") String client_id,
+            @Field("client_secret") String client_secret,
+            @Field("redirect_uri") String redirectUri,
+            @Field("code") String code,
+            @Field("grant_type") String grantType);
 
     /**
      * Get list of photos
@@ -37,7 +60,7 @@ public interface UnsplashAPI {
      * @return list of photos
      */
     @GET("photos")
-    Call<List<Photo>> listPhotos(
+    Call<List<SimplePhoto>> listPhotos(
             @Query("page") Integer page,
             @Query("per_page") Integer perPage,
             @Query("order_by") String orderBy);

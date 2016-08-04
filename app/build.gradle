@@ -4,15 +4,22 @@ apply plugin: 'android-apt'
 def gitSha1 = 'git rev-parse --short HEAD'.execute([], project.rootDir).text.trim()
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.0"
+    compileSdkVersion 23
+    buildToolsVersion "23.0.3"
+
+    // load api key and put it to build config
+    Properties localProperties = new Properties()
+    localProperties.load(new FileInputStream(file(project.rootProject.file("local.properties"))))
+
     defaultConfig {
         applicationId "com.bitsailer.yauc"
         minSdkVersion 19
-        targetSdkVersion 24
+        targetSdkVersion 23
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        buildConfigField "String", "UNSPLASH_CLIENT_ID", localProperties["unsplash_client_id"]
+        buildConfigField "String", "UNSPLASH_CLIENT_SECRET", localProperties["unsplash_client_secret"]
     }
     buildTypes {
         release {
@@ -23,8 +30,8 @@ android {
 }
 
 ext {
-    // versions for libraries that multiple dependencies
-    supportLibVersion = '24.1.0'
+    // versions for libraries with multiple dependencies
+    supportLibVersion = '23.4.0'
     schematicVersion = '0.6.7'
     playServicesVersion = '9.0.0'
     butterKnifeVersion = '8.2.1'
@@ -41,6 +48,7 @@ dependencies {
     // Android Libraries
     compile "com.android.support:appcompat-v7:${supportLibVersion}"
     compile "com.android.support:design:${supportLibVersion}"
+    compile "com.android.support:recyclerview-v7:${supportLibVersion}"
 
     // Binding
     compile "com.jakewharton:butterknife:${butterKnifeVersion}"
@@ -67,6 +75,12 @@ dependencies {
 
     // Google Maps
     compile "com.google.android.gms:play-services-maps:${playServicesVersion}"
+
+    // Logging
+    compile 'com.orhanobut:logger:1.15'
+
+    // Events
+    compile 'org.greenrobot:eventbus:3.0.0'
 
     // Testing
     testCompile 'junit:junit:4.12'

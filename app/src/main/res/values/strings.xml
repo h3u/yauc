@@ -1,5 +1,33 @@
 <resources>
     <string name="app_name">YAUC</string>
-    <string name="action_settings">Settings</string>
-    <string name="section_format">Hello World from section: %1$d</string>
+
+    <!--menu-->
+    <string name="action_login">Sign in</string>
+    <string name="action_logout">Sign out</string>
+    <string name="action_refresh">Refresh</string>
+
+    <!--sync-->
+    <string name="content_authority">com.bitsailer.yauc.provider</string>
+
+    <!--tabs-->
+    <string name="section_1">What\'s new</string>
+    <string name="section_2">Favorites</string>
+    <string name="section_3">My photos</string>
+
+    <!--oauth authorization-->
+    <string name="unsplash_authorization_url">https://unsplash.com/oauth/authorize?client_id=%1$s&amp;redirect_uri=yauc://redirect-uri&amp;response_type=code&amp;scope=%2$s</string>
+    <string name="unsplash_authorization_redirect_uri">yauc://redirect-uri</string>
+    <string name="unsplash_redirect_uri_scheme">yauc</string>
+
+    <!--login -->
+    <string name="login_redirect_hint">To sign in, you will be redirected to unsplash.com.</string>
+    <string name="title_activity_login">Sign in</string>
+    <string name="message_failure_login">Sign in failed. Please try again.</string>
+    <string name="message_login">Hello %1$s!</string>
+    <string name="unknown_user_name">Unsplasher</string>
+    <string name="message_ask_logout">Really want to sign out?</string>
+    <string name="message_logout">You have been signed out.</string>
+
+    <!--buttons-->
+    <string name="button_yes">@android:string/yes</string>
 </resources>
