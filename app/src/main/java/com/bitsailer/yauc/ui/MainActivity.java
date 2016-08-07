@@ -19,11 +19,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bitsailer.yauc.Preferences;
 import com.bitsailer.yauc.R;
 import com.bitsailer.yauc.api.UnsplashAPI;
 import com.bitsailer.yauc.api.UnsplashService;
 import com.bitsailer.yauc.api.model.User;
-import com.bitsailer.yauc.Preferences;
 import com.bitsailer.yauc.sync.PhotoManagement;
 import com.bitsailer.yauc.sync.SyncAdapter;
 import com.orhanobut.logger.Logger;
@@ -34,13 +34,17 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static com.bitsailer.yauc.R.id.fab;
+
 /**
  * App entry point and holder of three {@link PhotoListFragment} to
  * display new, favorite and own photos arranged in tabs.
  */
 public class MainActivity extends AppCompatActivity {
 
+    private static final String STATE_TAB_POSITION = "state_tab_position";
     private static Preferences mPreferences;
+    private int mTabPosition;
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -58,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
      */
     @BindView(R.id.container) ViewPager mViewPager;
     @BindView(R.id.tabs) TabLayout mTabLayout;
+    @BindView(fab) FloatingActionButton mFab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,17 +84,69 @@ public class MainActivity extends AppCompatActivity {
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
         mTabLayout.setupWithViewPager(mViewPager);
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        if (savedInstanceState != null) {
+            mTabPosition = savedInstanceState.getInt(STATE_TAB_POSITION, 0);
+        }
+
+        // add listener and display fab
+        mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Add photo coming soon ...", Snackbar.LENGTH_SHORT)
                         .setAction("Action", null).show();
             }
         });
 
+        // setup icons
+        initTabs();
     }
 
+    private void arrange(TabLayout.Tab tab) {
+        mTabPosition = tab.getPosition();
+        mViewPager.setCurrentItem(mTabPosition);
+        if (mTabPosition == SectionsPagerAdapter.POSITION_NEW) {
+            if (tab.isSelected()) {
+                tab.setIcon(R.drawable.ic_new_releases_accent);
+                mFab.hide();
+            } else {
+                tab.setIcon(R.drawable.ic_new_releases);
+            }
+        } else if (mTabPosition == SectionsPagerAdapter.POSITION_FAVORITES) {
+            if (tab.isSelected()) {
+                tab.setIcon(R.drawable.ic_favorite_accent);
+                mFab.hide();
+            } else {
+                tab.setIcon(R.drawable.ic_favorite);
+            }
+        } else if (mTabPosition == SectionsPagerAdapter.POSITION_OWN) {
+            if (tab.isSelected()) {
+                tab.setIcon(R.drawable.ic_account_accent);
+                mFab.show();
+            } else {
+                tab.setIcon(R.drawable.ic_account);
+            }
+        }
+    }
+
+    private void initTabs() {
+        for (int i=0; i < SectionsPagerAdapter.PAGES; i++) {
+            TabLayout.Tab tab = mTabLayout.getTabAt(i);
+            if (tab != null) {
+                arrange(tab);
+                switch (i) {
+                    case SectionsPagerAdapter.POSITION_NEW:
+                        tab.setContentDescription(R.string.content_description_tab_new);
+                        break;
+                    case SectionsPagerAdapter.POSITION_FAVORITES:
+                        tab.setContentDescription(R.string.content_description_tab_favorite);
+                        break;
+                    case SectionsPagerAdapter.POSITION_OWN:
+                        tab.setContentDescription(R.string.content_description_tab_own);
+                        break;
+                }
+            }
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -143,6 +200,18 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt(STATE_TAB_POSITION, mTabPosition);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mTabLayout.setOnTabSelectedListener(null);
+    }
+
     /**
      * Greet user if there's an intent from login.
      */
@@ -158,6 +227,29 @@ public class MainActivity extends AppCompatActivity {
             }
             getIntent().removeExtra(LoginActivity.INTENT_EXTRA_SUCCESS);
         }
+        initTabs();
+        mTabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                arrange(tab);
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+                if (tab.getPosition() == SectionsPagerAdapter.POSITION_NEW) {
+                    tab.setIcon(R.drawable.ic_new_releases);
+                } else if (tab.getPosition() == SectionsPagerAdapter.POSITION_FAVORITES) {
+                    tab.setIcon(R.drawable.ic_favorite);
+                } else if (tab.getPosition() == SectionsPagerAdapter.POSITION_OWN) {
+                    tab.setIcon(R.drawable.ic_account);
+                }
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+                Logger.d(tab.getPosition());
+            }
+        });
     }
 
     private void sayHello() {
@@ -231,6 +323,11 @@ public class MainActivity extends AppCompatActivity {
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
+        static final int PAGES = 3;
+        static final int POSITION_NEW = 0;
+        static final int POSITION_FAVORITES = 1;
+        static final int POSITION_OWN = 2;
+
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
@@ -239,11 +336,11 @@ public class MainActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            if (position == 0) {
+            if (position == POSITION_NEW) {
                 return PhotoListFragment.newInstance(2, PhotoListFragment.PHOTO_TYPE_NEW);
-            } else if (position == 1) {
-                return PhotoListFragment.newInstance(2, PhotoListFragment.PHOTO_TYPE_FAVORITES);
-            } else if (position == 2) {
+            } else if (position == POSITION_FAVORITES) {
+                return PhotoListFragment.newInstance(1, PhotoListFragment.PHOTO_TYPE_FAVORITES);
+            } else if (position == POSITION_OWN) {
                 return PhotoListFragment.newInstance(2, PhotoListFragment.PHOTO_TYPE_OWN);
             }
             return PlaceholderFragment.newInstance(position + 1);
@@ -252,20 +349,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 3;
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0:
-                    return getString(R.string.section_1);
-                case 1:
-                    return getString(R.string.section_2);
-                case 2:
-                    return getString(R.string.section_3);
-            }
-            return null;
+            return PAGES;
         }
     }
 }

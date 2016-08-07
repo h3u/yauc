@@ -9,10 +9,11 @@
     <!--sync-->
     <string name="content_authority">com.bitsailer.yauc.provider</string>
 
-    <!--tabs-->
-    <string name="section_1">What\'s new</string>
-    <string name="section_2">Favorites</string>
-    <string name="section_3">My photos</string>
+    <!-- buttons -->
+    <string name="content_description_tab_new">New photos</string>
+    <string name="content_description_tab_favorite">Your favorite photos</string>
+    <string name="content_description_tab_own">Your own photos</string>
+    <string name="content_description_fab">Add a new photo</string>
 
     <!--oauth authorization-->
     <string name="unsplash_authorization_url">https://unsplash.com/oauth/authorize?client_id=%1$s&amp;redirect_uri=yauc://redirect-uri&amp;response_type=code&amp;scope=%2$s</string>

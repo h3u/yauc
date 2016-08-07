@@ -1,11 +1,12 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColorHighlight">@color/colorAccent</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -17,13 +18,17 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <style name="AppTabLayout" parent="Widget.Design.TabLayout">
+    <style name="AppTheme.TabLayout" parent="Widget.Design.TabLayout">
+        <item name="android:layout_height">48dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="tabMinWidth">@dimen/tab_min_width</item>
         <item name="tabMaxWidth">@dimen/tab_max_width</item>
         <item name="tabIndicatorColor">?attr/colorAccent</item>
         <item name="tabIndicatorHeight">2dp</item>
         <item name="tabBackground">?attr/selectableItemBackground</item>
         <item name="tabTextAppearance">@style/AppTabTextAppearance</item>
-        <item name="tabSelectedTextColor">?attr/colorAccent</item>
+        <item name="tabGravity">fill</item>
+        <item name="tabMode">fixed</item>
     </style>
 
     <!-- for text -->

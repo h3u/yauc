@@ -38,6 +38,7 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
     static final int PHOTO_TYPE_FAVORITES = 2;
     static final int PHOTO_TYPE_OWN = 3;
     private int mColumnCount = 2;
+    private int mOrientation;
     private int mPhotoType = PHOTO_TYPE_NEW;
     private static final String[] PHOTO_COLUMNS = {
             PhotoColumns.PHOTO_ID,
@@ -73,6 +74,7 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
             mPhotoType = getArguments().getInt(ARG_PHOTO_TYPE);
         }
+        mOrientation = getResources().getConfiguration().orientation;
     }
 
     @Override
