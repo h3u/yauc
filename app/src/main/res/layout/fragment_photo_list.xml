@@ -6,9 +6,9 @@
     android:name="com.bitsailer.yauc.ui.NewPhotosFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginTop="8dp"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
+    android:paddingTop="4dp"
+    android:paddingLeft="2dp"
+    android:paddingRight="2dp"
     app:layoutManager="LinearLayoutManager"
     tools:context="com.bitsailer.yauc.ui.PhotoListFragment"
     tools:listitem="@layout/photo_grid_item" />

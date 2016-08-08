@@ -8,7 +8,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
@@ -27,18 +26,15 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 /**
- * Fragment to display list (column count = 1) or grid of photos.
+ * Fragment to display grid of photos.
  */
 public class PhotoListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private static final String ARG_COLUMN_COUNT = "column-count";
     private static final String ARG_PHOTO_TYPE = "photo-type";
     private static final int LOADER_ID = 0;
     static final int PHOTO_TYPE_NEW = 1;
     static final int PHOTO_TYPE_FAVORITES = 2;
     static final int PHOTO_TYPE_OWN = 3;
-    private int mColumnCount = 2;
-    private int mOrientation;
     private int mPhotoType = PHOTO_TYPE_NEW;
     private static final String[] PHOTO_COLUMNS = {
             PhotoColumns.PHOTO_ID,
@@ -56,11 +52,9 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
     public PhotoListFragment() {
     }
 
-    @SuppressWarnings("unused")
-    public static PhotoListFragment newInstance(int columnCount, int photoType) {
+    public static PhotoListFragment newInstance(int photoType) {
         PhotoListFragment fragment = new PhotoListFragment();
         Bundle args = new Bundle();
-        args.putInt(ARG_COLUMN_COUNT, columnCount);
         args.putInt(ARG_PHOTO_TYPE, photoType);
         fragment.setArguments(args);
         return fragment;
@@ -71,29 +65,29 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
             mPhotoType = getArguments().getInt(ARG_PHOTO_TYPE);
         }
-        mOrientation = getResources().getConfiguration().orientation;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_photo_list, container, false);
+        // get column count
+        int columnCount = getResources().getInteger(R.integer.photo_grid_columns);
+        if (mPhotoType == PHOTO_TYPE_FAVORITES) {
+            columnCount = getResources().getInteger(R.integer.favorite_photo_columns);
+        }
+
         // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
             RecyclerView recyclerView = (RecyclerView) view;
-            if (mColumnCount <= 1) {
-                recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            } else {
-                recyclerView
-                        .setLayoutManager(new StaggeredGridLayoutManager(
-                                mColumnCount, StaggeredGridLayoutManager.VERTICAL));
-            }
+            recyclerView
+                    .setLayoutManager(new StaggeredGridLayoutManager(
+                            columnCount, StaggeredGridLayoutManager.VERTICAL));
 
-            mAdapter = new PhotoListAdapter(context, null);
+            mAdapter = new PhotoListAdapter(context, null, columnCount);
 
             recyclerView.setAdapter(mAdapter);
         }

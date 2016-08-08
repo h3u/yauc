@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String STATE_TAB_POSITION = "state_tab_position";
     private static Preferences mPreferences;
-    private int mTabPosition;
+    private int mTabPosition = SectionsPagerAdapter.POSITION_NEW;
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -85,8 +85,11 @@ public class MainActivity extends AppCompatActivity {
 
         mTabLayout.setupWithViewPager(mViewPager);
         if (savedInstanceState != null) {
-            mTabPosition = savedInstanceState.getInt(STATE_TAB_POSITION, 0);
+            mTabPosition = savedInstanceState
+                    .getInt(STATE_TAB_POSITION, SectionsPagerAdapter.POSITION_NEW);
         }
+        // todo: add welcome dialog without saved instance state
+
 
         // add listener and display fab
         mFab.setOnClickListener(new View.OnClickListener() {
@@ -98,27 +101,25 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // setup icons
-        initTabs();
+        initTabs(mTabPosition);
     }
 
     private void arrange(TabLayout.Tab tab) {
-        mTabPosition = tab.getPosition();
-        mViewPager.setCurrentItem(mTabPosition);
-        if (mTabPosition == SectionsPagerAdapter.POSITION_NEW) {
+        if (tab.getPosition() == SectionsPagerAdapter.POSITION_NEW) {
             if (tab.isSelected()) {
                 tab.setIcon(R.drawable.ic_new_releases_accent);
                 mFab.hide();
             } else {
                 tab.setIcon(R.drawable.ic_new_releases);
             }
-        } else if (mTabPosition == SectionsPagerAdapter.POSITION_FAVORITES) {
+        } else if (tab.getPosition() == SectionsPagerAdapter.POSITION_FAVORITES) {
             if (tab.isSelected()) {
                 tab.setIcon(R.drawable.ic_favorite_accent);
                 mFab.hide();
             } else {
                 tab.setIcon(R.drawable.ic_favorite);
             }
-        } else if (mTabPosition == SectionsPagerAdapter.POSITION_OWN) {
+        } else if (tab.getPosition() == SectionsPagerAdapter.POSITION_OWN) {
             if (tab.isSelected()) {
                 tab.setIcon(R.drawable.ic_account_accent);
                 mFab.show();
@@ -128,7 +129,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void initTabs() {
+    private void initTabs(int position) {
+        mViewPager.setCurrentItem(position);
         for (int i=0; i < SectionsPagerAdapter.PAGES; i++) {
             TabLayout.Tab tab = mTabLayout.getTabAt(i);
             if (tab != null) {
@@ -219,6 +221,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Intent intent = getIntent();
+        // comeback from sign in
         if (intent != null && intent.hasExtra(LoginActivity.INTENT_EXTRA_SUCCESS)) {
             if (intent.getBooleanExtra(LoginActivity.INTENT_EXTRA_SUCCESS, true)) {
                 sayHello();
@@ -227,10 +230,12 @@ public class MainActivity extends AppCompatActivity {
             }
             getIntent().removeExtra(LoginActivity.INTENT_EXTRA_SUCCESS);
         }
-        initTabs();
+
         mTabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
+                mTabPosition = tab.getPosition();
+                initTabs(mTabPosition);
                 arrange(tab);
             }
 
@@ -337,11 +342,11 @@ public class MainActivity extends AppCompatActivity {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
             if (position == POSITION_NEW) {
-                return PhotoListFragment.newInstance(2, PhotoListFragment.PHOTO_TYPE_NEW);
+                return PhotoListFragment.newInstance(PhotoListFragment.PHOTO_TYPE_NEW);
             } else if (position == POSITION_FAVORITES) {
-                return PhotoListFragment.newInstance(1, PhotoListFragment.PHOTO_TYPE_FAVORITES);
+                return PhotoListFragment.newInstance(PhotoListFragment.PHOTO_TYPE_FAVORITES);
             } else if (position == POSITION_OWN) {
-                return PhotoListFragment.newInstance(2, PhotoListFragment.PHOTO_TYPE_OWN);
+                return PhotoListFragment.newInstance(PhotoListFragment.PHOTO_TYPE_OWN);
             }
             return PlaceholderFragment.newInstance(position + 1);
         }
