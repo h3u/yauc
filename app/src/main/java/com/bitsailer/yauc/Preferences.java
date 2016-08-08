@@ -15,10 +15,11 @@ import com.bitsailer.yauc.api.model.User;
 public class Preferences {
 
     public static final String APP_PREF = "yauc_prefs";
-    public static final String KEY_ACCESS_TOKEN = "key_access_token";
-    public static final String KEY_ACCESS_TOKEN_CREATED_AT = "key_access_token_created_at";
-    public static final String KEY_REFRESH_TOKEN = "key_refresh_token";
-    public static final String KEY_AUTH_CODE = "key_auth_code";
+    private static final String KEY_APP_VERSION = "key_app_version";
+    private static final String KEY_ACCESS_TOKEN = "key_access_token";
+    private static final String KEY_ACCESS_TOKEN_CREATED_AT = "key_access_token_created_at";
+    private static final String KEY_REFRESH_TOKEN = "key_refresh_token";
+    private static final String KEY_AUTH_CODE = "key_auth_code";
     private static final String KEY_USER_NAME = "key_user_name";
     private static final String KEY_USER_USERNAME = "key_user_username";
     private static final String KEY_USER_AVATAR = "key_user_avatar";
@@ -51,6 +52,14 @@ public class Preferences {
     public static SharedPreferences getSharedPreferences(Context context) {
         return context.getApplicationContext()
                 .getSharedPreferences(APP_PREF, Context.MODE_PRIVATE);
+    }
+
+    public void setAppVersion(int version) {
+        mPreferences.edit().putInt(KEY_APP_VERSION, version).commit();
+    }
+
+    public int getAppVersion() {
+        return mPreferences.getInt(KEY_APP_VERSION, -1);
     }
 
     public String getAccessToken() {

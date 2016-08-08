@@ -1,14 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/list"
-    android:name="com.bitsailer.yauc.ui.NewPhotosFragment"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingTop="4dp"
-    android:paddingLeft="2dp"
-    android:paddingRight="2dp"
-    app:layoutManager="LinearLayoutManager"
-    tools:context="com.bitsailer.yauc.ui.PhotoListFragment"
-    tools:listitem="@layout/photo_grid_item" />
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.RecyclerView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/list"
+        android:name="com.bitsailer.yauc.ui.NewPhotosFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="4dp"
+        android:paddingLeft="2dp"
+        android:paddingRight="2dp"
+        app:layoutManager="LinearLayoutManager"
+        tools:context="com.bitsailer.yauc.ui.PhotoListFragment"
+        tools:listitem="@layout/photo_grid_item" />
+
+    <include
+        layout="@layout/anonymous_photo_list"
+        android:visibility="gone"/>
+</RelativeLayout>

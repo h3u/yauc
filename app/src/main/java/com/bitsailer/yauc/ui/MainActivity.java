@@ -1,5 +1,6 @@
 package com.bitsailer.yauc.ui;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
@@ -10,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -21,6 +23,7 @@ import android.view.ViewGroup;
 
 import com.bitsailer.yauc.Preferences;
 import com.bitsailer.yauc.R;
+import com.bitsailer.yauc.Util;
 import com.bitsailer.yauc.api.UnsplashAPI;
 import com.bitsailer.yauc.api.UnsplashService;
 import com.bitsailer.yauc.api.model.User;
@@ -35,6 +38,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static com.bitsailer.yauc.R.id.fab;
+import static com.bitsailer.yauc.Util.AppStart.FIRST_TIME;
 
 /**
  * App entry point and holder of three {@link PhotoListFragment} to
@@ -88,8 +92,10 @@ public class MainActivity extends AppCompatActivity {
             mTabPosition = savedInstanceState
                     .getInt(STATE_TAB_POSITION, SectionsPagerAdapter.POSITION_NEW);
         }
-        // todo: add welcome dialog without saved instance state
 
+        if (FIRST_TIME == Util.checkAppStart(this, mPreferences)) {
+            welcome();
+        }
 
         // add listener and display fab
         mFab.setOnClickListener(new View.OnClickListener() {
@@ -102,6 +108,21 @@ public class MainActivity extends AppCompatActivity {
 
         // setup icons
         initTabs(mTabPosition);
+    }
+
+    private void welcome() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.dialog_welcome_title)
+                .setMessage(R.string.dialog_welcome_message);
+        builder.setPositiveButton(R.string.button_dialog_welcome_positive, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked Sign in button
+                startActivity(new Intent(MainActivity.this, LoginActivity.class));
+            }
+        });
+        builder.setNegativeButton(R.string.button_dialog_welcome_dismiss, null);
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     private void arrange(TabLayout.Tab tab) {
@@ -122,7 +143,9 @@ public class MainActivity extends AppCompatActivity {
         } else if (tab.getPosition() == SectionsPagerAdapter.POSITION_OWN) {
             if (tab.isSelected()) {
                 tab.setIcon(R.drawable.ic_account_accent);
-                mFab.show();
+                if (mPreferences.isAuthenticated()) {
+                    mFab.show();
+                }
             } else {
                 tab.setIcon(R.drawable.ic_account);
             }

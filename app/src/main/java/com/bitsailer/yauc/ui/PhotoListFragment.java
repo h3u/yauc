@@ -1,6 +1,7 @@
 package com.bitsailer.yauc.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -13,6 +14,9 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.bitsailer.yauc.Preferences;
 import com.bitsailer.yauc.R;
@@ -24,6 +28,11 @@ import com.bitsailer.yauc.event.UserDataRemovedEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import butterknife.Unbinder;
 
 /**
  * Fragment to display grid of photos.
@@ -44,6 +53,16 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
             PhotoColumns.URLS_SMALL
     };
     private PhotoListAdapter mAdapter;
+    private Unbinder butterknife;
+
+    @BindView(R.id.list)
+    RecyclerView recyclerView;
+    @BindView(R.id.emptyLayout)
+    LinearLayout emptyLayout;
+    @BindView(R.id.buttonSignIn)
+    Button buttonSignIn;
+    @BindView(R.id.textViewEmpty)
+    TextView emptyText;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -73,6 +92,7 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_photo_list, container, false);
+        butterknife = ButterKnife.bind(this, view);
         // get column count
         int columnCount = getResources().getInteger(R.integer.photo_grid_columns);
         if (mPhotoType == PHOTO_TYPE_FAVORITES) {
@@ -80,17 +100,10 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
         }
 
         // Set the adapter
-        if (view instanceof RecyclerView) {
-            Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
-            recyclerView
-                    .setLayoutManager(new StaggeredGridLayoutManager(
-                            columnCount, StaggeredGridLayoutManager.VERTICAL));
-
-            mAdapter = new PhotoListAdapter(context, null, columnCount);
-
-            recyclerView.setAdapter(mAdapter);
-        }
+        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(
+                columnCount, StaggeredGridLayoutManager.VERTICAL));
+        mAdapter = new PhotoListAdapter(view.getContext(), null, columnCount);
+        recyclerView.setAdapter(mAdapter);
         return view;
     }
 
@@ -108,6 +121,12 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
     @Override
     public void onDetach() {
         super.onDetach();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        butterknife.unbind();
     }
 
     private String getSelection() {
@@ -158,11 +177,30 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mAdapter.changeCursor(data);
+        if (data.getCount() == 0 && mPhotoType != PHOTO_TYPE_NEW) {
+            // data set empty
+            emptyLayout.setVisibility(View.VISIBLE);
+            if (Preferences.get(getContext()).isAuthenticated()) {
+                emptyText.setText(getString(mPhotoType == PHOTO_TYPE_FAVORITES ?
+                        R.string.text_empty_favorites : R.string.text_empty_own));
+                buttonSignIn.setVisibility(View.GONE);
+            } else {
+                emptyText.setText(getString(R.string.text_anonymous_photo_list));
+                buttonSignIn.setVisibility(View.VISIBLE);
+            }
+        } else {
+            emptyLayout.setVisibility(View.GONE);
+        }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mAdapter.changeCursor(null);
+    }
+
+    @OnClick(R.id.buttonSignIn)
+    public void onLoginClick() {
+        startActivity(new Intent(getActivity(), LoginActivity.class));
     }
 
     @Override

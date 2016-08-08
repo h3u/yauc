@@ -31,4 +31,16 @@
 
     <!--buttons-->
     <string name="button_yes">@android:string/yes</string>
+    <string name="button_dialog_welcome_dismiss">Later</string>
+    <string name="button_dialog_welcome_positive">Sign in</string>
+    <string name="button_empty_photo_list_login">Sign in</string>
+
+    <!-- welcome dialog -->
+    <string name="dialog_welcome_title">Welcome to YAUC</string>
+    <string name="dialog_welcome_message">YAUC is your android unsplash client. To see your favorites and own photos you need to authorize YAUC and sing in to unsplash.com.</string>
+
+    <!-- empty anonymous photo list -->
+    <string name="text_anonymous_photo_list">Please sign in to see photos.</string>
+    <string name="text_empty_favorites">You haven\'t liked a photo yet. </string>
+    <string name="text_empty_own">You haven\'t added a photo yet. </string>
 </resources>
