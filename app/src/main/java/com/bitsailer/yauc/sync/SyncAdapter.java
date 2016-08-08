@@ -183,9 +183,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private static void onAccountCreated(Account account, Context context) {
-        // Enable automatic synchronisation
-        ContentResolver.setSyncAutomatically(account,
-                context.getString(R.string.content_authority), true);
 
         // add periodic synchronisation
         SyncRequest request = new SyncRequest.Builder()
