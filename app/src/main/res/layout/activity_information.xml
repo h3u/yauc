@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_information"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="com.bitsailer.yauc.ui.InformationActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/appbar_padding_top">
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:layout_scrollFlags="scroll|enterAlways"
+            app:popupTheme="@style/AppTheme.PopupOverlay">
+        </android.support.v7.widget.Toolbar>
+    </android.support.design.widget.AppBarLayout>
+
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="?attr/actionBarSize"
+            android:paddingTop="8dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/layoutAuthor"
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
+                android:orientation="horizontal">
+                <RelativeLayout
+                    android:layout_width="72dp"
+                    android:layout_height="match_parent"
+                    android:paddingStart="16dp"
+                    android:gravity="center_vertical">
+                <ImageView
+                    android:id="@+id/imageViewProfile"
+                    android:layout_width="@dimen/information_avatar_size"
+                    android:layout_height="@dimen/information_avatar_size"
+                    android:src="@drawable/ic_account_circle_black"/>
+                </RelativeLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="16dp"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/textViewAuthorName"
+                        style="?android:attr/listPreferredItemHeightLarge"
+                        android:textAppearance="?android:attr/textAppearanceListItem"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="bottom"
+                        tools:text="Photo by John Doe"/>
+
+                    <TextView
+                        android:id="@+id/textViewAuthorProfileLink"
+                        style="?android:attr/listPreferredItemHeightSmall"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="top"
+                        android:autoLink="web"
+                        android:maxLines="1"
+                        tools:text="https://unsplash.com/@john.doe"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutPublished"
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
+                android:orientation="horizontal">
+                <RelativeLayout
+                    android:layout_width="72dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical">
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:src="@drawable/ic_publish"/>
+                </RelativeLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="16dp"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+                    <TextView
+                        style="?android:attr/listPreferredItemHeightLarge"
+                        android:textAppearance="?android:attr/textAppearanceListItem"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/information_published_at"/>
+                    <TextView
+                        android:id="@+id/textViewPublishedAt"
+                        style="?android:attr/listPreferredItemHeightSmall"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        tools:text="June 12, 2016"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutCamera"
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
+                android:orientation="horizontal">
+                <RelativeLayout
+                    android:layout_width="72dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical">
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:src="@drawable/ic_camera_alt"/>
+                </RelativeLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="16dp"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+                    <TextView
+                        style="?android:attr/listPreferredItemHeightLarge"
+                        android:textAppearance="?android:attr/textAppearanceListItem"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/information_camera"/>
+                    <TextView
+                        android:id="@+id/textViewCameraModel"
+                        style="?android:attr/listPreferredItemHeightSmall"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        tools:text="FUJIFILM X100T"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutExposure"
+                android:layout_width="match_parent"
+                android:layout_height="88dp"
+                android:orientation="horizontal">
+                <RelativeLayout
+                    android:layout_width="72dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical">
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:src="@drawable/ic_insert_photo"/>
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="16dp"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+                    <TextView
+                        style="?android:attr/listPreferredItemHeightLarge"
+                        android:textAppearance="?android:attr/textAppearanceListItem"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/information_exposure"/>
+                    <TextView
+                        android:id="@+id/textViewPhotoSize"
+                        style="?android:attr/listPreferredItemHeightSmall"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        tools:text="4896 x 2917"/>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:id="@+id/textViewPhotoAperture"
+                            style="?android:attr/listPreferredItemHeightSmall"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="2dp"
+                            android:layout_marginEnd="2dp"
+                            android:text=""
+                            tools:text="f/2.9"/>
+                        <TextView
+                            android:id="@+id/textViewPhotoExposureTime"
+                            style="?android:attr/listPreferredItemHeightSmall"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="2dp"
+                            android:layout_marginEnd="2dp"
+                            android:text=""
+                            tools:text="0.01 s"/>
+                        <TextView
+                            android:id="@+id/textViewPhotoFocalLength"
+                            style="?android:attr/listPreferredItemHeightSmall"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="2dp"
+                            android:layout_marginEnd="2dp"
+                            android:text=""
+                            tools:text="3.5 mm"/>
+                        <TextView
+                            android:id="@+id/textViewPhotoIso"
+                            style="?android:attr/listPreferredItemHeightSmall"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="2dp"
+                            android:layout_marginEnd="2dp"
+                            android:text=""
+                            tools:text="ISO 200"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutLocation"
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
+                android:orientation="horizontal">
+                <RelativeLayout
+                    android:layout_width="72dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical">
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:src="@drawable/ic_location_on"/>
+                </RelativeLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="16dp"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+                    <TextView
+                        style="?android:attr/listPreferredItemHeightLarge"
+                        android:textAppearance="?android:attr/textAppearanceListItem"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/information_location"/>
+                    <TextView
+                        android:id="@+id/textViewLocation"
+                        style="?android:attr/listPreferredItemHeightSmall"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        tools:text="Adelboden, Switzerland"/>
+
+                </LinearLayout>
+            </LinearLayout>
+
+            <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:map="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:id="@+id/locationMap"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/information_map_height"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                map:cameraZoom="10"
+                map:mapType="normal"
+                map:liteMode="true"
+                tools:context="com.bitsailer.yauc.ui.InformationActivity" />
+
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</android.support.design.widget.CoordinatorLayout>

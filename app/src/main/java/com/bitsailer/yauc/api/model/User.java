@@ -25,7 +25,7 @@ public class User {
 
     @SerializedName("portfolio_url")
     @Expose
-    private Object portfolioUrl;
+    private String portfolioUrl;
 
     @SerializedName("profile_image")
     @Expose
@@ -146,7 +146,7 @@ public class User {
      * @return
      *     The portfolioUrl
      */
-    public Object getPortfolioUrl() {
+    public String getPortfolioUrl() {
         return portfolioUrl;
     }
 
@@ -155,7 +155,7 @@ public class User {
      * @param portfolioUrl
      *     The portfolio_url
      */
-    public void setPortfolioUrl(Object portfolioUrl) {
+    public void setPortfolioUrl(String portfolioUrl) {
         this.portfolioUrl = portfolioUrl;
     }
 

@@ -31,9 +31,11 @@
 
     <!--buttons-->
     <string name="button_yes">@android:string/yes</string>
-    <string name="button_dialog_welcome_dismiss">Later</string>
-    <string name="button_dialog_welcome_positive">Sign in</string>
+    <string name="button_dialog_dismiss">Not now</string>
+    <string name="button_dialog_positive">Sign in</string>
     <string name="button_empty_photo_list_login">Sign in</string>
+    <string name="button_detail_share">Share</string>
+    <string name="button_detail_info">About</string>
 
     <!-- welcome dialog -->
     <string name="dialog_welcome_title">Welcome to YAUC</string>
@@ -43,4 +45,28 @@
     <string name="text_anonymous_photo_list">Please sign in to see photos.</string>
     <string name="text_empty_favorites">You haven\'t liked a photo yet. </string>
     <string name="text_empty_own">You haven\'t added a photo yet. </string>
+
+    <string name="title_activity_information">About Photo</string>
+
+    <!-- detail -->
+    <string name="share_title">Share photo</string>
+    <string name="share_text">Hey, look what an awesome photo I\'ve found %1$s</string>
+    <string name="like_dialog_sign_in_message">You have to sign in to like photos.</string>
+    <string name="liked_message">Photo added to favorites.</string>
+    <string name="unliked_message">Photo removed from favorites.</string>
+    <string name="photo_not_found">Arrrgh, photo not found, sorry.</string>
+
+    <!-- information about photo -->
+    <string name="information_published_at">Published</string>
+    <string name="information_camera">Camera</string>
+    <string name="information_exposure">Exposure</string>
+    <string name="information_location">Location</string>
+    <string name="information_make_model">%1$s %2$s</string>
+    <string name="information_photo_size">%1$d x %2$d</string>
+    <string name="information_photo_iso">ISO%1$d</string>
+    <string name="information_photo_aperture">f/%1$.1f</string>
+    <string name="information_photo_exposure_time_short">1/%1$.0fs</string>
+    <string name="information_photo_exposure_time_long">%1$.1fs</string>
+    <string name="information_photo_focal_length">%1$.1fmm</string>
+    <string name="information_location_data">%1$s %2$s</string>
 </resources>

@@ -17,8 +17,7 @@ import java.util.Date;
  */
 
 public class ContentValuesBuilder {
-
-    private static SimpleDateFormat mDateFormat = new SimpleDateFormat("yyyy-mm-dd'T'HH:mm:ssZ");
+    private static SimpleDateFormat mDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
     private static PhotosValuesBuilder buildBase(PhotosValuesBuilder builder, SimplePhoto photo) {
         Date createdAt = new Date();
@@ -46,27 +45,32 @@ public class ContentValuesBuilder {
                 .userId(photo.getUser().getId())
                 .userUsername(photo.getUser().getUsername())
                 .userName(photo.getUser().getName());
-                ;
         return builder;
     }
 
     public static ContentValues from(Photo photo) {
-
         PhotosValuesBuilder builder = new PhotosValuesBuilder();
         builder = buildBase(builder, photo);
         builder
                 .photoDownloads(photo.getDownloads())
-                .exifAperture(Double.parseDouble(photo.getExif().getAperture()))
-                .exifExposureTime(Double.parseDouble(photo.getExif().getExposureTime()))
-                .exifFocalLength(Double.parseDouble(photo.getExif().getFocalLength()))
+                .exifAperture(photo.getExif().getAperture())
+                .exifExposureTime(photo.getExif().getExposureTime())
+                .exifFocalLength(photo.getExif().getFocalLength())
                 .exifIso(photo.getExif().getIso())
                 .exifMake(photo.getExif().getMake())
-                .exifModel(photo.getExif().getModel())
-                .locationCity(photo.getLocation().getCity())
-                .locationCountry(photo.getLocation().getCountry())
-                .locationLatitude(photo.getLocation().getPosition().getLatitude())
-                .locationLongitude(photo.getLocation().getPosition().getLongitude())
-                .userPortfolioUrl(photo.getUser().getPortfolioUrl().toString())
+                .exifModel(photo.getExif().getModel());
+        if (photo.getLocation() != null) {
+            builder
+                    .locationCity(photo.getLocation().getCity())
+                    .locationCountry(photo.getLocation().getCountry());
+                    if (photo.getLocation().getPosition() != null) {
+                        builder
+                            .locationLatitude(photo.getLocation().getPosition().getLatitude())
+                            .locationLongitude(photo.getLocation().getPosition().getLongitude());
+                    }
+        }
+        builder
+                .userPortfolioUrl(photo.getUser().getPortfolioUrl())
                 .userProfileImageLarge(photo.getUser().getProfileImage().getLarge())
                 .userProfileImageMedium(photo.getUser().getProfileImage().getMedium())
                 .userProfileImageSmall(photo.getUser().getProfileImage().getSmall())
@@ -83,7 +87,7 @@ public class ContentValuesBuilder {
         builder = buildBase(builder, photo);
 
         if (photo.getUser().getPortfolioUrl() != null) {
-            builder.userPortfolioUrl(photo.getUser().getPortfolioUrl().toString());
+            builder.userPortfolioUrl(photo.getUser().getPortfolioUrl());
         }
 
         builder

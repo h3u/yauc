@@ -47,13 +47,13 @@ public interface PhotoColumns {
     @DataType(TEXT)
     String EXIF_MODEL = "exif_model";
 
-    @DataType(REAL)
+    @DataType(TEXT)
     String EXIF_EXPOSURE_TIME = "exif_exposure_time";
 
-    @DataType(REAL)
+    @DataType(TEXT)
     String EXIF_APERTURE = "exif_aperture";
 
-    @DataType(REAL)
+    @DataType(TEXT)
     String EXIF_FOCAL_LENGTH = "exif_focal_length";
 
     @DataType(INTEGER)

@@ -19,7 +19,6 @@ import com.bitsailer.yauc.api.model.SimplePhoto;
 import com.bitsailer.yauc.data.ContentValuesBuilder;
 import com.bitsailer.yauc.data.PhotoColumns;
 import com.bitsailer.yauc.data.PhotoProvider;
-import com.bitsailer.yauc.Preferences;
 import com.orhanobut.logger.Logger;
 
 import java.io.IOException;
@@ -56,15 +55,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient contentProviderClient, SyncResult syncResult) {
         int inserted = 0;
-        int perPage = 10;//UnsplashAPI.MAX_PER_PAGE;
+        int perPage = UnsplashAPI.MAX_PER_PAGE;
         boolean firstSync = extras.getBoolean(KEY_INITIAL_SYNC, false);
         mSumInsertedLastSync = 0;
 
-        // do we have an access token?
-        String accessToken = extras.getString(KEY_ACCESS_TOKEN, null);
-
         // get api service
-        UnsplashAPI api = UnsplashService.create(UnsplashAPI.class, accessToken);
+        UnsplashAPI api = UnsplashService.create(UnsplashAPI.class);
 
         /**
          * fetch new photos and insert them until the number of
@@ -127,7 +123,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private boolean exists(ContentProviderClient contentProviderClient, SimplePhoto photo) {
-        String[] projection = new String[]{ PhotoColumns.PHOTO_ID };
+        String[] projection = new String[]{ PhotoColumns.PHOTO_ID};
         boolean have = false;
         try {
             Cursor cursor = contentProviderClient.query(
@@ -152,8 +148,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private static void sync(Context context, Bundle bundle) {
-        Preferences prefs = Preferences.get(context);
-        bundle.putString(KEY_ACCESS_TOKEN, prefs.getAccessToken());
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         ContentResolver.requestSync(AuthenticatorService.getAccount(),
@@ -190,6 +184,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 .setSyncAdapter(account, context.getString(R.string.content_authority))
                 .setExtras(new Bundle()).build();
         ContentResolver.requestSync(request);
+
+        ContentResolver.setSyncAutomatically(account,
+                context.getString(R.string.content_authority), true);
 
         // initial sync
         Bundle bundle = new Bundle();

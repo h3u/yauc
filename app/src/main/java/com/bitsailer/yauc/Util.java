@@ -3,7 +3,10 @@ package com.bitsailer.yauc;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.text.TextUtils;
 
+import com.bitsailer.yauc.data.PhotoColumns;
 import com.orhanobut.logger.Logger;
 
 /**
@@ -86,5 +89,59 @@ public class Util {
         } else {
             return AppStart.NORMAL;
         }
+    }
+
+    public static int getBackgroundColor(String color) {
+        int intColor = Color.TRANSPARENT;
+        if (color != null && !TextUtils.isEmpty(color)) {
+            try {
+                intColor = Color.parseColor(color);
+            } catch (IllegalArgumentException e) {
+                Logger.e("background color <%s> failed", color, e);
+            }
+        }
+        return intColor;
+    }
+
+    public static String[] getAllPhotoColumns() {
+        return new String[] {
+                PhotoColumns.PHOTO_ID,
+                PhotoColumns.PHOTO_CREATED_AT,
+                PhotoColumns.PHOTO_WIDTH,
+                PhotoColumns.PHOTO_HEIGHT,
+                PhotoColumns.PHOTO_COLOR,
+                PhotoColumns.PHOTO_DOWNLOADS,
+                PhotoColumns.PHOTO_LIKES,
+                PhotoColumns.PHOTO_LIKED_BY_USER,
+                PhotoColumns.EXIF_MAKE,
+                PhotoColumns.EXIF_MODEL,
+                PhotoColumns.EXIF_APERTURE,
+                PhotoColumns.EXIF_EXPOSURE_TIME,
+                PhotoColumns.EXIF_FOCAL_LENGTH,
+                PhotoColumns.EXIF_ISO,
+                PhotoColumns.LOCATION_COUNTRY,
+                PhotoColumns.LOCATION_CITY,
+                PhotoColumns.LOCATION_LATITUDE,
+                PhotoColumns.LOCATION_LONGITUDE,
+                PhotoColumns.URLS_RAW,
+                PhotoColumns.URLS_FULL,
+                PhotoColumns.URLS_REGULAR,
+                PhotoColumns.URLS_SMALL,
+                PhotoColumns.URLS_THUMB,
+                PhotoColumns.LINKS_SELF,
+                PhotoColumns.LINKS_HTML,
+                PhotoColumns.LINKS_DOWNLOAD,
+                PhotoColumns.USER_ID,
+                PhotoColumns.USER_USERNAME,
+                PhotoColumns.USER_NAME,
+                PhotoColumns.USER_PORTFOLIO_URL,
+                PhotoColumns.USER_PROFILE_IMAGE_SMALL,
+                PhotoColumns.USER_PROFILE_IMAGE_MEDIUM,
+                PhotoColumns.USER_PROFILE_IMAGE_LARGE,
+                PhotoColumns.USER_LINKS_SELF,
+                PhotoColumns.USER_LINKS_HTML,
+                PhotoColumns.USER_LINKS_PHOTOS,
+                PhotoColumns.USER_LINKS_LIKES
+        };
     }
 }

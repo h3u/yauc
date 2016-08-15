@@ -1,0 +1,6 @@
+<resources>
+    <!-- TODO: Howto move this key to local build properties? -->
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">
+        AIzaSyB58d8HolFOgOQkjcTnVBxnmXM3nyxXFVY
+    </string>
+</resources>

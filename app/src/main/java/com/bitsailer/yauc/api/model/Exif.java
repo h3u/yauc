@@ -1,6 +1,8 @@
 
 package com.bitsailer.yauc.api.model;
 
+import android.text.TextUtils;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -41,7 +43,7 @@ public class Exif {
      *     The make
      */
     public String getMake() {
-        return make;
+        return make != null ? make : "";
     }
 
     /**
@@ -59,7 +61,7 @@ public class Exif {
      *     The model
      */
     public String getModel() {
-        return model;
+        return model != null ? model : "";
     }
 
     /**
@@ -77,7 +79,7 @@ public class Exif {
      *     The exposureTime
      */
     public String getExposureTime() {
-        return exposureTime;
+        return exposureTime != null ? exposureTime : "";
     }
 
     /**
@@ -95,7 +97,7 @@ public class Exif {
      *     The aperture
      */
     public String getAperture() {
-        return aperture;
+        return aperture != null ? aperture : "";
     }
 
     /**
@@ -113,7 +115,7 @@ public class Exif {
      *     The focalLength
      */
     public String getFocalLength() {
-        return focalLength;
+        return focalLength != null ? focalLength : "";
     }
 
     /**
@@ -165,4 +167,7 @@ public class Exif {
         return new EqualsBuilder().append(make, rhs.make).append(model, rhs.model).append(exposureTime, rhs.exposureTime).append(aperture, rhs.aperture).append(focalLength, rhs.focalLength).append(iso, rhs.iso).isEquals();
     }
 
+    public boolean isCameraEmpty() {
+        return TextUtils.isEmpty(make) && TextUtils.isEmpty(model);
+    }
 }

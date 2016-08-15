@@ -1,6 +1,8 @@
 
 package com.bitsailer.yauc.api.model;
 
+import android.text.TextUtils;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -29,7 +31,7 @@ public class Location {
      *     The city
      */
     public String getCity() {
-        return city;
+        return city != null ? city : "";
     }
 
     /**
@@ -47,7 +49,7 @@ public class Location {
      *     The country
      */
     public String getCountry() {
-        return country;
+        return country != null ? country : "";
     }
 
     /**
@@ -99,4 +101,7 @@ public class Location {
         return new EqualsBuilder().append(city, rhs.city).append(country, rhs.country).append(position, rhs.position).isEquals();
     }
 
+    public boolean isEmpty() {
+        return TextUtils.isEmpty(country) && TextUtils.isEmpty(city);
+    }
 }

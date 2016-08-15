@@ -3,6 +3,7 @@ package com.bitsailer.yauc.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -102,7 +103,15 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
         // Set the adapter
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(
                 columnCount, StaggeredGridLayoutManager.VERTICAL));
-        mAdapter = new PhotoListAdapter(view.getContext(), null, columnCount);
+
+        mAdapter = new PhotoListAdapter(view.getContext(), null, columnCount,
+                new PhotoListAdapter.PhotoOnClickHandler() {
+                    @Override
+                    public void onClick(String photoId, PhotoListAdapter.PhotoListItemViewHolder vh) {
+                        ((ClickCallback) getActivity())
+                                .onItemSelected(PhotoProvider.Uri.withId(photoId), vh);
+                    }
+                });
         recyclerView.setAdapter(mAdapter);
         return view;
     }
@@ -129,6 +138,17 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
         butterknife.unbind();
     }
 
+    /**
+     * Interface that needs to be implemented by Activity which holds this Fragment to get notified
+     * about item selection.
+     */
+    public interface ClickCallback {
+        /**
+         * Callback when an item has been selected.
+         */
+        public void onItemSelected(Uri uri, PhotoListAdapter.PhotoListItemViewHolder vh);
+    }
+
     private String getSelection() {
 
         if (Preferences.get(getActivity()).getUserUsername() != null) {
@@ -152,10 +172,10 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if (mPhotoType == PHOTO_TYPE_FAVORITES) {
             return new CursorLoader(getActivity(),
-                    PhotoProvider.Uri.FAVORITE,
+                    PhotoProvider.Uri.BASE,
                     PHOTO_COLUMNS,
-                    null,
-                    null,
+                    PhotoColumns.PHOTO_LIKED_BY_USER + " = ?",
+                    new String[] {"1"},
                     null);
         } else if (mPhotoType == PHOTO_TYPE_OWN) {
             return new CursorLoader(getActivity(),
@@ -217,11 +237,15 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onUserDataLoaded(UserDataLoadedEvent event) {
-        getLoaderManager().restartLoader(LOADER_ID, null, this);
+        restartLoader();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onUserDataRemoved(UserDataRemovedEvent event) {
+        restartLoader();
+    }
+
+    private void restartLoader() {
         getLoaderManager().restartLoader(LOADER_ID, null, this);
     }
 }

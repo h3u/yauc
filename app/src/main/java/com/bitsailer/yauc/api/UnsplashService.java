@@ -1,6 +1,9 @@
 package com.bitsailer.yauc.api;
 
+import android.content.Context;
+
 import com.bitsailer.yauc.BuildConfig;
+import com.bitsailer.yauc.Preferences;
 
 import java.io.IOException;
 
@@ -32,10 +35,17 @@ public class UnsplashService {
      * With a given authToken it will be injected in Authorization
      * header.
      * @param serviceClass service class to create
-     * @param authToken authentication token if exists, null if not
      * @return Implementation of service interface
      */
-    public static <S> S create(Class<S> serviceClass, String authToken) {
+    public static <S> S create(Class<S> serviceClass) {
+        return create(serviceClass, null, null);
+    }
+
+    public static <S> S create(Class<S> serviceClass, Context context) {
+        String authToken = null;
+        if (context != null) {
+            authToken = Preferences.get(context).getAccessToken();
+        }
         return create(serviceClass, authToken, null);
     }
 

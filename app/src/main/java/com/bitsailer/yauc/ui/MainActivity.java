@@ -2,6 +2,7 @@ package com.bitsailer.yauc.ui;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -44,7 +45,7 @@ import static com.bitsailer.yauc.Util.AppStart.FIRST_TIME;
  * App entry point and holder of three {@link PhotoListFragment} to
  * display new, favorite and own photos arranged in tabs.
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements PhotoListFragment.ClickCallback {
 
     private static final String STATE_TAB_POSITION = "state_tab_position";
     private static Preferences mPreferences;
@@ -97,6 +98,13 @@ public class MainActivity extends AppCompatActivity {
             welcome();
         }
 
+        // todo: enable this after app approval (without hourly rate limit)
+        // update users photos on app start
+        /* if (savedInstanceState == null && mPreferences.isAuthenticated()) {
+            PhotoManagement.updateUsersPhotos(MainActivity.this,
+                    mPreferences.getUserUsername());
+        } */
+
         // add listener and display fab
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -114,13 +122,13 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.dialog_welcome_title)
                 .setMessage(R.string.dialog_welcome_message);
-        builder.setPositiveButton(R.string.button_dialog_welcome_positive, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.button_dialog_positive, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 // User clicked Sign in button
                 startActivity(new Intent(MainActivity.this, LoginActivity.class));
             }
         });
-        builder.setNegativeButton(R.string.button_dialog_welcome_dismiss, null);
+        builder.setNegativeButton(R.string.button_dialog_dismiss, null);
         AlertDialog dialog = builder.create();
         dialog.show();
     }
@@ -233,8 +241,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-        super.onStop();
         mTabLayout.setOnTabSelectedListener(null);
+        super.onStop();
     }
 
     /**
@@ -281,7 +289,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void sayHello() {
-        UnsplashAPI api = UnsplashService.create(UnsplashAPI.class, mPreferences.getAccessToken());
+        UnsplashAPI api = UnsplashService.create(UnsplashAPI.class, this);
         Call<User> call = api.getMe();
         call.enqueue(new Callback<User>() {
             @Override
@@ -293,7 +301,7 @@ public class MainActivity extends AppCompatActivity {
                     name = getString(R.string.unknown_user_name);
                 } else {
                     PhotoManagement
-                            .updateUsersPhotos(MainActivity.this, user.getUsername(), mPreferences.getAccessToken());
+                            .updateUsersPhotos(MainActivity.this, user.getUsername());
                 }
                 Snackbar.make(mMainContent,
                         String.format(getString(R.string.message_login), name),
@@ -310,6 +318,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void loginError() {
         Snackbar.make(mMainContent, R.string.message_failure_login, Snackbar.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onItemSelected(Uri uri, PhotoListAdapter.PhotoListItemViewHolder vh) {
+        Intent intent = new Intent(this, DetailActivity.class)
+                .setData(uri);
+        startActivity(intent);
     }
 
     /**

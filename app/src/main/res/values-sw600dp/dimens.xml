@@ -2,4 +2,5 @@
 <resources>
     <dimen name="tab_min_width">160dp</dimen>
     <dimen name="photo_width">300dp</dimen>
+    <dimen name="information_map_height">800dp</dimen>
 </resources>

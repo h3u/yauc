@@ -1,12 +1,19 @@
 
 package com.bitsailer.yauc.api.model;
 
+import android.database.Cursor;
+
+import com.bitsailer.yauc.data.PhotoColumns;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 //@Generated("org.jsonschema2pojo")
 public class Photo extends SimplePhoto {
@@ -82,6 +89,17 @@ public class Photo extends SimplePhoto {
         return ToStringBuilder.reflectionToString(this);
     }
 
+
+    /**
+     * Check given photo for incomplete data.
+     *
+     * @return true if there is data missing
+     */
+    public boolean isIncomplete() {
+        return exif.isCameraEmpty() || exif.getIso() == 0
+                || location.getPosition() == null || location.isEmpty();
+    }
+
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
@@ -111,4 +129,60 @@ public class Photo extends SimplePhoto {
                 .append(getUser(), rhs.getUser()).isEquals();
     }
 
+    public static Photo fromCursor(Cursor cursor) {
+        Photo photo = new Photo();
+        if (cursor != null) {
+            photo.setId(cursor.getString(cursor.getColumnIndex(PhotoColumns.PHOTO_ID)));
+            photo.setColor(cursor.getString(cursor.getColumnIndex(PhotoColumns.PHOTO_COLOR)));
+            photo.setWidth(cursor.getInt(cursor.getColumnIndex(PhotoColumns.PHOTO_WIDTH)));
+            photo.setHeight(cursor.getInt(cursor.getColumnIndex(PhotoColumns.PHOTO_HEIGHT)));
+            photo.setLikes(cursor.getInt(cursor.getColumnIndex(PhotoColumns.PHOTO_LIKES)));
+            photo.setLikedByUser(
+                    1 == cursor.getInt(cursor.getColumnIndex(PhotoColumns.PHOTO_LIKED_BY_USER)));
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            Date d = new Date();
+            d.setTime(cursor.getLong(cursor.getColumnIndex(PhotoColumns.PHOTO_CREATED_AT)));
+            photo.setCreatedAt(sdf.format(d));
+            Urls urls = new Urls();
+            urls.setRegular(cursor.getString(cursor.getColumnIndex(PhotoColumns.URLS_REGULAR)));
+            urls.setFull(cursor.getString(cursor.getColumnIndex(PhotoColumns.URLS_FULL)));
+            photo.setUrls(urls);
+            PhotoLinks links = new PhotoLinks();
+            links.setHtml(cursor.getString(cursor.getColumnIndex(PhotoColumns.LINKS_HTML)));
+            photo.setLinks(links);
+            User user = new User();
+            user.setUsername(cursor.getString(cursor.getColumnIndex(PhotoColumns.USER_USERNAME)));
+            user.setName(cursor.getString(cursor.getColumnIndex(PhotoColumns.USER_NAME)));
+            user.setPortfolioUrl(cursor.getString(cursor.getColumnIndex(PhotoColumns.USER_PORTFOLIO_URL)));
+            ProfileImage profileImage = new ProfileImage();
+            profileImage.setLarge(cursor.getString(cursor.getColumnIndex(PhotoColumns.USER_PROFILE_IMAGE_LARGE)));
+            user.setProfileImage(profileImage);
+            UserLinks userLinks = new UserLinks();
+            userLinks.setHtml(cursor.getString(cursor.getColumnIndex(PhotoColumns.USER_LINKS_HTML)));
+            user.setLinks(userLinks);
+            photo.setUser(user);
+            Exif exif = new Exif();
+            exif.setMake(cursor.getString(cursor.getColumnIndex(PhotoColumns.EXIF_MAKE)));
+            exif.setModel(cursor.getString(cursor.getColumnIndex(PhotoColumns.EXIF_MODEL)));
+            exif.setAperture(cursor.getString(cursor.getColumnIndex(PhotoColumns.EXIF_APERTURE)));
+            exif.setExposureTime(cursor.getString(cursor.getColumnIndex(PhotoColumns.EXIF_EXPOSURE_TIME)));
+            exif.setFocalLength(cursor.getString(cursor.getColumnIndex(PhotoColumns.EXIF_FOCAL_LENGTH)));
+            exif.setIso(cursor.getInt(cursor.getColumnIndex(PhotoColumns.EXIF_ISO)));
+            photo.setExif(exif);
+            Location location = new Location();
+            location.setCountry(cursor.getString(cursor.getColumnIndex(PhotoColumns.LOCATION_COUNTRY)));
+            location.setCity(cursor.getString(cursor.getColumnIndex(PhotoColumns.LOCATION_CITY)));
+            Double latitude = cursor.getDouble(cursor.getColumnIndex(PhotoColumns.LOCATION_LATITUDE));
+            Double longitude = cursor.getDouble(cursor.getColumnIndex(PhotoColumns.LOCATION_LONGITUDE));
+            if (latitude != 0.0 && longitude != 0.0) {
+                Position position = new Position();
+                position.setLatitude(latitude);
+                position.setLongitude(longitude);
+                location.setPosition(position);
+            }
+            photo.setLocation(location);
+        }
+
+        return photo;
+    }
 }

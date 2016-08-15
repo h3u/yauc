@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="photo_width">300dp</dimen>
+    <dimen name="bottom_bar_size">72dp</dimen>
+    <dimen name="bottom_bar_button_width">168dp</dimen>
 </resources>

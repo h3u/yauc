@@ -2,17 +2,15 @@ package com.bitsailer.yauc.ui;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.bitsailer.yauc.R;
+import com.bitsailer.yauc.Util;
 import com.bitsailer.yauc.api.model.SimplePhoto;
 import com.bumptech.glide.Glide;
-import com.orhanobut.logger.Logger;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -26,16 +24,24 @@ class PhotoListAdapter extends CursorRecyclerViewAdapter<PhotoListAdapter.PhotoL
 
     private static final int VIEW_TYPE_GRID = 0;
     private static final int VIEW_TYPE_LIST = 1;
+    private static final int TAG_PHOTO_ID = 1;
     private int mColumnCount = 2;
+    private PhotoOnClickHandler mClickHandler;
 
     public PhotoListAdapter(Context context, Cursor cursor) {
         super(context, cursor);
     }
 
-    PhotoListAdapter(Context context, Cursor cursor, int columns) {
+    PhotoListAdapter(Context context, Cursor cursor, int columns, PhotoOnClickHandler clickHandler) {
         super(context, cursor);
         mColumnCount = columns;
+        mClickHandler = clickHandler;
     }
+
+    public interface PhotoOnClickHandler {
+        void onClick(String photoId, PhotoListItemViewHolder vh);
+    }
+
 
     @Override
     public int getItemViewType(int position) {
@@ -56,7 +62,8 @@ class PhotoListAdapter extends CursorRecyclerViewAdapter<PhotoListAdapter.PhotoL
     @Override
     public void onBindViewHolder(PhotoListItemViewHolder viewHolder, Cursor cursor) {
         SimplePhoto photo = SimplePhoto.fromCursor(cursor);
-        viewHolder.imageViewPhoto.setBackgroundColor(getBackgroundColor(photo.getColor()));
+        viewHolder.setPhotoId(photo.getId());
+        viewHolder.imageViewPhoto.setBackgroundColor(Util.getBackgroundColor(photo.getColor()));
         viewHolder.imageViewPhoto.setAspectRatio((photo.getWidth() / (float) photo.getHeight()));
         Glide.with(getContext())
                 .load(photo.getUrls().getSmall())
@@ -64,25 +71,27 @@ class PhotoListAdapter extends CursorRecyclerViewAdapter<PhotoListAdapter.PhotoL
                 .into(viewHolder.imageViewPhoto);
     }
 
-    class PhotoListItemViewHolder extends RecyclerView.ViewHolder {
+    class PhotoListItemViewHolder extends RecyclerView.ViewHolder  implements View.OnClickListener {
         @BindView(photo)
         DynamicImageView imageViewPhoto;
+
+        private String mPhotoId;
 
         PhotoListItemViewHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
+            view.setOnClickListener(this);
         }
-    }
 
-    private int getBackgroundColor(String color) {
-        int intColor = Color.TRANSPARENT;
-        if (color != null && !TextUtils.isEmpty(color)) {
-            try {
-                intColor = Color.parseColor(color);
-            } catch (IllegalArgumentException e) {
-                Logger.e("background color <%s> failed", color, e);
+        void setPhotoId(String photoId) {
+            mPhotoId = photoId;
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (mPhotoId != null) {
+                mClickHandler.onClick(mPhotoId, this);
             }
         }
-        return intColor;
     }
 }
