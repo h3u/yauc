@@ -69,4 +69,12 @@
     <string name="information_photo_exposure_time_long">%1$.1fs</string>
     <string name="information_photo_focal_length">%1$.1fmm</string>
     <string name="information_location_data">%1$s %2$s</string>
+
+    <!-- new photos widget -->
+    <string name="widget_icon_content_description">Start YAUC to see new photos</string>
+    <string name="appwidget_text">YAUC</string>
+    <plurals name="widget_new_photos_text">
+        <item quantity="one">%1$d new photo</item>
+        <item quantity="other">%1$d new photos</item>
+    </plurals>
 </resources>

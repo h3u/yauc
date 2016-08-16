@@ -13,4 +13,5 @@
     <dimen name="bottom_bar_button_width">0dp</dimen>
     <dimen name="information_avatar_size">40dp</dimen>
     <dimen name="information_map_height">300dp</dimen>
+    <dimen name="widget_margin">8dp</dimen>
 </resources>

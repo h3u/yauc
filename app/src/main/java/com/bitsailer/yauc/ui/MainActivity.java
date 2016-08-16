@@ -30,6 +30,7 @@ import com.bitsailer.yauc.api.UnsplashService;
 import com.bitsailer.yauc.api.model.User;
 import com.bitsailer.yauc.sync.PhotoManagement;
 import com.bitsailer.yauc.sync.SyncAdapter;
+import com.bitsailer.yauc.widget.NewPhotosWidgetIntentService;
 import com.orhanobut.logger.Logger;
 
 import butterknife.BindView;
@@ -40,6 +41,7 @@ import retrofit2.Response;
 
 import static com.bitsailer.yauc.R.id.fab;
 import static com.bitsailer.yauc.Util.AppStart.FIRST_TIME;
+import static com.bitsailer.yauc.widget.NewPhotosWidget.EXTRA_NUM_PHOTOS;
 
 /**
  * App entry point and holder of three {@link PhotoListFragment} to
@@ -94,7 +96,8 @@ public class MainActivity extends AppCompatActivity implements PhotoListFragment
                     .getInt(STATE_TAB_POSITION, SectionsPagerAdapter.POSITION_NEW);
         }
 
-        if (FIRST_TIME == Util.checkAppStart(this, mPreferences)) {
+        if (FIRST_TIME == Util.checkAppStart(this, mPreferences)
+                && !mPreferences.isAuthenticated()) {
             welcome();
         }
 
@@ -104,6 +107,11 @@ public class MainActivity extends AppCompatActivity implements PhotoListFragment
             PhotoManagement.updateUsersPhotos(MainActivity.this,
                     mPreferences.getUserUsername());
         } */
+
+        // reset widget
+        Intent intentService = new Intent(this, NewPhotosWidgetIntentService.class);
+        intentService.putExtra(EXTRA_NUM_PHOTOS, 0);
+        this.startService(intentService);
 
         // add listener and display fab
         mFab.setOnClickListener(new View.OnClickListener() {

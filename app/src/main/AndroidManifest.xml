@@ -19,6 +19,7 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
+
         <activity
             android:name=".ui.MainActivity"
             android:label="@string/app_name"
@@ -41,22 +42,20 @@
                     android:scheme="@string/unsplash_redirect_uri_scheme" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ui.DetailActivity"
-            android:parentActivityName=".ui.MainActivity"
             android:launchMode="singleTop"
+            android:parentActivityName=".ui.MainActivity"
             android:theme="@style/FullscreenTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.bitsailer.yauc.ui.MainActivity" />
         </activity>
-
         <activity
             android:name=".ui.InformationActivity"
-            android:theme="@style/AppTheme.NoActionBar"
             android:label="@string/title_activity_information"
-            android:parentActivityName=".ui.DetailActivity">
+            android:parentActivityName=".ui.DetailActivity"
+            android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.bitsailer.yauc.ui.DetailActivity" />
@@ -95,6 +94,21 @@
         <service
             android:name=".sync.PhotoManagement"
             android:exported="false" />
+
+        <receiver android:name=".widget.NewPhotosWidget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.bitsailer.yauc.sync.ACTION_DATA_UPDATED" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/new_photos_widget_info" />
+        </receiver>
+
+        <service
+            android:name=".widget.NewPhotosWidgetIntentService"
+            android:exported="false"></service>
     </application>
 
 </manifest>

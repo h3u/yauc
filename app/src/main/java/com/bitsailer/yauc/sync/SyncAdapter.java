@@ -7,6 +7,7 @@ import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SyncRequest;
 import android.content.SyncResult;
 import android.database.Cursor;
@@ -43,10 +44,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private static final int MAX_PAGES = 4;
 
-    private static final String KEY_ACCESS_TOKEN = "key_access_token";
+    public static final String ACTION_DATA_UPDATED =
+            "com.bitsailer.yauc.sync.ACTION_DATA_UPDATED";
+    public static final String EXRTA_NUM_INSERTED = "extra_num_inserted";
     private static final String KEY_INITIAL_SYNC = "key_initial_sync";
-
-    private int mSumInsertedLastSync;
 
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize, false);
@@ -57,7 +58,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         int inserted = 0;
         int perPage = UnsplashAPI.MAX_PER_PAGE;
         boolean firstSync = extras.getBoolean(KEY_INITIAL_SYNC, false);
-        mSumInsertedLastSync = 0;
+        int sumInsertedLastSync = 0;
 
         // get api service
         UnsplashAPI api = UnsplashService.create(UnsplashAPI.class);
@@ -82,14 +83,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             try {
                 List<SimplePhoto> list = listCall.execute().body();
                 inserted = insert(contentProviderClient, list);
-                mSumInsertedLastSync += inserted;
+                sumInsertedLastSync += inserted;
             } catch (IOException e) {
                 Logger.e(e.getMessage());
             }
         }
 
         // todo: start widget update
-        Logger.d("sum inserted %d", mSumInsertedLastSync);
+        Logger.d("sum inserted %d", sumInsertedLastSync);
+        updateWidgets(sumInsertedLastSync);
 
         // todo: add clean up of photos (not favorites/own)
         // yauc should not run into issues with thousands of photos ...
@@ -192,5 +194,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Bundle bundle = new Bundle();
         bundle.putBoolean(KEY_INITIAL_SYNC, true);
         sync(context, bundle);
+    }
+
+    private void updateWidgets(int insertedPhotos) {
+        Context context = getContext();
+        // Setting the package ensures that only components in our app will receive the broadcast
+        Intent dataUpdatedIntent = new Intent(ACTION_DATA_UPDATED)
+                .setPackage(context.getPackageName())
+                .putExtra(EXRTA_NUM_INSERTED, insertedPhotos);
+        context.sendBroadcast(dataUpdatedIntent);
     }
 }
