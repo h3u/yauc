@@ -12,6 +12,7 @@ import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,11 +23,14 @@ import android.widget.TextView;
 import com.bitsailer.yauc.Preferences;
 import com.bitsailer.yauc.R;
 import com.bitsailer.yauc.Util;
+import com.bitsailer.yauc.YaucApplication;
 import com.bitsailer.yauc.api.model.Photo;
 import com.bitsailer.yauc.event.PhotoDataLoadedEvent;
 import com.bitsailer.yauc.sync.PhotoManagement;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -88,8 +92,6 @@ public class InformationActivity extends AppCompatActivity
         // get content uri from intent
         mUri = getIntent().getData();
 
-        PhotoManagement.amendPhoto(this, mUri.getLastPathSegment(), true);
-
         getSupportLoaderManager().initLoader(LOADER_ID, null, this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -101,6 +103,15 @@ public class InformationActivity extends AppCompatActivity
                 .findFragmentById(R.id.locationMap);
         mMapFragment.getMapAsync(this);
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Analytics track screen name
+        Tracker tracker = ((YaucApplication) getApplication()).getDefaultTracker();
+        tracker.setScreenName(getString(R.string.ga_name_information_activity));
+        tracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
     @Override
@@ -119,6 +130,7 @@ public class InformationActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.action_edit && isPhotoOwnedByUser) {
+            PhotoManagement.amendPhoto(this, mUri.getLastPathSegment(), true);
             Intent intent = new Intent(this, EditPhotoActivity.class)
                     .setData(mUri);
             startActivity(intent);
@@ -198,9 +210,15 @@ public class InformationActivity extends AppCompatActivity
                 Double exposureTime = 0.0;
                 Double focalLength = 0.0;
                 try {
-                    aperture = Double.parseDouble(photo.getExif().getAperture());
-                    exposureTime = Double.parseDouble(photo.getExif().getExposureTime());
-                    focalLength = Double.parseDouble(photo.getExif().getFocalLength());
+                    if (!TextUtils.isEmpty(photo.getExif().getAperture())) {
+                        aperture = Double.parseDouble(photo.getExif().getAperture());
+                    }
+                    if (!TextUtils.isEmpty(photo.getExif().getExposureTime())) {
+                        exposureTime = Double.parseDouble(photo.getExif().getExposureTime());
+                    }
+                    if (!TextUtils.isEmpty(photo.getExif().getFocalLength())) {
+                        focalLength = Double.parseDouble(photo.getExif().getFocalLength());
+                    }
                 } catch (NumberFormatException e) {
                     Logger.e(e.getMessage());
                 }

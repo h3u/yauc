@@ -20,8 +20,11 @@ import android.widget.Toast;
 
 import com.bitsailer.yauc.R;
 import com.bitsailer.yauc.Util;
+import com.bitsailer.yauc.YaucApplication;
 import com.bitsailer.yauc.api.model.Photo;
 import com.bitsailer.yauc.sync.PhotoManagement;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.mobsandgeeks.saripaar.ValidationError;
 import com.mobsandgeeks.saripaar.Validator;
 import com.mobsandgeeks.saripaar.annotation.DecimalMax;
@@ -97,6 +100,15 @@ public class EditPhotoActivity extends AppCompatActivity
         mValidator = new Validator(this);
         mValidator.setValidationListener(this);
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Analytics track screen name
+        Tracker tracker = ((YaucApplication) getApplication()).getDefaultTracker();
+        tracker.setScreenName(getString(R.string.ga_name_edit_photo_activity));
+        tracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
     @Override

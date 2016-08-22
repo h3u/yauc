@@ -55,6 +55,7 @@
                     android:layout_height="@dimen/information_avatar_size"
                     android:src="@drawable/ic_account_circle_black"/>
                 </RelativeLayout>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"

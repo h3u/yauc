@@ -24,12 +24,15 @@ import android.view.ViewGroup;
 import com.bitsailer.yauc.Preferences;
 import com.bitsailer.yauc.R;
 import com.bitsailer.yauc.Util;
+import com.bitsailer.yauc.YaucApplication;
 import com.bitsailer.yauc.api.UnsplashAPI;
 import com.bitsailer.yauc.api.UnsplashService;
 import com.bitsailer.yauc.api.model.User;
 import com.bitsailer.yauc.sync.PhotoManagement;
 import com.bitsailer.yauc.sync.SyncAdapter;
 import com.bitsailer.yauc.widget.NewPhotosWidgetIntentService;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.orhanobut.logger.Logger;
 
 import butterknife.BindView;
@@ -50,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements PhotoListFragment
     private static final String STATE_TAB_POSITION = "state_tab_position";
     private static Preferences mPreferences;
     private int mTabPosition = SectionsPagerAdapter.POSITION_NEW;
+    private Tracker mTracker;
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -112,6 +116,11 @@ public class MainActivity extends AppCompatActivity implements PhotoListFragment
 
         // setup icons
         initTabs(mTabPosition);
+
+        // Obtain the shared Tracker instance.
+        YaucApplication application = (YaucApplication) getApplication();
+        mTracker = application.getDefaultTracker();
+        trackScreen();
     }
 
     private void welcome() {
@@ -258,7 +267,7 @@ public class MainActivity extends AppCompatActivity implements PhotoListFragment
             public void onTabSelected(TabLayout.Tab tab) {
                 mTabPosition = tab.getPosition();
                 initTabs(mTabPosition);
-                arrange(tab);
+                trackScreen();
             }
 
             @Override
@@ -279,6 +288,25 @@ public class MainActivity extends AppCompatActivity implements PhotoListFragment
         });
     }
 
+    /**
+     * Analytics track screen name
+     */
+    private void trackScreen() {
+        String name = String.format("Tab%s", getTabName(mTabPosition));
+        mTracker.setScreenName(name);
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+    }
+
+    private String getTabName(int tabPosition) {
+        if (tabPosition == SectionsPagerAdapter.POSITION_FAVORITES) {
+            return getString(R.string.ga_name_tab_favorite);
+        } else if (tabPosition == SectionsPagerAdapter.POSITION_OWN) {
+            return getString(R.string.ga_name_tab_own);
+        } else {
+            return getString(R.string.ga_name_tab_new);
+        }
+    }
+
     private void sayHello() {
         UnsplashAPI api = UnsplashService.create(UnsplashAPI.class, this);
         Call<User> call = api.getMe();
@@ -296,7 +324,11 @@ public class MainActivity extends AppCompatActivity implements PhotoListFragment
                 }
                 Snackbar.make(mMainContent,
                         String.format(getString(R.string.message_login), name),
-                        Snackbar.LENGTH_SHORT).show();
+                        Snackbar.LENGTH_LONG).show();
+                // add user id to analytics
+                if (!TextUtils.isEmpty(user.getUid())) {
+                    mTracker.set("&uid", user.getUid());
+                }
             }
 
             @Override

@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.bitsailer.yauc.Preferences;
 import com.bitsailer.yauc.R;
 import com.bitsailer.yauc.Util;
+import com.bitsailer.yauc.YaucApplication;
 import com.bitsailer.yauc.api.model.Photo;
 import com.bitsailer.yauc.event.PhotoLikedEvent;
 import com.bitsailer.yauc.event.PhotoUnlikedEvent;
@@ -31,6 +32,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -51,6 +54,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     private String mShareUrl;
     private boolean mFavorite = false;
     private int mLikes = 0;
+    private Tracker mTracker;
 
     /**
      * Some older devices needs a small delay between UI widget updates
@@ -133,6 +137,17 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                 toggle();
             }
         });
+
+        // Analytics
+        mTracker = ((YaucApplication) getApplication()).getDefaultTracker();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Analytics track screen name
+        mTracker.setScreenName(getString(R.string.ga_name_detail_activity));
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
     private void toggle() {
@@ -247,6 +262,10 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     @OnClick(R.id.buttonShare)
     public void onShareButtonClicked() {
         if (mShareUrl != null) {
+            mTracker.send(new HitBuilders.EventBuilder()
+                    .setCategory(getString(R.string.ga_category_action))
+                    .setAction(getString(R.string.ga_action_share))
+                    .build());
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text, mShareUrl));
             shareIntent.setType("text/plain");
@@ -276,11 +295,19 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                 mFavorite = false;
                 toggleLikeButton(false, mLikes);
                 PhotoManagement.unlikePhoto(this, mPhotoId);
+                mTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(getString(R.string.ga_category_action))
+                        .setAction(getString(R.string.ga_action_unlike))
+                        .build());
             } else {
                 // like it
                 mFavorite = true;
                 toggleLikeButton(true, mLikes);
                 PhotoManagement.likePhoto(this, mPhotoId);
+                mTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory(getString(R.string.ga_category_action))
+                        .setAction(getString(R.string.ga_action_like))
+                        .build());
             }
         }
     }

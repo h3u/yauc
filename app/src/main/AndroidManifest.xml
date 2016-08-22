@@ -4,6 +4,8 @@
 
     <!-- For fetching images and data from unsplash.com -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- additional for google analytics -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <!-- SyncAdapter permissions -->
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
@@ -14,6 +16,7 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:name=".YaucApplication"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <meta-data

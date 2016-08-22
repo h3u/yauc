@@ -33,7 +33,7 @@ ext {
     // versions for libraries with multiple dependencies
     supportLibVersion = '23.4.0'
     schematicVersion = '0.6.7'
-    playServicesVersion = '9.0.0'
+    playServicesVersion = '9.4.0'
     butterKnifeVersion = '8.2.1'
     retrofitVersion = '2.1.0'
     okHttpVersion = '3.4.1'
