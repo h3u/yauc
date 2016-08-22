@@ -7,10 +7,8 @@ import com.bitsailer.yauc.api.model.User;
 
 import java.util.List;
 
-import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
-import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
@@ -75,16 +73,6 @@ public interface UnsplashAPI {
     Call<Photo> getPhoto(@Path("id") String id);
 
     /**
-     * Create a new photo. See format at
-     * https://unsplash.com/documentation#upload-a-photo
-     *
-     * @param body form-data with photo, location and exif data
-     * @return the new created photo
-     */
-    @POST("photos")
-    Call<Photo> createPhoto(@Body RequestBody body);
-
-    /**
      * Update photo.
      *
      * @param id photo identifier
@@ -103,9 +91,10 @@ public interface UnsplashAPI {
     @FormUrlEncoded
     @PUT("photos/{id}")
     Call<Photo> updatePhoto(
-            @Field("id") String id, // required, rest optional
-            @Field("location[latitude]") Double latitude,
-            @Field("location[longitude]") Double longitude,
+            @Path("id") String idPath, // required
+            @Field("id") String idField, // required, rest optional
+            @Field("location[latitude]") String latitude,
+            @Field("location[longitude]") String longitude,
             @Field("location[city]") String city,
             @Field("location[country]") String country,
             @Field("exif[make]") String make,

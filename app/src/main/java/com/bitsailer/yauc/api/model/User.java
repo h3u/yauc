@@ -1,6 +1,9 @@
 
 package com.bitsailer.yauc.api.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -9,7 +12,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 //@Generated("org.jsonschema2pojo")
-public class User {
+public class User implements Parcelable {
 
     @SerializedName("id")
     @Expose
@@ -45,11 +48,11 @@ public class User {
 
     @SerializedName("bio")
     @Expose
-    private Object bio;
+    private String bio;
 
     @SerializedName("location")
     @Expose
-    private Object location;
+    private String location;
 
     @SerializedName("total_likes")
     @Expose
@@ -77,7 +80,7 @@ public class User {
 
     @SerializedName("instagram_username")
     @Expose
-    private Object instagramUsername;
+    private String instagramUsername;
 
     @SerializedName("email")
     @Expose
@@ -85,7 +88,7 @@ public class User {
 
     @SerializedName("badge")
     @Expose
-    private Object badge;
+    private Badge badge;
 
     /**
      *
@@ -245,7 +248,7 @@ public class User {
      * @param bio
      *     The bio
      */
-    public void setBio(Object bio) {
+    public void setBio(String bio) {
         this.bio = bio;
     }
 
@@ -263,7 +266,7 @@ public class User {
      * @param location
      *     The location
      */
-    public void setLocation(Object location) {
+    public void setLocation(String location) {
         this.location = location;
     }
 
@@ -389,7 +392,7 @@ public class User {
      * @param instagramUsername
      *     The instagram_username
      */
-    public void setInstagramUsername(Object instagramUsername) {
+    public void setInstagramUsername(String instagramUsername) {
         this.instagramUsername = instagramUsername;
     }
 
@@ -425,7 +428,7 @@ public class User {
      * @param badge
      *     The badge
      */
-    public void setBadge(Object badge) {
+    public void setBadge(Badge badge) {
         this.badge = badge;
     }
 
@@ -451,4 +454,68 @@ public class User {
         return new EqualsBuilder().append(getUsername(), rhs.getUsername()).append(getName(), rhs.getName()).append(firstName, rhs.firstName).append(lastName, rhs.lastName).append(getPortfolioUrl(), rhs.getPortfolioUrl()).append(bio, rhs.bio).append(location, rhs.location).append(totalLikes, rhs.totalLikes).append(totalPhotos, rhs.totalPhotos).append(totalCollections, rhs.totalCollections).append(downloads, rhs.downloads).append(getProfileImage(), rhs.getProfileImage()).append(uid, rhs.uid).append(uploadsRemaining, rhs.uploadsRemaining).append(instagramUsername, rhs.instagramUsername).append(email, rhs.email).append(badge, rhs.badge).append(getLinks(), rhs.getLinks()).isEquals();
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.id);
+        dest.writeString(this.username);
+        dest.writeString(this.name);
+        dest.writeString(this.portfolioUrl);
+        dest.writeParcelable(this.profileImage, flags);
+        dest.writeParcelable(this.links, flags);
+        dest.writeString(this.firstName);
+        dest.writeString(this.lastName);
+        dest.writeString(this.bio);
+        dest.writeString(this.location);
+        dest.writeValue(this.totalLikes);
+        dest.writeValue(this.totalPhotos);
+        dest.writeValue(this.totalCollections);
+        dest.writeValue(this.downloads);
+        dest.writeString(this.uid);
+        dest.writeValue(this.uploadsRemaining);
+        dest.writeString(this.instagramUsername);
+        dest.writeString(this.email);
+        dest.writeParcelable(this.badge, flags);
+    }
+
+    public User() {
+    }
+
+    protected User(Parcel in) {
+        this.id = in.readString();
+        this.username = in.readString();
+        this.name = in.readString();
+        this.portfolioUrl = in.readString();
+        this.profileImage = in.readParcelable(ProfileImage.class.getClassLoader());
+        this.links = in.readParcelable(UserLinks.class.getClassLoader());
+        this.firstName = in.readString();
+        this.lastName = in.readString();
+        this.bio = in.readParcelable(Object.class.getClassLoader());
+        this.location = in.readParcelable(Object.class.getClassLoader());
+        this.totalLikes = (Integer) in.readValue(Integer.class.getClassLoader());
+        this.totalPhotos = (Integer) in.readValue(Integer.class.getClassLoader());
+        this.totalCollections = (Integer) in.readValue(Integer.class.getClassLoader());
+        this.downloads = (Integer) in.readValue(Integer.class.getClassLoader());
+        this.uid = in.readString();
+        this.uploadsRemaining = (Integer) in.readValue(Integer.class.getClassLoader());
+        this.instagramUsername = in.readParcelable(Object.class.getClassLoader());
+        this.email = in.readString();
+        this.badge = in.readParcelable(Object.class.getClassLoader());
+    }
+
+    public static final Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>() {
+        @Override
+        public User createFromParcel(Parcel source) {
+            return new User(source);
+        }
+
+        @Override
+        public User[] newArray(int size) {
+            return new User[size];
+        }
+    };
 }

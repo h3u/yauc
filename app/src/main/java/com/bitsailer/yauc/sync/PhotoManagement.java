@@ -45,11 +45,12 @@ public class PhotoManagement extends IntentService {
     private static final String ACTION_AMEND_PHOTO = "com.bitsailer.yauc.sync.action.amend_photo";
     private static final String ACTION_LIKE_PHOTO = "com.bitsailer.yauc.sync.action.like_photo";
     private static final String ACTION_UNLIKE_PHOTO = "com.bitsailer.yauc.sync.action.unlike_photo";
-    private static final String ACTION_ADD_PHOTO = "com.bitsailer.yauc.sync.action.add_photo";
+    private static final String ACTION_EDIT_PHOTO = "com.bitsailer.yauc.sync.action.edit_photo";
 
     private static final String EXTRA_USERNAME = "com.bitsailer.yauc.sync.extra.username";
     private static final String EXTRA_PHOTO_ID = "com.bitsailer.yauc.sync.extra.photo_id";
     private static final String EXTRA_PHOTO = "com.bitsailer.yauc.sync.extra.photo";
+    private static final String EXTRA_FORCE = "com.bitsailer.yauc.sync.extra.force";
 
     public PhotoManagement() {
         super("PhotoManagement");
@@ -89,12 +90,14 @@ public class PhotoManagement extends IntentService {
      *
      * @param context calling context
      * @param photoId id of photo to amend data
+     * @param force do a forced fetch/update
      * @see IntentService
      */
-    public static void amendPhoto(Context context, String photoId) {
+    public static void amendPhoto(Context context, String photoId, boolean force) {
         Intent intent = new Intent(context, PhotoManagement.class);
         intent.setAction(ACTION_AMEND_PHOTO);
         intent.putExtra(EXTRA_PHOTO_ID, photoId);
+        intent.putExtra(EXTRA_FORCE, force);
         context.startService(intent);
     }
 
@@ -129,16 +132,16 @@ public class PhotoManagement extends IntentService {
     }
 
     /**
-     * Add photo to users own photos.
+     * Edit a photo
      *
      * @param context calling context
-     * @param photo the photo to add
+     * @param photo the photo updates
      * @see IntentService
      */
-    // TODO: create extra bundle with photo
-    public static void addPhoto(Context context, Photo photo) {
+    public static void editPhoto(Context context, Photo photo) {
         Intent intent = new Intent(context, PhotoManagement.class);
-        intent.setAction(ACTION_ADD_PHOTO);
+        intent.setAction(ACTION_EDIT_PHOTO);
+        intent.putExtra(EXTRA_PHOTO, photo);
         context.startService(intent);
     }
 
@@ -154,16 +157,17 @@ public class PhotoManagement extends IntentService {
                 handleCleanupUsersPhotos(username);
             } else if (ACTION_AMEND_PHOTO.equals(action)) {
                 final String photoId = intent.getStringExtra(EXTRA_PHOTO_ID);
-                handleAmendPhoto(photoId);
+                final boolean force = intent.getBooleanExtra(EXTRA_FORCE, false);
+                handleAmendPhoto(photoId, force);
             } else if (ACTION_LIKE_PHOTO.equals(action)) {
                 final String photoId = intent.getStringExtra(EXTRA_PHOTO_ID);
                 handleLikePhoto(photoId);
             } else if (ACTION_UNLIKE_PHOTO.equals(action)) {
                 final String photoId = intent.getStringExtra(EXTRA_PHOTO_ID);
                 handleUnlikePhoto(photoId);
-            } else if (ACTION_ADD_PHOTO.equals(action)) {
-                // TODO: get extra bundle with photo
-                //handleAddPhoto(photo);
+            } else if (ACTION_EDIT_PHOTO.equals(action)) {
+                final Photo photo = intent.getParcelableExtra(EXTRA_PHOTO);
+                handleEditPhoto(photo);
             }
         }
     }
@@ -190,7 +194,7 @@ public class PhotoManagement extends IntentService {
                     }
                 } else {
                     // update existing
-                    handleAmendPhoto(item.getId());
+                    handleAmendPhoto(item.getId(), false);
                 }
             }
         }
@@ -277,25 +281,31 @@ public class PhotoManagement extends IntentService {
      * This only fetches and updates if the photo data is incomplete.
      *
      * @param photoId id of photo to amend data
+     * @param force do a forced fetch/update
      */
-    private void handleAmendPhoto(String photoId) {
+    private void handleAmendPhoto(String photoId, boolean force) {
         Photo photo = getById(photoId);
-        if (photo != null && photo.isIncomplete()) {
+        if (photo != null && (photo.isIncomplete() || force)) {
             // get api service
             UnsplashAPI api = UnsplashService.create(UnsplashAPI.class, this);
             Call<Photo> call = api.getPhoto(photoId);
             try {
                 Photo photoUpdate = call.execute().body();
                 if (photoUpdate != null) {
-                    ContentValues values = ContentValuesBuilder.from(photoUpdate);
-                    int num = getContentResolver().update(PhotoProvider.Uri.withId(photoId), values, null, null);
+                    int num = updatePhoto(photoUpdate);
                     Logger.d("%d photos updated", num);
-                    EventBus.getDefault().post(new PhotoDataLoadedEvent(photoId));
                 }
             } catch (IOException e) {
                 Logger.e(e.getMessage());
             }
         }
+    }
+
+    private int updatePhoto(Photo photo) {
+        ContentValues values = ContentValuesBuilder.from(photo);
+        int num = getContentResolver().update(PhotoProvider.Uri.withId(photo.getId()), values, null, null);
+        EventBus.getDefault().post(new PhotoDataLoadedEvent(photo.getId()));
+        return num;
     }
 
     /**
@@ -397,11 +407,35 @@ public class PhotoManagement extends IntentService {
     }
 
     /**
-     * Handle action add photo.
-     * // TODO: implement add of new photo
-     * @param photo the new photo
+     * Handle action edit photo.
+     * @param update the photo updates
      */
-    private void handleAddPhoto(Photo photo) {
-        throw new UnsupportedOperationException("Not yet implemented");
+    private void handleEditPhoto(Photo update) {
+        if (update != null) {
+            Logger.d(update.getExif().getIso());
+            // get api service
+            UnsplashAPI api = UnsplashService.create(UnsplashAPI.class, this);
+            Call<Photo> call = api.updatePhoto(
+                    update.getId(), update.getId(),
+                    null, null,
+                    update.getLocation().getCity(),
+                    update.getLocation().getCountry(),
+                    update.getExif().getMake(),
+                    update.getExif().getModel(),
+                    update.getExif().getExposureTime(),
+                    update.getExif().getAperture(),
+                    update.getExif().getFocalLength(),
+                    (update.getExif().getIso() != null) ?
+                            Integer.toString(update.getExif().getIso()) : null
+            );
+            try {
+                Photo photo = call.execute().body();
+                if (photo != null) {
+                    updatePhoto(photo);
+                }
+            } catch (IOException e) {
+                Logger.e(e.getMessage());
+            }
+        }
     }
 }

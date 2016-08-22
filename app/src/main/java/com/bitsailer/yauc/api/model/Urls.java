@@ -1,6 +1,9 @@
 
 package com.bitsailer.yauc.api.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -9,7 +12,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 //@Generated("org.jsonschema2pojo")
-public class Urls {
+public class Urls implements Parcelable {
 
     @SerializedName("raw")
     @Expose
@@ -143,4 +146,40 @@ public class Urls {
         return new EqualsBuilder().append(raw, rhs.raw).append(full, rhs.full).append(regular, rhs.regular).append(small, rhs.small).append(thumb, rhs.thumb).isEquals();
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.raw);
+        dest.writeString(this.full);
+        dest.writeString(this.regular);
+        dest.writeString(this.small);
+        dest.writeString(this.thumb);
+    }
+
+    public Urls() {
+    }
+
+    protected Urls(Parcel in) {
+        this.raw = in.readString();
+        this.full = in.readString();
+        this.regular = in.readString();
+        this.small = in.readString();
+        this.thumb = in.readString();
+    }
+
+    public static final Parcelable.Creator<Urls> CREATOR = new Parcelable.Creator<Urls>() {
+        @Override
+        public Urls createFromParcel(Parcel source) {
+            return new Urls(source);
+        }
+
+        @Override
+        public Urls[] newArray(int size) {
+            return new Urls[size];
+        }
+    };
 }

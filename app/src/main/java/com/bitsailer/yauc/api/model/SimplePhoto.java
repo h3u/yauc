@@ -2,6 +2,8 @@
 package com.bitsailer.yauc.api.model;
 
 import android.database.Cursor;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.bitsailer.yauc.data.PhotoColumns;
 import com.google.gson.annotations.Expose;
@@ -15,55 +17,55 @@ import java.util.ArrayList;
 import java.util.List;
 
 //@Generated("org.jsonschema2pojo")
-public class SimplePhoto {
+public class SimplePhoto implements Parcelable {
 
     @SerializedName("id")
     @Expose
-    private String id;
+    protected String id;
 
     @SerializedName("created_at")
     @Expose
-    private String createdAt;
+    protected String createdAt;
 
     @SerializedName("width")
     @Expose
-    private Integer width;
+    protected Integer width;
 
     @SerializedName("height")
     @Expose
-    private Integer height;
+    protected Integer height;
 
     @SerializedName("color")
     @Expose
-    private String color;
+    protected String color;
 
     @SerializedName("likes")
     @Expose
-    private Integer likes;
+    protected Integer likes;
 
     @SerializedName("liked_by_user")
     @Expose
-    private Boolean likedByUser;
+    protected Boolean likedByUser;
 
     @SerializedName("user")
     @Expose
-    private User user;
+    protected User user;
 
     @SerializedName("current_user_collections")
     @Expose
-    private List<Object> currentUserCollections = new ArrayList<Object>();
+    protected List<Object> currentUserCollections = new ArrayList<Object>();
 
     @SerializedName("urls")
     @Expose
-    private Urls urls;
+    protected Urls urls;
 
     @SerializedName("categories")
     @Expose
-    private List<Category> categories = new ArrayList<Category>();
+    protected List<Category> categories = new ArrayList<Category>();
 
     @SerializedName("links")
     @Expose
-    private PhotoLinks links;
+    protected PhotoLinks links;
 
     /**
      * 
@@ -317,4 +319,46 @@ public class SimplePhoto {
 
         return photo;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.id);
+        dest.writeString(this.createdAt);
+        dest.writeValue(this.width);
+        dest.writeValue(this.height);
+        dest.writeString(this.color);
+        dest.writeValue(this.likes);
+        dest.writeValue(this.likedByUser);
+        dest.writeParcelable(this.user, flags);
+        dest.writeList(this.currentUserCollections);
+        dest.writeParcelable(this.urls, flags);
+        dest.writeList(this.categories);
+        dest.writeParcelable(this.links, flags);
+    }
+
+    public SimplePhoto() {
+    }
+
+    protected SimplePhoto(Parcel in) {
+        this.id = in.readString();
+        this.createdAt = in.readString();
+        this.width = (Integer) in.readValue(Integer.class.getClassLoader());
+        this.height = (Integer) in.readValue(Integer.class.getClassLoader());
+        this.color = in.readString();
+        this.likes = (Integer) in.readValue(Integer.class.getClassLoader());
+        this.likedByUser = (Boolean) in.readValue(Boolean.class.getClassLoader());
+        this.user = in.readParcelable(User.class.getClassLoader());
+        this.currentUserCollections = new ArrayList<Object>();
+        in.readList(this.currentUserCollections, Object.class.getClassLoader());
+        this.urls = in.readParcelable(Urls.class.getClassLoader());
+        this.categories = new ArrayList<Category>();
+        in.readList(this.categories, Category.class.getClassLoader());
+        this.links = in.readParcelable(PhotoLinks.class.getClassLoader());
+    }
+
 }

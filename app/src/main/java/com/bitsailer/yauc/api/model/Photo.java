@@ -2,6 +2,7 @@
 package com.bitsailer.yauc.api.model;
 
 import android.database.Cursor;
+import android.os.Parcel;
 
 import com.bitsailer.yauc.data.PhotoColumns;
 import com.google.gson.annotations.Expose;
@@ -12,6 +13,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
@@ -185,4 +187,65 @@ public class Photo extends SimplePhoto {
 
         return photo;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        dest.writeValue(this.downloads);
+        dest.writeParcelable(this.exif, flags);
+        dest.writeParcelable(this.location, flags);
+        dest.writeString(this.id);
+        dest.writeString(this.createdAt);
+        dest.writeValue(this.width);
+        dest.writeValue(this.height);
+        dest.writeString(this.color);
+        dest.writeValue(this.likes);
+        dest.writeValue(this.likedByUser);
+        dest.writeParcelable(this.user, flags);
+        dest.writeList(this.currentUserCollections);
+        dest.writeParcelable(this.urls, flags);
+        dest.writeList(this.categories);
+        dest.writeParcelable(this.links, flags);
+    }
+
+    public Photo() {
+    }
+
+    protected Photo(Parcel in) {
+        super(in);
+        this.downloads = (Integer) in.readValue(Integer.class.getClassLoader());
+        this.exif = in.readParcelable(Exif.class.getClassLoader());
+        this.location = in.readParcelable(Location.class.getClassLoader());
+        this.id = in.readString();
+        this.createdAt = in.readString();
+        this.width = (Integer) in.readValue(Integer.class.getClassLoader());
+        this.height = (Integer) in.readValue(Integer.class.getClassLoader());
+        this.color = in.readString();
+        this.likes = (Integer) in.readValue(Integer.class.getClassLoader());
+        this.likedByUser = (Boolean) in.readValue(Boolean.class.getClassLoader());
+        this.user = in.readParcelable(User.class.getClassLoader());
+        this.currentUserCollections = new ArrayList<Object>();
+        in.readList(this.currentUserCollections, Object.class.getClassLoader());
+        this.urls = in.readParcelable(Urls.class.getClassLoader());
+        this.categories = new ArrayList<Category>();
+        in.readList(this.categories, Category.class.getClassLoader());
+        this.links = in.readParcelable(PhotoLinks.class.getClassLoader());
+    }
+
+    public static final Creator<Photo> CREATOR = new Creator<Photo>() {
+        @Override
+        public Photo createFromParcel(Parcel source) {
+            return new Photo(source);
+        }
+
+        @Override
+        public Photo[] newArray(int size) {
+            return new Photo[size];
+        }
+    };
 }

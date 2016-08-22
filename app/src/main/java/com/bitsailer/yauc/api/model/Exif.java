@@ -1,6 +1,8 @@
 
 package com.bitsailer.yauc.api.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 
 import com.google.gson.annotations.Expose;
@@ -11,7 +13,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 //@Generated("org.jsonschema2pojo")
-public class Exif {
+public class Exif implements Parcelable {
 
     @SerializedName("make")
     @Expose
@@ -170,4 +172,43 @@ public class Exif {
     public boolean isCameraEmpty() {
         return TextUtils.isEmpty(make) && TextUtils.isEmpty(model);
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.make);
+        dest.writeString(this.model);
+        dest.writeString(this.exposureTime);
+        dest.writeString(this.aperture);
+        dest.writeString(this.focalLength);
+        dest.writeValue(this.iso);
+    }
+
+    public Exif() {
+    }
+
+    protected Exif(Parcel in) {
+        this.make = in.readString();
+        this.model = in.readString();
+        this.exposureTime = in.readString();
+        this.aperture = in.readString();
+        this.focalLength = in.readString();
+        this.iso = (Integer) in.readValue(Integer.class.getClassLoader());
+    }
+
+    public static final Parcelable.Creator<Exif> CREATOR = new Parcelable.Creator<Exif>() {
+        @Override
+        public Exif createFromParcel(Parcel source) {
+            return new Exif(source);
+        }
+
+        @Override
+        public Exif[] newArray(int size) {
+            return new Exif[size];
+        }
+    };
 }

@@ -18,8 +18,11 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
+            android:contentInsetStart="@dimen/activity_toolbar_content_inset"
+            android:contentInsetLeft="@dimen/activity_toolbar_content_inset"
+            app:contentInsetLeft="@dimen/activity_toolbar_content_inset"
+            app:contentInsetStart="@dimen/activity_toolbar_content_inset"
             android:background="?attr/colorPrimary"
-            app:layout_scrollFlags="scroll|enterAlways"
             app:popupTheme="@style/AppTheme.PopupOverlay">
         </android.support.v7.widget.Toolbar>
     </android.support.design.widget.AppBarLayout>
@@ -244,6 +247,7 @@
                         android:layout_marginStart="16dp"
                         android:src="@drawable/ic_location_on"/>
                 </RelativeLayout>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -261,6 +265,7 @@
                         style="?android:attr/listPreferredItemHeightSmall"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="top"
                         tools:text="Adelboden, Switzerland"/>
 
                 </LinearLayout>
@@ -274,6 +279,7 @@
                 android:name="com.google.android.gms.maps.SupportMapFragment"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/information_map_height"
+                android:layout_marginTop="8dp"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior"
                 map:cameraZoom="10"
                 map:mapType="normal"

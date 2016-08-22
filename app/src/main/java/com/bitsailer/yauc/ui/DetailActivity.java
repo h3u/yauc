@@ -122,7 +122,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         // get content uri from intent
         mUri = getIntent().getData();
 
-        PhotoManagement.amendPhoto(this, mUri.getLastPathSegment());
+        PhotoManagement.amendPhoto(this, mUri.getLastPathSegment(), false);
 
         getSupportLoaderManager().initLoader(LOADER_ID, null, this);
 

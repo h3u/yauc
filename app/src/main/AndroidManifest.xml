@@ -53,12 +53,23 @@
         </activity>
         <activity
             android:name=".ui.InformationActivity"
+            android:launchMode="singleTop"
             android:label="@string/title_activity_information"
             android:parentActivityName=".ui.DetailActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.bitsailer.yauc.ui.DetailActivity" />
+        </activity>
+        <activity
+            android:name=".ui.EditPhotoActivity"
+            android:label="@string/edit_text_dialog_title"
+            android:parentActivityName=".ui.InformationActivity"
+            android:theme="@style/AppTheme.NoActionBar.Floating"
+            android:windowSoftInputMode="stateHidden|adjustResize">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.bitsailer.yauc.ui.InformationActivity" />
         </activity>
 
         <provider
@@ -108,7 +119,7 @@
 
         <service
             android:name=".widget.NewPhotosWidgetIntentService"
-            android:exported="false"></service>
+            android:exported="false" />
     </application>
 
 </manifest>

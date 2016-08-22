@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -39,7 +38,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static com.bitsailer.yauc.R.id.fab;
 import static com.bitsailer.yauc.Util.AppStart.FIRST_TIME;
 import static com.bitsailer.yauc.widget.NewPhotosWidget.EXTRA_NUM_PHOTOS;
 
@@ -69,7 +67,6 @@ public class MainActivity extends AppCompatActivity implements PhotoListFragment
      */
     @BindView(R.id.container) ViewPager mViewPager;
     @BindView(R.id.tabs) TabLayout mTabLayout;
-    @BindView(fab) FloatingActionButton mFab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,15 +110,6 @@ public class MainActivity extends AppCompatActivity implements PhotoListFragment
         intentService.putExtra(EXTRA_NUM_PHOTOS, 0);
         this.startService(intentService);
 
-        // add listener and display fab
-        mFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Add photo coming soon ...", Snackbar.LENGTH_SHORT)
-                        .setAction("Action", null).show();
-            }
-        });
-
         // setup icons
         initTabs(mTabPosition);
     }
@@ -145,23 +133,18 @@ public class MainActivity extends AppCompatActivity implements PhotoListFragment
         if (tab.getPosition() == SectionsPagerAdapter.POSITION_NEW) {
             if (tab.isSelected()) {
                 tab.setIcon(R.drawable.ic_new_releases_accent);
-                mFab.hide();
             } else {
                 tab.setIcon(R.drawable.ic_new_releases);
             }
         } else if (tab.getPosition() == SectionsPagerAdapter.POSITION_FAVORITES) {
             if (tab.isSelected()) {
                 tab.setIcon(R.drawable.ic_favorite_accent);
-                mFab.hide();
             } else {
                 tab.setIcon(R.drawable.ic_favorite);
             }
         } else if (tab.getPosition() == SectionsPagerAdapter.POSITION_OWN) {
             if (tab.isSelected()) {
                 tab.setIcon(R.drawable.ic_account_accent);
-                if (mPreferences.isAuthenticated()) {
-                    mFab.show();
-                }
             } else {
                 tab.setIcon(R.drawable.ic_account);
             }

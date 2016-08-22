@@ -1,6 +1,9 @@
 
 package com.bitsailer.yauc.api.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -9,7 +12,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 //@Generated("org.jsonschema2pojo")
-public class Position {
+public class Position implements Parcelable {
 
     @SerializedName("latitude")
     @Expose
@@ -77,4 +80,34 @@ public class Position {
         return new EqualsBuilder().append(latitude, rhs.latitude).append(longitude, rhs.longitude).isEquals();
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeValue(this.latitude);
+        dest.writeValue(this.longitude);
+    }
+
+    public Position() {
+    }
+
+    protected Position(Parcel in) {
+        this.latitude = (Double) in.readValue(Double.class.getClassLoader());
+        this.longitude = (Double) in.readValue(Double.class.getClassLoader());
+    }
+
+    public static final Parcelable.Creator<Position> CREATOR = new Parcelable.Creator<Position>() {
+        @Override
+        public Position createFromParcel(Parcel source) {
+            return new Position(source);
+        }
+
+        @Override
+        public Position[] newArray(int size) {
+            return new Position[size];
+        }
+    };
 }

@@ -5,6 +5,8 @@
     <string name="action_login">Sign in</string>
     <string name="action_logout">Sign out</string>
     <string name="action_refresh">Refresh</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_save">Save</string>
 
     <!--sync-->
     <string name="content_authority">com.bitsailer.yauc.provider</string>
@@ -77,4 +79,23 @@
         <item quantity="one">%1$d new photo</item>
         <item quantity="other">%1$d new photos</item>
     </plurals>
+
+    <!-- edit photo dialog -->
+    <string name="edit_text_dialog_title">Edit Photo</string>
+    <string name="edit_text_location_country">Country</string>
+    <string name="edit_text_location_city">City</string>
+    <string name="edit_text_exif_camera">Camera manufacturer</string>
+    <string name="edit_text_exif_model">Camera model</string>
+    <string name="edit_text_exif_exposure_aperture">Aperture (f)</string>
+    <string name="edit_text_exif_exposure_aperture_min">Should be greater than 0.5</string>
+    <string name="edit_text_exif_exposure_aperture_max">Should be less than 256</string>
+    <string name="edit_text_exif_exposure_time">Exposure time (sec)</string>
+    <string name="edit_text_exif_exposure_time_min">Should be greater than 0.00005</string>
+    <string name="edit_text_exif_exposure_time_max">Should be less than 86400</string>
+    <string name="edit_text_exif_exposure_focal_length">Focal length (mm)</string>
+    <string name="edit_text_exif_exposure_focal_length_min">Should be greater than 1</string>
+    <string name="edit_text_exif_exposure_focal_length_max">Should be less than 2000</string>
+    <string name="edit_text_exif_exposure_iso">ISO</string>
+    <string name="edit_text_exif_exposure_iso_min">Should be greater than 25</string>
+    <string name="edit_text_exif_exposure_iso_max">Should be less than 409600</string>
 </resources>

@@ -1,6 +1,9 @@
 
 package com.bitsailer.yauc.api.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -9,7 +12,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 //@Generated("org.jsonschema2pojo")
-public class PhotoLinks {
+public class PhotoLinks implements Parcelable {
 
     @SerializedName("self")
     @Expose
@@ -99,4 +102,36 @@ public class PhotoLinks {
         return new EqualsBuilder().append(self, rhs.self).append(html, rhs.html).append(download, rhs.download).isEquals();
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.self);
+        dest.writeString(this.html);
+        dest.writeString(this.download);
+    }
+
+    public PhotoLinks() {
+    }
+
+    protected PhotoLinks(Parcel in) {
+        this.self = in.readString();
+        this.html = in.readString();
+        this.download = in.readString();
+    }
+
+    public static final Parcelable.Creator<PhotoLinks> CREATOR = new Parcelable.Creator<PhotoLinks>() {
+        @Override
+        public PhotoLinks createFromParcel(Parcel source) {
+            return new PhotoLinks(source);
+        }
+
+        @Override
+        public PhotoLinks[] newArray(int size) {
+            return new PhotoLinks[size];
+        }
+    };
 }

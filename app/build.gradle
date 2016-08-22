@@ -82,6 +82,9 @@ dependencies {
     // Events
     compile 'org.greenrobot:eventbus:3.0.0'
 
+    // Validation of user input
+    compile 'com.mobsandgeeks:android-saripaar:2.0.3'
+
     // Testing
     testCompile 'junit:junit:4.12'
 }

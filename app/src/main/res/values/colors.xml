@@ -4,4 +4,7 @@
     <color name="colorPrimaryDark">#E0E0E0</color>
     <color name="colorAccent">#448AFF</color>
     <color name="colorTextPrimary">#595959</color>
+    <color name="colorTextSecondary">#727272</color>
+    <color name="colorDivider">#B6B6B6</color>
+    <color name="opacityBlack54">#8A000000</color>
 </resources>

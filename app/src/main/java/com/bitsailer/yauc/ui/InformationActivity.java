@@ -1,5 +1,6 @@
 package com.bitsailer.yauc.ui;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -11,14 +12,19 @@ import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bitsailer.yauc.Preferences;
 import com.bitsailer.yauc.R;
 import com.bitsailer.yauc.Util;
 import com.bitsailer.yauc.api.model.Photo;
+import com.bitsailer.yauc.event.PhotoDataLoadedEvent;
+import com.bitsailer.yauc.sync.PhotoManagement;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -28,6 +34,10 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.orhanobut.logger.Logger;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -40,6 +50,7 @@ public class InformationActivity extends AppCompatActivity
     private SupportMapFragment mMapFragment;
     private GoogleMap mMap;
     private LatLng mLocation;
+    private boolean isPhotoOwnedByUser = false;
     @BindView(R.id.imageViewProfile)
     ImageView avatar;
     @BindView(R.id.textViewAuthorName)
@@ -77,6 +88,8 @@ public class InformationActivity extends AppCompatActivity
         // get content uri from intent
         mUri = getIntent().getData();
 
+        PhotoManagement.amendPhoto(this, mUri.getLastPathSegment(), true);
+
         getSupportLoaderManager().initLoader(LOADER_ID, null, this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -88,6 +101,42 @@ public class InformationActivity extends AppCompatActivity
                 .findFragmentById(R.id.locationMap);
         mMapFragment.getMapAsync(this);
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_information, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        if (id == R.id.action_edit && isPhotoOwnedByUser) {
+            Intent intent = new Intent(this, EditPhotoActivity.class)
+                    .setData(mUri);
+            startActivity(intent);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (isPhotoOwnedByUser) {
+            menu.findItem(R.id.action_edit).setVisible(true);
+        } else {
+            menu.findItem(R.id.action_edit).setVisible(false);
+        }
+
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -107,6 +156,9 @@ public class InformationActivity extends AppCompatActivity
         if (data.getCount() == 1 && data.moveToFirst()) {
 
             Photo photo = Photo.fromCursor(data);
+            isPhotoOwnedByUser = photo.getUser().getUsername()
+                    .equals(Preferences.get(this).getUserUsername());
+            invalidateOptionsMenu();
 
             Glide.with(this)
                     .load(photo.getUser().getProfileImage().getLarge()).asBitmap()
@@ -224,5 +276,22 @@ public class InformationActivity extends AppCompatActivity
         } catch (Exception e) {
             Logger.e(e.getMessage());
         }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onPhotoLoaded(PhotoDataLoadedEvent event) {
+        getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
     }
 }
