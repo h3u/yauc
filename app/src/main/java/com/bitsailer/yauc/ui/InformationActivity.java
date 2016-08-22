@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.bitsailer.yauc.Preferences;
@@ -55,6 +56,10 @@ public class InformationActivity extends AppCompatActivity
     private GoogleMap mMap;
     private LatLng mLocation;
     private boolean isPhotoOwnedByUser = false;
+    @BindView(R.id.content)
+    ScrollView contentView;
+    @BindView(R.id.emptyLayout)
+    LinearLayout emptyLayout;
     @BindView(R.id.imageViewProfile)
     ImageView avatar;
     @BindView(R.id.textViewAuthorName)
@@ -267,7 +272,8 @@ public class InformationActivity extends AppCompatActivity
 
         } else {
             // photo not found
-            // todo: activate empty view
+            contentView.setVisibility(View.GONE);
+            emptyLayout.setVisibility(View.VISIBLE);
         }
     }
 

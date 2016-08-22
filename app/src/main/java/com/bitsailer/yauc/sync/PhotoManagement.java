@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import com.bitsailer.yauc.Preferences;
 import com.bitsailer.yauc.Util;
 import com.bitsailer.yauc.api.UnsplashAPI;
 import com.bitsailer.yauc.api.UnsplashService;
@@ -40,7 +41,11 @@ import retrofit2.Response;
  * api.unsplash.com in sync.
  */
 public class PhotoManagement extends IntentService {
+
+    private static final int PHOTO_AMOUNT_TO_KEEP = 200;
+
     private static final String ACTION_UPDATE_USERS_PHOTOS = "com.bitsailer.yauc.sync.action.update_users_photos";
+    private static final String ACTION_CLEANUP_NEW_PHOTOS = "com.bitsailer.yauc.sync.action.cleanup_new_photos";
     private static final String ACTION_CLEANUP_USERS_PHOTOS = "com.bitsailer.yauc.sync.action.cleanup_users_photos";
     private static final String ACTION_AMEND_PHOTO = "com.bitsailer.yauc.sync.action.amend_photo";
     private static final String ACTION_LIKE_PHOTO = "com.bitsailer.yauc.sync.action.like_photo";
@@ -68,6 +73,18 @@ public class PhotoManagement extends IntentService {
         Intent intent = new Intent(context, PhotoManagement.class);
         intent.setAction(ACTION_UPDATE_USERS_PHOTOS);
         intent.putExtra(EXTRA_USERNAME, username);
+        context.startService(intent);
+    }
+
+    /**
+     * Removes new photos up to a limit to keep
+     *
+     * @param context calling context
+     * @see IntentService
+     */
+    public static void cleanupNewPhotos(Context context) {
+        Intent intent = new Intent(context, PhotoManagement.class);
+        intent.setAction(ACTION_CLEANUP_NEW_PHOTOS);
         context.startService(intent);
     }
 
@@ -155,6 +172,8 @@ public class PhotoManagement extends IntentService {
             } else if (ACTION_CLEANUP_USERS_PHOTOS.equals(action)) {
                 final String username = intent.getStringExtra(EXTRA_USERNAME);
                 handleCleanupUsersPhotos(username);
+            } else if (ACTION_CLEANUP_NEW_PHOTOS.equals(action)) {
+                handleCleanupNewPhotos();
             } else if (ACTION_AMEND_PHOTO.equals(action)) {
                 final String photoId = intent.getStringExtra(EXTRA_PHOTO_ID);
                 final boolean force = intent.getBooleanExtra(EXTRA_FORCE, false);
@@ -274,6 +293,82 @@ public class PhotoManagement extends IntentService {
         }
         Logger.i("deleted %d favorites and %d own photos", deletedFavorites, deletedOwn);
         EventBus.getDefault().post(new UserDataRemovedEvent(deletedFavorites, deletedOwn));
+    }
+
+    /**
+     * Delete some "old" photos but keep {@link #PHOTO_AMOUNT_TO_KEEP} and
+     * users favorite and own photos if authenticated.
+     * The cleanup is done in reverse order: older photos are removed first.
+     */
+    private void handleCleanupNewPhotos() {
+        int photoCount;
+        int deleted = 0;
+        String username = Preferences.get(getApplicationContext()).getUserUsername();
+        Boolean signedIn = Preferences.get(getApplicationContext()).isAuthenticated();
+
+        if (username != null || !signedIn) {
+            photoCount = countNew(username);
+
+            if (photoCount > PHOTO_AMOUNT_TO_KEEP) {
+                String selection = null;
+                String selectionArgs[] = null;
+
+                if (username != null) {
+                    selection = PhotoColumns.PHOTO_LIKED_BY_USER + " = ?"
+                            + " AND " + PhotoColumns.USER_USERNAME + " <> ?";
+                    selectionArgs = new String[] { "0", username };
+                }
+
+                Cursor cursor = getContentResolver().query(
+                        PhotoProvider.Uri.BASE,
+                        new String[] {
+                                PhotoColumns.PHOTO_ID,
+                                PhotoColumns.PHOTO_CREATED_AT,
+                                PhotoColumns.LINKS_HTML,
+                        },
+                        selection, selectionArgs,
+                        PhotoColumns.PHOTO_CREATED_AT + " ASC");
+
+                if (cursor != null && cursor.getCount() > 0) {
+                    int toDelete = photoCount - PHOTO_AMOUNT_TO_KEEP;
+                    while (toDelete > 0 && cursor.moveToNext()) {
+
+                        deleted += getContentResolver().delete(
+                                PhotoProvider.Uri.BASE,
+                                PhotoColumns.PHOTO_ID + " = ?",
+                                new String[] {cursor.getString(cursor.getColumnIndex(PhotoColumns.PHOTO_ID))});
+                        toDelete--;
+
+                    };
+                    cursor.close();
+                    Logger.i("deleted %d photos from %d during cleanup", deleted, photoCount);
+                }
+            }
+        }
+    }
+
+    private int countNew(String username) {
+        String selection = null;
+        String selectionArgs[] = null;
+
+        if (username != null) {
+            selection = PhotoColumns.PHOTO_LIKED_BY_USER + " = ?"
+                    + " AND " + PhotoColumns.USER_USERNAME + " <> ?";
+            selectionArgs = new String[]{"0", username};
+        }
+
+        Cursor cursor = getContentResolver().query(
+                PhotoProvider.Uri.BASE,
+                new String[] {PhotoColumns.PHOTO_ID},
+                selection,
+                selectionArgs,
+                null);
+
+        if (cursor != null) {
+            return cursor.getCount();
+        }
+
+        return 0;
     }
 
     /**

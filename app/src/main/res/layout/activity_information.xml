@@ -28,6 +28,7 @@
     </android.support.design.widget.AppBarLayout>
 
     <ScrollView
+        android:id="@+id/content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:scrollbars="none">
@@ -291,5 +292,22 @@
         </LinearLayout>
 
     </ScrollView>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/emptyLayout"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/textViewEmpty"
+            android:text="@string/photo_not_found"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Base.TextAppearance.AppCompat.Body1"/>
+
+    </LinearLayout>
 
 </android.support.design.widget.CoordinatorLayout>

@@ -89,12 +89,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             }
         }
 
-        // todo: start widget update
         Logger.d("sum inserted %d", sumInsertedLastSync);
+        // start widget update
         updateWidgets(sumInsertedLastSync);
 
-        // todo: add clean up of photos (not favorites/own)
+        // clean up of photos (not favorites/own)
         // yauc should not run into issues with thousands of photos ...
+        PhotoManagement.cleanupNewPhotos(getContext());
     }
 
     /**
