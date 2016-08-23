@@ -16,5 +16,6 @@
     <dimen name="information_map_height">300dp</dimen>
     <dimen name="widget_margin">8dp</dimen>
     <dimen name="list_icon_size">56dp</dimen>
-    <dimen name="edit_photo_horizontal_margin">16dp</dimen>
+    <dimen name="edit_photo_horizontal_margin">8dp</dimen>
+    <dimen name="edit_photo_text_input_margin_left">64dp</dimen>
 </resources>

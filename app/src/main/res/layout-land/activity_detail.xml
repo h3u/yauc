@@ -47,12 +47,13 @@
                 android:layout_weight="1"
                 android:gravity="center_vertical">
                 <Button
-                    android:id="@+id/buttonShare"
+                    android:id="@+id/buttonInfo"
                     style="@style/FullscreenTheme.Button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:drawableTop="@drawable/ic_share_white"
-                    android:text="@string/button_detail_share" />
+                    android:contentDescription="@string/button_detail_info_content_description"
+                    android:drawableTop="@drawable/ic_info_outline_white"
+                    android:text="@string/button_detail_info" />
             </RelativeLayout>
             <RelativeLayout
                 android:layout_width="wrap_content"
@@ -73,12 +74,13 @@
                 android:layout_weight="1"
                 android:gravity="center_vertical">
                 <Button
-                    android:id="@+id/buttonInfo"
+                    android:id="@+id/buttonShare"
                     style="@style/FullscreenTheme.Button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:drawableTop="@drawable/ic_info_outline_white"
-                    android:text="@string/button_detail_info" />
+                    android:drawableTop="@drawable/ic_share_white"
+                    android:contentDescription="@string/button_detail_share_content_description"
+                    android:text="@string/button_detail_share" />
             </RelativeLayout>
         </LinearLayout>
     </FrameLayout>

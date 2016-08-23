@@ -35,7 +35,7 @@ public class NewPhotosWidgetIntentService extends IntentService {
                 RemoteViews views = new RemoteViews(getPackageName(), R.layout.new_photos_widget);
                 Resources res = getResources();
                 String text = String.format(
-                        res.getQuantityString(R.plurals.widget_new_photos_text, numNewPhotos), numNewPhotos);
+                        res.getString(R.string.widget_new_photos_text), numNewPhotos);
                 views.setTextViewText(R.id.appwidget_text, text);
 
                 // Create launch Intent

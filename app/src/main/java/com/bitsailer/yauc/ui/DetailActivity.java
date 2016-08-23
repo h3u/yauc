@@ -248,9 +248,11 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         if (liked) {
             mLikeButton.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_favorite_white, 0, 0);
             mLikeButton.setText(String.format("%d", likes));
+            mLikeButton.setContentDescription(getString(R.string.button_detail_unlike_content_description));
         } else {
             mLikeButton.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_favorite_border_white, 0, 0);
             mLikeButton.setText(String.format("%d", likes));
+            mLikeButton.setContentDescription(getString(R.string.button_detail_like_content_description));
         }
     }
 

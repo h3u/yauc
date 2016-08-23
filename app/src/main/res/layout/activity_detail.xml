@@ -47,6 +47,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:contentDescription="@string/button_detail_share_content_description"
                 android:drawableTop="@drawable/ic_share_white"
                 android:text="@string/button_detail_share" />
             <Button
@@ -64,6 +65,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:drawableTop="@drawable/ic_info_outline_white"
+                android:contentDescription="@string/button_detail_info_content_description"
                 android:text="@string/button_detail_info" />
 
         </LinearLayout>

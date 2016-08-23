@@ -39,7 +39,11 @@
     <string name="button_dialog_positive">Sign in</string>
     <string name="button_empty_photo_list_login">Sign in</string>
     <string name="button_detail_share">Share</string>
+    <string name="button_detail_share_content_description">Share photo</string>
     <string name="button_detail_info">About</string>
+    <string name="button_detail_info_content_description">Information about photo</string>
+    <string name="button_detail_like_content_description">Like photo</string>
+    <string name="button_detail_unlike_content_description">Unlike photo</string>
 
     <!-- welcome dialog -->
     <string name="dialog_welcome_title">Welcome to YAUC</string>
@@ -77,12 +81,9 @@
     <string name="information_location_data">%1$s %2$s</string>
 
     <!-- new photos widget -->
-    <string name="widget_icon_content_description">Start YAUC to see new photos</string>
+    <string name="widget_icon_content_description">Start YAUC</string>
     <string name="appwidget_text">YAUC</string>
-    <plurals name="widget_new_photos_text">
-        <item quantity="one">%1$d new photo</item>
-        <item quantity="other">%1$d new photos</item>
-    </plurals>
+    <string name="widget_new_photos_text">%1$d new</string>
 
     <!-- edit photo dialog -->
     <string name="ga_name_edit_photo_activity">PhotoEdit</string>
