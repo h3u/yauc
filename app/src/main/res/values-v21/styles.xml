@@ -5,6 +5,10 @@
         <item name="windowNoTitle">true</item>
         <item name="android:statusBarColor">@android:color/background_dark</item>
     </style>
+    <style name="AppTheme.NoActionBar.PhotoList" parent="AppTheme.NoActionBar">
+        <item name="android:windowExitTransition">@transition/photo_list_exit</item>
+    </style>
+
     <style name="AppTheme.TransparentBars">
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>

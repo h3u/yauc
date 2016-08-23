@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -347,7 +348,8 @@ public class MainActivity extends AppCompatActivity implements PhotoListFragment
     public void onItemSelected(Uri uri, PhotoListAdapter.PhotoListItemViewHolder vh) {
         Intent intent = new Intent(this, DetailActivity.class)
                 .setData(uri);
-        startActivity(intent);
+        Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle();
+        startActivity(intent, bundle);
     }
 
     /**
