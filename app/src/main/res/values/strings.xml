@@ -58,6 +58,7 @@
 
     <!-- detail -->
     <string name="ga_name_detail_activity">PhotoDetail</string>
+    <string name="text_author">Photo by %1$s</string>
     <string name="share_title">Share photo</string>
     <string name="share_text">Hey, look what an awesome photo I\'ve found %1$s</string>
     <string name="like_dialog_sign_in_message">You have to sign in to like photos.</string>

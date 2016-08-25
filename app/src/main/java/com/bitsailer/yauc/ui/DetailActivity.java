@@ -1,18 +1,17 @@
 package com.bitsailer.yauc.ui;
 
-import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -56,30 +55,6 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     private int mLikes = 0;
     private Tracker mTracker;
 
-    /**
-     * Some older devices needs a small delay between UI widget updates
-     * and a change of the status and navigation bar.
-     */
-    private static final int UI_ANIMATION_DELAY = 300;
-    private final Handler mHideHandler = new Handler();
-    private final Runnable mHideSystemViewsRunnable = new Runnable() {
-        @SuppressLint("InlinedApi")
-        @Override
-        public void run() {
-            // Delayed removal of status and navigation bar
-
-            // Note that some of these constants are new as of API 16 (Jelly Bean)
-            // and API 19 (KitKat). It is safe to use them, as they are inlined
-            // at compile-time and do nothing on earlier devices.
-            mContentView.setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-        }
-    };
     @BindView(R.id.fullscreen_content_controls)
     View mControlsView;
 
@@ -95,27 +70,8 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     @BindView(R.id.buttonLike)
     Button mLikeButton;
 
-    private final Runnable mShowControlsRunnable = new Runnable() {
-        @Override
-        public void run() {
-            // Delayed display of UI elements
-            mControlsView.setVisibility(View.VISIBLE);
-        }
-    };
-    private final Runnable mHideControlsRunnable = new Runnable() {
-        @Override
-        public void run() {
-            // Delayed display of UI elements
-            mControlsView.setVisibility(View.GONE);
-        }
-    };
-    private boolean mVisible;
-    private final Runnable mHideRunnable = new Runnable() {
-        @Override
-        public void run() {
-            hide();
-        }
-    };
+    @BindView(R.id.textViewAuthor)
+    TextView mAuthor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,20 +79,15 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         setContentView(R.layout.activity_detail);
         ButterKnife.bind(this);
 
+        Window w = getWindow(); // in Activity's onCreate() for instance
+        w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+
         // get content uri from intent
         mUri = getIntent().getData();
 
         PhotoManagement.amendPhoto(this, mUri.getLastPathSegment(), false);
 
         getSupportLoaderManager().initLoader(LOADER_ID, null, this);
-
-        // Set up the user interaction to manually show or hide the system UI.
-        mContentView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toggle();
-            }
-        });
 
         // Analytics
         mTracker = ((YaucApplication) getApplication()).getDefaultTracker();
@@ -148,51 +99,6 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         // Analytics track screen name
         mTracker.setScreenName(getString(R.string.ga_name_detail_activity));
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
-    }
-
-    private void toggle() {
-        if (mVisible) {
-            hide();
-        } else {
-            show();
-        }
-    }
-
-    private void hide() {
-        // UI first
-        // hide status bar
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-
-        // hide bottom bar
-        mHideHandler.postDelayed(mHideControlsRunnable, UI_ANIMATION_DELAY);
-        mVisible = false;
-
-        // Schedule a runnable to remove the status and navigation bar after a delay
-        mHideHandler.removeCallbacks(mShowControlsRunnable);
-        mHideHandler.postDelayed(mHideSystemViewsRunnable, UI_ANIMATION_DELAY);
-    }
-
-    @SuppressLint("InlinedApi")
-    private void show() {
-        // show status bar
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        // Show the system bar
-        mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        mVisible = true;
-
-        // Schedule a runnable to display UI elements after a delay
-        mHideHandler.removeCallbacks(mHideSystemViewsRunnable);
-        mHideHandler.postDelayed(mShowControlsRunnable, UI_ANIMATION_DELAY);
-    }
-
-    /**
-     * Schedules a call to hide() in [delay] milliseconds, canceling any
-     * previously scheduled calls.
-     */
-    private void delayedHide(int delayMillis) {
-        mHideHandler.removeCallbacks(mHideRunnable);
-        mHideHandler.postDelayed(mHideRunnable, delayMillis);
     }
 
     @Override
@@ -217,6 +123,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
             mFavorite = photo.getLikedByUser();
             mLikes = photo.getLikes();
             toggleLikeButton(mFavorite, mLikes);
+            mAuthor.setText(getString(R.string.text_author, photo.getUser().getName()));
             Glide.with(this)
                     .load(photo.getUrls().getRegular())
                     .listener(new RequestListener<String, GlideDrawable>() {
@@ -232,10 +139,9 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                             return false;
                         }
                     })
-                    .fitCenter()
+                    .centerCrop()
                     .crossFade()
                     .into(mContentView);
-            delayedHide(1000);
         } else {
             // photo not found
             mProgressBar.setVisibility(View.GONE);

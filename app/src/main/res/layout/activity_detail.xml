@@ -2,43 +2,57 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@android:color/background_dark"
     tools:context="com.bitsailer.yauc.ui.DetailActivity">
 
-    <!-- This FrameLayout insets its children based on system windows using
-         android:fitsSystemWindows. -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminateTint="@color/colorAccent" />
+    <TextView
+        android:id="@+id/textViewEmpty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:text="@string/photo_not_found"/>
+
+    <ImageView
+        android:id="@+id/fullscreenPhoto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/background_dark"
         android:fitsSystemWindows="true">
 
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:indeterminateTint="@color/colorAccent" />
         <TextView
-            android:id="@+id/textViewEmpty"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:visibility="gone"
-            android:text="@string/photo_not_found"/>
-
-        <ImageView
-            android:id="@+id/fullscreenPhoto"
+            android:id="@+id/textViewAuthor"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="@dimen/gradient_content_size_top"
+            android:background="@drawable/background_gradient_top_down"
+            android:layout_gravity="top"
+            android:gravity="start"
+            android:paddingStart="@dimen/activity_horizontal_margin"
+            android:paddingEnd="@dimen/activity_horizontal_margin"
+            android:paddingTop="@dimen/gradient_content_padding_top"
+            android:fontFamily="sans-serif"
+            android:textSize="12sp"
+            android:textColor="@android:color/white"
+            android:text="Photo by John Doe">
+        </TextView>
 
         <LinearLayout
             android:id="@+id/fullscreen_content_controls"
             style="?android:attr/buttonBarStyle"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/bottom_bar_size"
-            android:layout_gravity="bottom|center_horizontal"
-            android:background="@android:color/background_dark"
+            android:layout_height="@dimen/gradient_content_size_bottom"
+            android:paddingBottom="@dimen/gradient_content_padding_bottom"
+            android:layout_gravity="bottom"
+            android:gravity="bottom"
+            android:background="@drawable/background_gradient_down_top"
             android:orientation="horizontal">
 
             <Button

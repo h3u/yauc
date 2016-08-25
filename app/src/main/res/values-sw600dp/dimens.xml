@@ -3,4 +3,7 @@
     <dimen name="tab_min_width">160dp</dimen>
     <dimen name="photo_width">300dp</dimen>
     <dimen name="information_map_height">800dp</dimen>
+    <dimen name="gradient_content_padding_bottom">64dp</dimen>
+    <dimen name="gradient_content_size_top">168dp</dimen>
+    <dimen name="gradient_content_size_bottom">192dp</dimen>
 </resources>
