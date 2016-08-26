@@ -21,10 +21,21 @@ android {
         buildConfigField "String", "UNSPLASH_CLIENT_ID", localProperties["unsplash_client_id"]
         buildConfigField "String", "UNSPLASH_CLIENT_SECRET", localProperties["unsplash_client_secret"]
     }
+
+    signingConfigs {
+        config {
+            keyAlias 'yauc'
+            keyPassword 'password'
+            storeFile file("$rootDir/keyStore.jks")
+            storePassword 'password'
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
         }
     }
 }
