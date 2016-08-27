@@ -110,4 +110,11 @@
     <string name="ga_action_share">Share</string>
     <string name="ga_action_like">Like</string>
     <string name="ga_action_unlike">Unlike</string>
+
+    <!-- notifications -->
+    <string name="notification_title">New Photos</string>
+    <plurals name="notification_text">
+        <item quantity="one">Unsplash has %1$d new photo</item>
+        <item quantity="other">Unsplash has %1$d new photos</item>
+    </plurals>
 </resources>

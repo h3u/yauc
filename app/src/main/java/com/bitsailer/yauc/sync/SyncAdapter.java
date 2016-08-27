@@ -2,6 +2,9 @@ package com.bitsailer.yauc.sync;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -12,6 +15,7 @@ import android.content.SyncRequest;
 import android.content.SyncResult;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 
 import com.bitsailer.yauc.R;
 import com.bitsailer.yauc.api.UnsplashAPI;
@@ -20,6 +24,7 @@ import com.bitsailer.yauc.api.model.SimplePhoto;
 import com.bitsailer.yauc.data.ContentValuesBuilder;
 import com.bitsailer.yauc.data.PhotoColumns;
 import com.bitsailer.yauc.data.PhotoProvider;
+import com.bitsailer.yauc.ui.MainActivity;
 import com.orhanobut.logger.Logger;
 
 import java.io.IOException;
@@ -48,6 +53,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             "com.bitsailer.yauc.sync.ACTION_DATA_UPDATED";
     public static final String EXRTA_NUM_INSERTED = "extra_num_inserted";
     private static final String KEY_INITIAL_SYNC = "key_initial_sync";
+
+    private static final int NEW_PHOTOS_NOTIFICATION_ID = 0;
 
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize, false);
@@ -92,6 +99,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Logger.d("sum inserted %d", sumInsertedLastSync);
         // start widget update
         updateWidgets(sumInsertedLastSync);
+        createNotification(sumInsertedLastSync);
 
         // clean up of photos (not favorites/own)
         // yauc should not run into issues with thousands of photos ...
@@ -204,5 +212,33 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 .setPackage(context.getPackageName())
                 .putExtra(EXRTA_NUM_INSERTED, insertedPhotos);
         context.sendBroadcast(dataUpdatedIntent);
+    }
+
+    private void createNotification(int insertedPhotos) {
+        if (insertedPhotos > 0) {
+            NotificationCompat.Builder mBuilder =
+                    new NotificationCompat.Builder(getContext())
+                            .setAutoCancel(true)
+                            .setSmallIcon(R.drawable.ic_camera)
+                            .setContentTitle(getContext().getString(R.string.notification_title))
+                            .setContentText(String.format(getContext().getResources()
+                                    .getQuantityString(R.plurals.notification_text, insertedPhotos), insertedPhotos));
+
+            // open MainActivity with default tab new photos
+            Intent resultIntent = new Intent(getContext(), MainActivity.class);
+
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(getContext());
+            stackBuilder.addNextIntent(resultIntent);
+            PendingIntent resultPendingIntent =
+                    stackBuilder.getPendingIntent(
+                            0,
+                            PendingIntent.FLAG_UPDATE_CURRENT
+                    );
+            mBuilder.setContentIntent(resultPendingIntent);
+
+            NotificationManager mNotificationManager =
+                    (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+            mNotificationManager.notify(NEW_PHOTOS_NOTIFICATION_ID, mBuilder.build());
+        }
     }
 }
