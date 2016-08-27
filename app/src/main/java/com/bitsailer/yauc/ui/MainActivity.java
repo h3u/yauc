@@ -49,9 +49,12 @@ import static com.bitsailer.yauc.widget.NewPhotosWidget.EXTRA_NUM_PHOTOS;
  * App entry point and holder of three {@link PhotoListFragment} to
  * display new, favorite and own photos arranged in tabs.
  */
-public class MainActivity extends AppCompatActivity implements PhotoListFragment.ClickCallback {
+public class MainActivity extends AppCompatActivity implements
+        PhotoListFragment.ClickCallback, PhotoListFragment.LoginCallback {
 
     private static final String STATE_TAB_POSITION = "state_tab_position";
+    public static final int RC_LOGIN_ACTIVITY = 4711;
+
     private static Preferences mPreferences;
     private int mTabPosition = SectionsPagerAdapter.POSITION_NEW;
     private Tracker mTracker;
@@ -104,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements PhotoListFragment
         }
 
         // todo: enable this after app approval (without hourly rate limit)
-        // update users photos on app start
+        // update users photos on to keep things synchronized
         /* if (savedInstanceState == null && mPreferences.isAuthenticated()) {
             PhotoManagement.updateUsersPhotos(MainActivity.this,
                     mPreferences.getUserUsername());
@@ -222,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements PhotoListFragment
                             }
                         }).show();
             } else {
-                startActivity(new Intent(this, LoginActivity.class));
+                startLogin();
             }
             return true;
         }
@@ -246,22 +249,27 @@ public class MainActivity extends AppCompatActivity implements PhotoListFragment
         super.onStop();
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == RC_LOGIN_ACTIVITY) {
+            if (resultCode == RESULT_OK) {
+                sayHello();
+            } else {
+                loginError();
+            }
+        }
+    }
+
+    public void startLogin() {
+        startActivityForResult(new Intent(this, LoginActivity.class), RC_LOGIN_ACTIVITY);
+    }
+
     /**
      * Greet user if there's an intent from login.
      */
     @Override
     protected void onResume() {
         super.onResume();
-        Intent intent = getIntent();
-        // comeback from sign in
-        if (intent != null && intent.hasExtra(LoginActivity.INTENT_EXTRA_SUCCESS)) {
-            if (intent.getBooleanExtra(LoginActivity.INTENT_EXTRA_SUCCESS, true)) {
-                sayHello();
-            } else {
-                loginError();
-            }
-            getIntent().removeExtra(LoginActivity.INTENT_EXTRA_SUCCESS);
-        }
 
         mTabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -350,6 +358,11 @@ public class MainActivity extends AppCompatActivity implements PhotoListFragment
                 .setData(uri);
         Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle();
         startActivity(intent, bundle);
+    }
+
+    @Override
+    public void onSignInSelected() {
+        startLogin();
     }
 
     /**

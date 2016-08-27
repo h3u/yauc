@@ -1,7 +1,6 @@
 package com.bitsailer.yauc.ui;
 
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -149,6 +148,13 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
         public void onItemSelected(Uri uri, PhotoListAdapter.PhotoListItemViewHolder vh);
     }
 
+    public interface LoginCallback {
+        /**
+         * Callback when user pressed Sign In.
+         */
+        public void onSignInSelected();
+    }
+
     private String getSelection() {
 
         if (Preferences.get(getActivity()).getUserUsername() != null) {
@@ -220,7 +226,7 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
 
     @OnClick(R.id.buttonSignIn)
     public void onLoginClick() {
-        startActivity(new Intent(getActivity(), LoginActivity.class));
+        ((LoginCallback) getActivity()).onSignInSelected();
     }
 
     @Override

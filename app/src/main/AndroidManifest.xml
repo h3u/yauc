@@ -33,7 +33,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.LoginActivity">
+        <activity
+            android:name=".ui.LoginActivity"
+            android:label="@string/title_activity_login"
+            android:parentActivityName=".ui.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.bitsailer.yauc.ui.MainActivity" />
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
