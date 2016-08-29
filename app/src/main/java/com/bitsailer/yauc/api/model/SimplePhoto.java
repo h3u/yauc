@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 //@Generated("org.jsonschema2pojo")
+@SuppressWarnings("ALL")
 public class SimplePhoto implements Parcelable {
 
     @SerializedName("id")
@@ -53,7 +54,7 @@ public class SimplePhoto implements Parcelable {
 
     @SerializedName("current_user_collections")
     @Expose
-    protected List<Object> currentUserCollections = new ArrayList<Object>();
+    protected List<Object> currentUserCollections = new ArrayList<>();
 
     @SerializedName("urls")
     @Expose
@@ -298,7 +299,7 @@ public class SimplePhoto implements Parcelable {
         if (other == this) {
             return true;
         }
-        if ((other instanceof SimplePhoto) == false) {
+        if (!(other instanceof SimplePhoto)) {
             return false;
         }
         SimplePhoto rhs = ((SimplePhoto) other);
@@ -361,4 +362,15 @@ public class SimplePhoto implements Parcelable {
         this.links = in.readParcelable(PhotoLinks.class.getClassLoader());
     }
 
+    public static final Creator<SimplePhoto> CREATOR = new Creator<SimplePhoto>() {
+        @Override
+        public SimplePhoto createFromParcel(Parcel source) {
+            return new SimplePhoto(source);
+        }
+
+        @Override
+        public SimplePhoto[] newArray(int size) {
+            return new SimplePhoto[size];
+        }
+    };
 }

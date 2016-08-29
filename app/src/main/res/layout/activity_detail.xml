@@ -1,4 +1,4 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
@@ -9,7 +9,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:indeterminateTint="@color/colorAccent" />
+        android:indeterminateTint="@color/colorAccent"
+        tools:targetApi="lollipop" />
     <TextView
         android:id="@+id/textViewEmpty"
         android:layout_width="wrap_content"
@@ -20,6 +21,7 @@
 
     <ImageView
         android:id="@+id/fullscreenPhoto"
+        android:contentDescription="@string/content_description_photo"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
@@ -41,7 +43,8 @@
             android:fontFamily="sans-serif"
             android:textSize="12sp"
             android:textColor="@android:color/white"
-            android:text="Photo by John Doe">
+            android:text="Photo by John Doe"
+            tools:ignore="HardcodedText">
         </TextView>
 
         <LinearLayout
@@ -71,7 +74,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:drawableTop="@drawable/ic_favorite_border_white"
-                android:text="0" />
+                android:text="0"
+                tools:ignore="HardcodedText" />
             <Button
                 android:id="@+id/buttonInfo"
                 style="@style/FullscreenTheme.Button"
@@ -85,4 +89,4 @@
         </LinearLayout>
     </FrameLayout>
 
-</FrameLayout>
+</merge>

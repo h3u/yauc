@@ -10,7 +10,6 @@ import android.widget.ImageView;
  * if displayed in a (staggered) grid.
  * https://developer.android.com/training/custom-views/create-view.html
  * http://stackoverflow.com/questions/13992535/android-imageview-scale-smaller-image-to-width-with-flexible-height-without-crop
- * Created by Uli Wucherer (u.wucherer@gmail.com) on 07/08/16.
  */
 
 public class DynamicImageView extends ImageView {

@@ -1,5 +1,6 @@
 package com.bitsailer.yauc.data;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 
 import com.bitsailer.yauc.api.model.Photo;
@@ -17,7 +18,8 @@ import java.util.Date;
  */
 
 public class ContentValuesBuilder {
-    private static SimpleDateFormat mDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+    @SuppressLint("SimpleDateFormat")
+    private static final SimpleDateFormat mDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
     private static PhotosValuesBuilder buildBase(PhotosValuesBuilder builder, SimplePhoto photo) {
         Date createdAt = new Date();

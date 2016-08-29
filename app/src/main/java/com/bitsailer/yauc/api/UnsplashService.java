@@ -23,9 +23,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class UnsplashService {
 
-    private static OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+    private static final OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
 
-    private static Retrofit.Builder builder =
+    private static final Retrofit.Builder builder =
             new Retrofit.Builder()
                     .addConverterFactory(GsonConverterFactory.create());
 
@@ -53,11 +53,10 @@ public class UnsplashService {
      * Create service for endpoint defined in service interface.
      * With a given baseUrl it will be used instead of UnsplashAPI.URL.
      * @param serviceClass service class to create
-     * @param baseUrl the base url to use
      * @return Implementation of service interface
      */
-    public static <S> S createAuth(Class<S> serviceClass, String baseUrl) {
-        return create(serviceClass, null, baseUrl);
+    public static <S> S createAuth(Class<S> serviceClass) {
+        return create(serviceClass, null, UnsplashAPI.OAUTH_URL);
     }
 
     private static <S> S create(Class<S> serviceClass, final String authToken, final String baseUrl) {

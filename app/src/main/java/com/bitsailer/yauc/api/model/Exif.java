@@ -162,7 +162,7 @@ public class Exif implements Parcelable {
         if (other == this) {
             return true;
         }
-        if ((other instanceof Exif) == false) {
+        if (!(other instanceof Exif)) {
             return false;
         }
         Exif rhs = ((Exif) other);
@@ -191,7 +191,7 @@ public class Exif implements Parcelable {
     public Exif() {
     }
 
-    protected Exif(Parcel in) {
+    Exif(Parcel in) {
         this.make = in.readString();
         this.model = in.readString();
         this.exposureTime = in.readString();

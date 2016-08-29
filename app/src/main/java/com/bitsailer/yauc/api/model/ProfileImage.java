@@ -12,6 +12,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 //@Generated("org.jsonschema2pojo")
+@SuppressWarnings("ALL")
 public class ProfileImage implements Parcelable {
 
     @SerializedName("small")
@@ -95,7 +96,7 @@ public class ProfileImage implements Parcelable {
         if (other == this) {
             return true;
         }
-        if ((other instanceof ProfileImage) == false) {
+        if (!(other instanceof ProfileImage)) {
             return false;
         }
         ProfileImage rhs = ((ProfileImage) other);
@@ -117,7 +118,7 @@ public class ProfileImage implements Parcelable {
     public ProfileImage() {
     }
 
-    protected ProfileImage(Parcel in) {
+    ProfileImage(Parcel in) {
         this.small = in.readString();
         this.medium = in.readString();
         this.large = in.readString();

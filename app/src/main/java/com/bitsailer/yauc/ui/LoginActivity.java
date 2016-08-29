@@ -29,12 +29,12 @@ import retrofit2.Response;
  * Manage user sign in with a web view that displays authorization
  * and sign in at https://unsplash.com.
  */
+@SuppressWarnings("unused")
 public class LoginActivity extends AppCompatActivity {
 
     @BindView(R.id.webView)
     WebView mWebView;
 
-    @SuppressWarnings("deprecated")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +44,7 @@ public class LoginActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Uri unsplashAuthorization = Uri.parse(String.format(
@@ -60,6 +61,7 @@ public class LoginActivity extends AppCompatActivity {
                 }
             });
         } else {
+            //noinspection deprecation
             cookieManager.removeAllCookie();
         }
 
@@ -97,7 +99,7 @@ public class LoginActivity extends AppCompatActivity {
             Preferences.get(this).saveAuthorizationCode(code);
             // get access token
             Call<AccessToken> call = UnsplashService
-                    .createAuth(UnsplashAPI.class, UnsplashAPI.OAUTH_URL)
+                    .createAuth(UnsplashAPI.class)
                     .getAccessToken(
                             BuildConfig.UNSPLASH_CLIENT_ID,
                             BuildConfig.UNSPLASH_CLIENT_SECRET,

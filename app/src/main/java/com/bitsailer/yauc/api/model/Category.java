@@ -9,7 +9,8 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 //@Generated("org.jsonschema2pojo")
-public class Category {
+@SuppressWarnings("unused")
+class Category {
 
     @SerializedName("id")
     @Expose
@@ -114,7 +115,7 @@ public class Category {
         if (other == this) {
             return true;
         }
-        if ((other instanceof Category) == false) {
+        if (!(other instanceof Category)) {
             return false;
         }
         Category rhs = ((Category) other);

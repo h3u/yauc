@@ -20,7 +20,7 @@ public final class PhotoProvider {
     public static final String AUTHORITY = "com.bitsailer.yauc.provider";
     public static final String PACKAGE_NAME = "com.bitsailer.yauc.provider";
 
-    static final android.net.Uri BASE_CONTENT_URI = android.net.Uri.parse("content://" + AUTHORITY);
+    private static final android.net.Uri BASE_CONTENT_URI = android.net.Uri.parse("content://" + AUTHORITY);
 
     interface Path {
         String BASE = "photos";

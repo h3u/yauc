@@ -1,11 +1,12 @@
 package com.bitsailer.yauc.event;
 
 /**
- * Created by Uli Wucherer (u.wucherer@gmail.com) on 03/08/16.
+ * Event that occurs each time a photo has been fetched from
+ * unsplash api and updated in the database.
  */
-
 public class PhotoDataLoadedEvent {
-    public final String photoId;
+    @SuppressWarnings({"FieldCanBeLocal", "unused"})
+    private final String photoId;
 
     public PhotoDataLoadedEvent(String photoId) {
         this.photoId = photoId;

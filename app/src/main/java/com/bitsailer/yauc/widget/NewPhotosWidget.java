@@ -24,7 +24,7 @@ public class NewPhotosWidget extends AppWidgetProvider {
     public void onReceive(@NonNull Context context, @NonNull Intent intent) {
         super.onReceive(context, intent);
         if (SyncAdapter.ACTION_DATA_UPDATED.equals(intent.getAction())) {
-            int numNewPhotos = intent.getIntExtra(SyncAdapter.EXRTA_NUM_INSERTED, 0);
+            int numNewPhotos = intent.getIntExtra(SyncAdapter.EXTRA_NUM_INSERTED, 0);
             Intent intentService = new Intent(context, NewPhotosWidgetIntentService.class);
             intentService.putExtra(EXTRA_NUM_PHOTOS, numNewPhotos);
             context.startService(intentService);

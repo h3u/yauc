@@ -177,7 +177,7 @@ public class PhotoProviderTest extends ProviderTestCase2<com.bitsailer.yauc.prov
 
     @Test
     public void bulkInsertTest() {
-        Vector<ContentValues> vector = new Vector<ContentValues>(2);
+        Vector<ContentValues> vector = new Vector<>(2);
 
         for (int i=1;i <= 2; i++) {
             PhotosValuesBuilder builder = new PhotosValuesBuilder();

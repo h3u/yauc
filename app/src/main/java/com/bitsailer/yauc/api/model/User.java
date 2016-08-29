@@ -12,6 +12,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 //@Generated("org.jsonschema2pojo")
+@SuppressWarnings("ALL")
 public class User implements Parcelable {
 
     @SerializedName("id")
@@ -447,7 +448,7 @@ public class User implements Parcelable {
         if (other == this) {
             return true;
         }
-        if ((other instanceof User) == false) {
+        if (!(other instanceof User)) {
             return false;
         }
         User rhs = ((User) other);
@@ -485,7 +486,7 @@ public class User implements Parcelable {
     public User() {
     }
 
-    protected User(Parcel in) {
+    User(Parcel in) {
         this.id = in.readString();
         this.username = in.readString();
         this.name = in.readString();

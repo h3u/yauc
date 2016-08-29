@@ -9,11 +9,11 @@ import android.os.Bundle;
 
 /**
  * Stub Authenticator to satisfy AuthenticatorService and SyncService.
- * Unsplashs auth token does not expire and is stored
+ * Unsplash's auth token does not expire and is stored
  * in Preferences.
  */
 
-public class AccountAuthenticator extends AbstractAccountAuthenticator {
+class AccountAuthenticator extends AbstractAccountAuthenticator {
 
     public AccountAuthenticator(Context context) {
         super(context);

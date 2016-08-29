@@ -23,7 +23,8 @@
             app:contentInsetLeft="@dimen/activity_toolbar_content_inset"
             app:contentInsetStart="@dimen/activity_toolbar_content_inset"
             android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay">
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            tools:targetApi="lollipop">
         </android.support.v7.widget.Toolbar>
     </android.support.design.widget.AppBarLayout>
 

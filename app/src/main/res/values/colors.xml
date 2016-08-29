@@ -4,8 +4,6 @@
     <color name="colorPrimaryDark">#E0E0E0</color>
     <color name="colorAccent">#448AFF</color>
     <color name="colorTextPrimary">#595959</color>
-    <color name="colorTextSecondary">#727272</color>
-    <color name="colorDivider">#B6B6B6</color>
     <color name="alpha30Black">#4D000000</color>
     <color name="alpha40Black">#66000000</color>
 </resources>

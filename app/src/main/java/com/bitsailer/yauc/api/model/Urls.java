@@ -12,6 +12,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 //@Generated("org.jsonschema2pojo")
+@SuppressWarnings("ALL")
 public class Urls implements Parcelable {
 
     @SerializedName("raw")
@@ -139,7 +140,7 @@ public class Urls implements Parcelable {
         if (other == this) {
             return true;
         }
-        if ((other instanceof Urls) == false) {
+        if (!(other instanceof Urls)) {
             return false;
         }
         Urls rhs = ((Urls) other);
@@ -163,7 +164,7 @@ public class Urls implements Parcelable {
     public Urls() {
     }
 
-    protected Urls(Parcel in) {
+    Urls(Parcel in) {
         this.raw = in.readString();
         this.full = in.readString();
         this.regular = in.readString();

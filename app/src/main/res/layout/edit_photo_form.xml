@@ -158,7 +158,7 @@
                 android:layout_height="@dimen/list_icon_size">
 
                 <ImageView
-                    android:src="@drawable/ic_place"
+                    android:src="@drawable/ic_location_on"
                     android:layout_gravity="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

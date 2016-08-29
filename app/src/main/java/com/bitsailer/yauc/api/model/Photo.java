@@ -18,6 +18,7 @@ import java.util.Date;
 import java.util.Locale;
 
 //@Generated("org.jsonschema2pojo")
+@SuppressWarnings("ALL")
 public class Photo extends SimplePhoto {
 
     @SerializedName("downloads")
@@ -64,7 +65,7 @@ public class Photo extends SimplePhoto {
      * @param exif
      *     The exif
      */
-    public void setExif(Exif exif) {
+    private void setExif(Exif exif) {
         this.exif = exif;
     }
 
@@ -82,7 +83,7 @@ public class Photo extends SimplePhoto {
      * @param location
      *     The location
      */
-    public void setLocation(Location location) {
+    private void setLocation(Location location) {
         this.location = location;
     }
 
@@ -116,7 +117,7 @@ public class Photo extends SimplePhoto {
         if (other == this) {
             return true;
         }
-        if ((other instanceof Photo) == false) {
+        if (!(other instanceof Photo)) {
             return false;
         }
         Photo rhs = ((Photo) other);
@@ -213,10 +214,10 @@ public class Photo extends SimplePhoto {
         dest.writeParcelable(this.links, flags);
     }
 
-    public Photo() {
+    private Photo() {
     }
 
-    protected Photo(Parcel in) {
+    private Photo(Parcel in) {
         super(in);
         this.downloads = (Integer) in.readValue(Integer.class.getClassLoader());
         this.exif = in.readParcelable(Exif.class.getClassLoader());
@@ -229,10 +230,10 @@ public class Photo extends SimplePhoto {
         this.likes = (Integer) in.readValue(Integer.class.getClassLoader());
         this.likedByUser = (Boolean) in.readValue(Boolean.class.getClassLoader());
         this.user = in.readParcelable(User.class.getClassLoader());
-        this.currentUserCollections = new ArrayList<Object>();
+        this.currentUserCollections = new ArrayList<>();
         in.readList(this.currentUserCollections, Object.class.getClassLoader());
         this.urls = in.readParcelable(Urls.class.getClassLoader());
-        this.categories = new ArrayList<Category>();
+        this.categories = new ArrayList<>();
         in.readList(this.categories, Category.class.getClassLoader());
         this.links = in.readParcelable(PhotoLinks.class.getClassLoader());
     }

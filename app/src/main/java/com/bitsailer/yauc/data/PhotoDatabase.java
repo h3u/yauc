@@ -8,6 +8,7 @@ import net.simonvt.schematic.annotation.Table;
  * Definition of photo database
  */
 
+@SuppressWarnings("WeakerAccess")
 @Database(
         version = PhotoDatabase.VERSION,
         fileName = PhotoDatabase.FILENAME,

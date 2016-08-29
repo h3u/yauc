@@ -39,6 +39,7 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+@SuppressWarnings("unused")
 public class EditPhotoActivity extends AppCompatActivity
         implements LoaderManager.LoaderCallbacks<Cursor>, Validator.ValidationListener {
 
@@ -93,6 +94,7 @@ public class EditPhotoActivity extends AppCompatActivity
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close_black);
@@ -220,7 +222,7 @@ public class EditPhotoActivity extends AppCompatActivity
 
     class EditPhotoTextWatcher implements TextWatcher {
 
-        TextInputEditText mEditText;
+        final TextInputEditText mEditText;
 
         public EditPhotoTextWatcher(TextInputEditText mEditText) {
             this.mEditText = mEditText;

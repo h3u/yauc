@@ -73,7 +73,7 @@ public class Position implements Parcelable {
         if (other == this) {
             return true;
         }
-        if ((other instanceof Position) == false) {
+        if (!(other instanceof Position)) {
             return false;
         }
         Position rhs = ((Position) other);
@@ -94,7 +94,7 @@ public class Position implements Parcelable {
     public Position() {
     }
 
-    protected Position(Parcel in) {
+    Position(Parcel in) {
         this.latitude = (Double) in.readValue(Double.class.getClassLoader());
         this.longitude = (Double) in.readValue(Double.class.getClassLoader());
     }

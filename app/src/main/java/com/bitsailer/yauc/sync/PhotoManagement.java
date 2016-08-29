@@ -203,7 +203,6 @@ public class PhotoManagement extends IntentService {
         if (list != null && !list.isEmpty()) {
 
             for (SimplePhoto item : list) {
-                String log = item.getLinks().getHtml();
                 // check if exists
                 if (!hasPhoto(item.getId())) {
                     ContentValues values = ContentValuesBuilder.from(item);
@@ -277,7 +276,7 @@ public class PhotoManagement extends IntentService {
      * @param username username of user to cleanup
      */
     private void handleCleanupUsersPhotos(String username) {
-        int deletedFavorites = 0;
+        int deletedFavorites;
         int deletedOwn = 0;
         // delete favorites
         deletedFavorites = getContentResolver()
@@ -339,7 +338,7 @@ public class PhotoManagement extends IntentService {
                                 new String[] {cursor.getString(cursor.getColumnIndex(PhotoColumns.PHOTO_ID))});
                         toDelete--;
 
-                    };
+                    }
                     cursor.close();
                     Logger.i("deleted %d photos from %d during cleanup", deleted, photoCount);
                 }
@@ -350,6 +349,7 @@ public class PhotoManagement extends IntentService {
     private int countNew(String username) {
         String selection = null;
         String selectionArgs[] = null;
+        int countNew = 0;
 
         if (username != null) {
             selection = PhotoColumns.PHOTO_LIKED_BY_USER + " = ?"
@@ -365,10 +365,11 @@ public class PhotoManagement extends IntentService {
                 null);
 
         if (cursor != null) {
-            return cursor.getCount();
+            countNew = cursor.getCount();
+            cursor.close();
         }
 
-        return 0;
+        return countNew;
     }
 
     /**

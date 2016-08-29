@@ -23,12 +23,13 @@ import retrofit2.http.Query;
  * See https://unsplash.com/documentation
  */
 
+@SuppressWarnings("ALL")
 public interface UnsplashAPI {
 
     String URL = "https://api.unsplash.com/";
     String OAUTH_URL = "https://unsplash.com/";
     String AUTHORIZATION_GRANT_TYPE = "authorization_code";
-    String PERMISSION_SCOPE = "public+read_user+read_photos+write_photos+write_likes";
+    String PERMISSION_SCOPE = "public+read_user+read_photos+write_likes";
     int MAX_PER_PAGE = 30;
 
     /**
@@ -75,7 +76,8 @@ public interface UnsplashAPI {
     /**
      * Update photo.
      *
-     * @param id photo identifier
+     * @param idPath photo identifier
+     * @param idField photo identifier
      * @param latitude location latitude
      * @param longitude location longitude
      * @param city location city

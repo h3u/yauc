@@ -9,6 +9,15 @@
     android:fitsSystemWindows="true"
     tools:context="com.bitsailer.yauc.ui.EditPhotoActivity">
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorPrimary">
+
+        <include layout="@layout/edit_photo_form" />
+
+    </FrameLayout>
+
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appbar"
         android:layout_width="match_parent"
@@ -23,18 +32,10 @@
             android:contentInsetLeft="@dimen/activity_toolbar_content_inset"
             app:contentInsetLeft="@dimen/activity_toolbar_content_inset"
             app:contentInsetStart="@dimen/activity_toolbar_content_inset"
-            app:popupTheme="@style/AppTheme.PopupOverlay">
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            tools:targetApi="lollipop">
         </android.support.v7.widget.Toolbar>
 
     </android.support.design.widget.AppBarLayout>
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/colorPrimary">
-
-        <include layout="@layout/edit_photo_form" />
-
-    </FrameLayout>
 
 </android.support.design.widget.CoordinatorLayout>

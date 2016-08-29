@@ -22,7 +22,7 @@ public class SyncService extends Service {
     public void onCreate() {
         synchronized (sSyncAdapterLock) {
             if (sSyncSyncAdapter == null) {
-                sSyncSyncAdapter = new SyncAdapter(getApplicationContext(), true);
+                sSyncSyncAdapter = new SyncAdapter(getApplicationContext());
             }
         }
     }

@@ -1,11 +1,12 @@
 package com.bitsailer.yauc.event;
 
 /**
- * Created by Uli Wucherer (u.wucherer@gmail.com) on 03/08/16.
+ * Event that occurs when a user request to "unlike" a photo
+ * has been transmitted to api and saved to database.
  */
-
 public class PhotoUnlikedEvent {
-    public final String photoId;
+    @SuppressWarnings({"FieldCanBeLocal", "unused"})
+    private final String photoId;
 
     public PhotoUnlikedEvent(String photoId) {
         this.photoId = photoId;

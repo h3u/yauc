@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">YAUC</string>
 
     <!--menu-->
@@ -58,8 +58,9 @@
     <!-- detail -->
     <string name="ga_name_detail_activity">PhotoDetail</string>
     <string name="text_author">Photo by %1$s</string>
+    <string name="content_description_photo">Detail view of photo</string>
     <string name="share_title">Share photo</string>
-    <string name="share_text">Hey, look what an awesome photo I\'ve found %1$s</string>
+    <string name="share_text">Hey, look what an awesome photo i have found %1$s</string>
     <string name="like_dialog_sign_in_message">You have to sign in to like photos.</string>
     <string name="liked_message">Photo added to favorites.</string>
     <string name="unliked_message">Photo removed from favorites.</string>
@@ -67,6 +68,7 @@
 
     <!-- information about photo -->
     <string name="ga_name_information_activity">PhotoInformation</string>
+    <string name="content_description_profile">Photo of %1$s</string>
     <string name="information_published_at">Published</string>
     <string name="information_camera">Camera</string>
     <string name="information_exposure">Exposure</string>
@@ -81,9 +83,8 @@
     <string name="information_location_data">%1$s %2$s</string>
 
     <!-- new photos widget -->
-    <string name="widget_icon_content_description">Start YAUC</string>
     <string name="appwidget_text">YAUC</string>
-    <string name="widget_new_photos_text">%1$d new</string>
+    <string name="widget_new_photos_text" tools:ignore="PluralsCandidate">%1$d new</string>
 
     <!-- edit photo dialog -->
     <string name="ga_name_edit_photo_activity">PhotoEdit</string>
@@ -105,7 +106,7 @@
     <string name="edit_text_exif_exposure_iso_min">Should be greater than 25</string>
     <string name="edit_text_exif_exposure_iso_max">Should be less than 409600</string>
 
-    <!-- Google Anayltics -->
+    <!-- Google Analytics -->
     <string name="ga_category_action">Action</string>
     <string name="ga_action_share">Share</string>
     <string name="ga_action_like">Like</string>

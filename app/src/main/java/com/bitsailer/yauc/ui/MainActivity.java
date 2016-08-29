@@ -49,25 +49,18 @@ import static com.bitsailer.yauc.widget.NewPhotosWidget.EXTRA_NUM_PHOTOS;
  * App entry point and holder of three {@link PhotoListFragment} to
  * display new, favorite and own photos arranged in tabs.
  */
+@SuppressWarnings("unused")
 public class MainActivity extends AppCompatActivity implements
         PhotoListFragment.ClickCallback, PhotoListFragment.LoginCallback {
 
     private static final String STATE_TAB_POSITION = "state_tab_position";
-    public static final int RC_LOGIN_ACTIVITY = 4711;
+    private static final String STATE_WELCOME_VISIBLE = "state_welcome_visible";
+    private static final int RC_LOGIN_ACTIVITY = 4711;
 
     private static Preferences mPreferences;
     private int mTabPosition = SectionsPagerAdapter.POSITION_NEW;
     private Tracker mTracker;
-
-    /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-     */
-    private SectionsPagerAdapter mSectionsPagerAdapter;
+    private boolean mWelcomeVisible = false;
 
     @BindView(R.id.main_content) CoordinatorLayout mMainContent;
     /**
@@ -88,9 +81,11 @@ public class MainActivity extends AppCompatActivity implements
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        SectionsPagerAdapter mSectionsPagerAdapter =
+                new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
         mViewPager.setAdapter(mSectionsPagerAdapter);
@@ -99,6 +94,8 @@ public class MainActivity extends AppCompatActivity implements
         if (savedInstanceState != null) {
             mTabPosition = savedInstanceState
                     .getInt(STATE_TAB_POSITION, SectionsPagerAdapter.POSITION_NEW);
+            mWelcomeVisible = savedInstanceState
+                    .getBoolean(STATE_WELCOME_VISIBLE, false);
         }
 
         if (FIRST_TIME == Util.checkAppStart(this, mPreferences)
@@ -137,9 +134,14 @@ public class MainActivity extends AppCompatActivity implements
                 startActivity(new Intent(MainActivity.this, LoginActivity.class));
             }
         });
-        builder.setNegativeButton(R.string.button_dialog_dismiss, null);
+        builder.setNegativeButton(R.string.button_dialog_dismiss, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                mWelcomeVisible = false;
+            }
+        });
         AlertDialog dialog = builder.create();
         dialog.show();
+        mWelcomeVisible = true;
     }
 
     private void arrange(TabLayout.Tab tab) {
@@ -240,6 +242,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putInt(STATE_TAB_POSITION, mTabPosition);
+        outState.putBoolean(STATE_WELCOME_VISIBLE, mWelcomeVisible);
         super.onSaveInstanceState(outState);
     }
 
@@ -260,7 +263,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    public void startLogin() {
+    private void startLogin() {
         startActivityForResult(new Intent(this, LoginActivity.class), RC_LOGIN_ACTIVITY);
     }
 
@@ -356,6 +359,7 @@ public class MainActivity extends AppCompatActivity implements
     public void onItemSelected(Uri uri, PhotoListAdapter.PhotoListItemViewHolder vh) {
         Intent intent = new Intent(this, DetailActivity.class)
                 .setData(uri);
+        //noinspection unchecked
         Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle();
         startActivity(intent, bundle);
     }
@@ -393,8 +397,7 @@ public class MainActivity extends AppCompatActivity implements
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            return rootView;
+            return inflater.inflate(R.layout.fragment_main, container, false);
         }
     }
 
@@ -409,7 +412,7 @@ public class MainActivity extends AppCompatActivity implements
         static final int POSITION_FAVORITES = 1;
         static final int POSITION_OWN = 2;
 
-        public SectionsPagerAdapter(FragmentManager fm) {
+        SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 

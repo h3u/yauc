@@ -1,11 +1,12 @@
 package com.bitsailer.yauc.event;
 
 /**
- * Created by Uli Wucherer (u.wucherer@gmail.com) on 03/08/16.
+ * Event that occurs when a user request to like a photo
+ * has been transmitted to api and saved to database.
  */
-
 public class PhotoLikedEvent {
-    public final String photoId;
+    @SuppressWarnings({"FieldCanBeLocal", "unused"})
+    private final String photoId;
 
     public PhotoLikedEvent(String photoId) {
         this.photoId = photoId;

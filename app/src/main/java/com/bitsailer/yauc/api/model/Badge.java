@@ -11,6 +11,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 //@Generated("org.jsonschema2pojo")
+@SuppressWarnings("ALL")
 public class Badge implements Parcelable {
 
     @SerializedName("title")
@@ -113,7 +114,7 @@ public class Badge implements Parcelable {
         if (other == this) {
             return true;
         }
-        if ((other instanceof Badge) == false) {
+        if (!(other instanceof Badge)) {
             return false;
         }
         Badge rhs = ((Badge) other);
@@ -136,7 +137,7 @@ public class Badge implements Parcelable {
     public Badge() {
     }
 
-    protected Badge(Parcel in) {
+    private Badge(Parcel in) {
         this.title = in.readString();
         this.primary = (Boolean) in.readValue(Boolean.class.getClassLoader());
         this.slug = in.readString();

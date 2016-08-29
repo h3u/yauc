@@ -1,6 +1,5 @@
 package com.bitsailer.yauc.ui;
 
-import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -37,6 +36,7 @@ import butterknife.Unbinder;
 /**
  * Fragment to display grid of photos.
  */
+@SuppressWarnings("unused")
 public class PhotoListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String ARG_PHOTO_TYPE = "photo-type";
@@ -103,7 +103,7 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(
                 columnCount, StaggeredGridLayoutManager.VERTICAL));
 
-        mAdapter = new PhotoListAdapter(view.getContext(), null, columnCount,
+        mAdapter = new PhotoListAdapter(view.getContext(), columnCount,
                 new PhotoListAdapter.PhotoOnClickHandler() {
                     @Override
                     public void onClick(String photoId, PhotoListAdapter.PhotoListItemViewHolder vh) {
@@ -122,16 +122,6 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-    }
-
-    @Override
     public void onDestroyView() {
         super.onDestroyView();
         butterknife.unbind();
@@ -145,14 +135,15 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
         /**
          * Callback when an item has been selected.
          */
-        public void onItemSelected(Uri uri, PhotoListAdapter.PhotoListItemViewHolder vh);
+        @SuppressWarnings("UnusedParameters")
+        void onItemSelected(Uri uri, PhotoListAdapter.PhotoListItemViewHolder vh);
     }
 
     public interface LoginCallback {
         /**
          * Callback when user pressed Sign In.
          */
-        public void onSignInSelected();
+        void onSignInSelected();
     }
 
     private String getSelection() {
@@ -241,11 +232,13 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
         super.onStop();
     }
 
+    @SuppressWarnings("UnusedParameters")
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onUserDataLoaded(UserDataLoadedEvent event) {
         restartLoader();
     }
 
+    @SuppressWarnings("UnusedParameters")
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onUserDataRemoved(UserDataRemovedEvent event) {
         restartLoader();

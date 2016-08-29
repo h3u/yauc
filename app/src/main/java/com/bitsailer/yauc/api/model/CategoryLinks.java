@@ -9,6 +9,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 //@Generated("org.jsonschema2pojo")
+@SuppressWarnings("ALL")
 public class CategoryLinks {
 
     @SerializedName("self")
@@ -70,7 +71,7 @@ public class CategoryLinks {
         if (other == this) {
             return true;
         }
-        if ((other instanceof CategoryLinks) == false) {
+        if (!(other instanceof CategoryLinks)) {
             return false;
         }
         CategoryLinks rhs = ((CategoryLinks) other);

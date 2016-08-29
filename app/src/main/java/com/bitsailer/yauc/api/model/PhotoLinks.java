@@ -12,6 +12,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 //@Generated("org.jsonschema2pojo")
+@SuppressWarnings("ALL")
 public class PhotoLinks implements Parcelable {
 
     @SerializedName("self")
@@ -95,7 +96,7 @@ public class PhotoLinks implements Parcelable {
         if (other == this) {
             return true;
         }
-        if ((other instanceof PhotoLinks) == false) {
+        if (!(other instanceof PhotoLinks)) {
             return false;
         }
         PhotoLinks rhs = ((PhotoLinks) other);
@@ -117,7 +118,7 @@ public class PhotoLinks implements Parcelable {
     public PhotoLinks() {
     }
 
-    protected PhotoLinks(Parcel in) {
+    PhotoLinks(Parcel in) {
         this.self = in.readString();
         this.html = in.readString();
         this.download = in.readString();

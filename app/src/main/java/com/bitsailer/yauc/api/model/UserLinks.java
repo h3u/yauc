@@ -12,6 +12,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 //@Generated("org.jsonschema2pojo")
+@SuppressWarnings("ALL")
 public class UserLinks implements Parcelable {
 
     @SerializedName("self")
@@ -117,7 +118,7 @@ public class UserLinks implements Parcelable {
         if (other == this) {
             return true;
         }
-        if ((other instanceof UserLinks) == false) {
+        if (!(other instanceof UserLinks)) {
             return false;
         }
         UserLinks rhs = ((UserLinks) other);
@@ -140,7 +141,7 @@ public class UserLinks implements Parcelable {
     public UserLinks() {
     }
 
-    protected UserLinks(Parcel in) {
+    UserLinks(Parcel in) {
         this.self = in.readString();
         this.html = in.readString();
         this.photos = in.readString();

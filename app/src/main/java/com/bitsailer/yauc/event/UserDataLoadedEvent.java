@@ -1,12 +1,14 @@
 package com.bitsailer.yauc.event;
 
 /**
- * Created by Uli Wucherer (u.wucherer@gmail.com) on 03/08/16.
+ * Event that occurs when a user has signed in and his
+ * content (favorites/own photos) are fetched and stored
+ * in database.
  */
-
+@SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class UserDataLoadedEvent {
-    public final int countFavorites;
-    public final int countOwn;
+    private final int countFavorites;
+    private final int countOwn;
 
     public UserDataLoadedEvent(int countFavorites, int countOwn) {
         this.countFavorites = countFavorites;

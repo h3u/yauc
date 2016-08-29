@@ -96,7 +96,7 @@ public class Location implements Parcelable {
         if (other == this) {
             return true;
         }
-        if ((other instanceof Location) == false) {
+        if (!(other instanceof Location)) {
             return false;
         }
         Location rhs = ((Location) other);
@@ -122,7 +122,7 @@ public class Location implements Parcelable {
     public Location() {
     }
 
-    protected Location(Parcel in) {
+    Location(Parcel in) {
         this.city = in.readString();
         this.country = in.readString();
         this.position = in.readParcelable(Position.class.getClassLoader());

@@ -6,6 +6,7 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 //@Generated("org.jsonschema2pojo")
+@SuppressWarnings("ALL")
 public class AccessToken {
 
     @SerializedName("access_token")
@@ -128,7 +129,7 @@ public class AccessToken {
         if (other == this) {
             return true;
         }
-        if ((other instanceof AccessToken) == false) {
+        if (!(other instanceof AccessToken)) {
             return false;
         }
         AccessToken rhs = ((AccessToken) other);

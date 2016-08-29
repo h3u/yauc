@@ -24,16 +24,11 @@ class PhotoListAdapter extends CursorRecyclerViewAdapter<PhotoListAdapter.PhotoL
 
     private static final int VIEW_TYPE_GRID = 0;
     private static final int VIEW_TYPE_LIST = 1;
-    private static final int TAG_PHOTO_ID = 1;
     private int mColumnCount = 2;
-    private PhotoOnClickHandler mClickHandler;
+    private final PhotoOnClickHandler mClickHandler;
 
-    public PhotoListAdapter(Context context, Cursor cursor) {
-        super(context, cursor);
-    }
-
-    PhotoListAdapter(Context context, Cursor cursor, int columns, PhotoOnClickHandler clickHandler) {
-        super(context, cursor);
+    PhotoListAdapter(Context context, int columns, PhotoOnClickHandler clickHandler) {
+        super(context, null);
         mColumnCount = columns;
         mClickHandler = clickHandler;
     }
@@ -71,6 +66,7 @@ class PhotoListAdapter extends CursorRecyclerViewAdapter<PhotoListAdapter.PhotoL
                 .into(viewHolder.imageViewPhoto);
     }
 
+    @SuppressWarnings("unused")
     class PhotoListItemViewHolder extends RecyclerView.ViewHolder  implements View.OnClickListener {
         @BindView(photo)
         DynamicImageView imageViewPhoto;

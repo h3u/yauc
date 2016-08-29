@@ -16,6 +16,7 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -32,6 +33,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -47,6 +50,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+@SuppressWarnings("unused")
 public class InformationActivity extends AppCompatActivity
         implements LoaderManager.LoaderCallbacks<Cursor>, OnMapReadyCallback {
 
@@ -86,6 +90,8 @@ public class InformationActivity extends AppCompatActivity
     LinearLayout locationLayout;
     @BindView(R.id.textViewLocation)
     TextView location;
+    @BindView(R.id.mapWrapper)
+    FrameLayout mapWrapper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,13 +107,18 @@ public class InformationActivity extends AppCompatActivity
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        mMapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.locationMap);
-        mMapFragment.getMapAsync(this);
-
+        int result = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this);
+        if (result == ConnectionResult.SUCCESS) {
+            mMapFragment = (SupportMapFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.locationMap);
+            mMapFragment.getMapAsync(this);
+        } else {
+            mapWrapper.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -176,7 +187,8 @@ public class InformationActivity extends AppCompatActivity
             isPhotoOwnedByUser = photo.getUser().getUsername()
                     .equals(Preferences.get(this).getUserUsername());
             invalidateOptionsMenu();
-
+            avatar.setContentDescription(
+                    getString(R.string.content_description_profile,photo.getUser().getName()));
             Glide.with(this)
                     .load(photo.getUser().getProfileImage().getLarge()).asBitmap()
                     .centerCrop()
@@ -296,12 +308,15 @@ public class InformationActivity extends AppCompatActivity
 
     private void hideMap() {
         try {
-            mMapFragment.getView().setVisibility(View.INVISIBLE);
+            if (mMapFragment.getView() != null) {
+                mMapFragment.getView().setVisibility(View.INVISIBLE);
+            }
         } catch (Exception e) {
             Logger.e(e.getMessage());
         }
     }
 
+    @SuppressWarnings("UnusedParameters")
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onPhotoLoaded(PhotoDataLoadedEvent event) {
         getSupportLoaderManager().restartLoader(LOADER_ID, null, this);

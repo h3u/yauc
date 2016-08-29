@@ -36,13 +36,14 @@ public class Util {
      *
      */
     public enum AppStart {
-        FIRST_TIME, FIRST_TIME_VERSION, NORMAL;
+        FIRST_TIME, FIRST_TIME_VERSION, NORMAL
     }
 
     /**
      * The app version code (not the version name!) that was used on the last
      * start of the app.
      */
+    @SuppressWarnings("unused")
     private static final String LAST_APP_VERSION = "1";
 
     /**

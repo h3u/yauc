@@ -1,5 +1,6 @@
 package com.bitsailer.yauc;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
@@ -14,7 +15,7 @@ import com.bitsailer.yauc.api.model.User;
  */
 public class Preferences {
 
-    public static final String APP_PREF = "yauc_prefs";
+    private static final String APP_PREF = "yauc_prefs";
     private static final String KEY_APP_VERSION = "key_app_version";
     private static final String KEY_ACCESS_TOKEN = "key_access_token";
     private static final String KEY_ACCESS_TOKEN_CREATED_AT = "key_access_token_created_at";
@@ -44,16 +45,7 @@ public class Preferences {
         mAuthenticated = !TextUtils.isEmpty(mPreferences.getString(KEY_ACCESS_TOKEN, null));
     }
 
-    /**
-     * Helper to register change listeners.
-     * @param context any context
-     * @return the shared app preferences
-     */
-    public static SharedPreferences getSharedPreferences(Context context) {
-        return context.getApplicationContext()
-                .getSharedPreferences(APP_PREF, Context.MODE_PRIVATE);
-    }
-
+    @SuppressLint("CommitPrefEdits")
     public void setAppVersion(int version) {
         mPreferences.edit().putInt(KEY_APP_VERSION, version).commit();
     }
@@ -66,10 +58,12 @@ public class Preferences {
         return mPreferences.getString(KEY_ACCESS_TOKEN, null);
     }
 
+    @SuppressWarnings("unused")
     public String getUserAvatar() {
         return mPreferences.getString(KEY_USER_AVATAR, null);
     }
 
+    @SuppressWarnings("unused")
     public String getUserName() {
         return mPreferences.getString(KEY_USER_NAME, null);
     }
@@ -88,6 +82,7 @@ public class Preferences {
         }
     }
 
+    @SuppressLint("CommitPrefEdits")
     public void setAccessToken(@NonNull AccessToken response) {
         SharedPreferences.Editor editor = mPreferences.edit();
         if (!TextUtils.isEmpty(response.getAccessToken())) {
@@ -113,6 +108,7 @@ public class Preferences {
         }
     }
 
+    @SuppressLint("CommitPrefEdits")
     public void destroyAuthorization() {
         mAuthenticated = false;
         mPreferences.edit()
