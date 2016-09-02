@@ -8,9 +8,6 @@
     <string name="action_edit">Edit</string>
     <string name="action_save">Save</string>
 
-    <!--sync-->
-    <string name="content_authority">com.bitsailer.yauc.provider</string>
-
     <!-- tabs -->
     <string name="content_description_tab_new">New photos</string>
     <string name="ga_name_tab_new">NewPhotos</string>

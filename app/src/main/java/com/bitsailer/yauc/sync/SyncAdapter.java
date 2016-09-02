@@ -164,7 +164,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         ContentResolver.requestSync(AuthenticatorService.getAccount(),
-                context.getString(R.string.content_authority), bundle);
+                context.getString(R.string.authorities), bundle);
     }
 
     /**
@@ -194,12 +194,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         // add periodic synchronisation
         SyncRequest request = new SyncRequest.Builder()
                 .syncPeriodic(SYNC_INTERVAL, SYNC_FLEXTIME)
-                .setSyncAdapter(account, context.getString(R.string.content_authority))
+                .setSyncAdapter(account, context.getString(R.string.authorities))
                 .setExtras(new Bundle()).build();
         ContentResolver.requestSync(request);
 
         ContentResolver.setSyncAutomatically(account,
-                context.getString(R.string.content_authority), true);
+                context.getString(R.string.authorities), true);
 
         // initial sync
         Bundle bundle = new Bundle();

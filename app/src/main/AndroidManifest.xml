@@ -85,7 +85,7 @@
 
         <provider
             android:name=".provider.PhotoProvider"
-            android:authorities="com.bitsailer.yauc.provider"
+            android:authorities="${applicationId}.provider"
             android:exported="false"
             android:syncable="true" />
 

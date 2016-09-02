@@ -5,13 +5,14 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 
+import com.bitsailer.yauc.BuildConfig;
+
 /**
  * Service to create AccountAuthenticator and Account.
  */
 public class AuthenticatorService extends Service {
 
     private static final String SYNC_ACCOUNT_NAME = "Sync with Unsplash";
-    private static final String SYNC_ACCOUNT_TYPE = "yauc.bitsailer.com";
 
     private AccountAuthenticator mAuthenticator;
 
@@ -26,6 +27,6 @@ public class AuthenticatorService extends Service {
     }
 
     public static Account getAccount() {
-        return new Account(SYNC_ACCOUNT_NAME, SYNC_ACCOUNT_TYPE);
+        return new Account(SYNC_ACCOUNT_NAME, BuildConfig.ACCOUNT_TYPE);
     }
 }

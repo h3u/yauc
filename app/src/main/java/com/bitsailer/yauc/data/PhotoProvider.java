@@ -1,5 +1,7 @@
 package com.bitsailer.yauc.data;
 
+import com.bitsailer.yauc.BuildConfig;
+
 import net.simonvt.schematic.annotation.ContentProvider;
 import net.simonvt.schematic.annotation.ContentUri;
 import net.simonvt.schematic.annotation.InexactContentUri;
@@ -17,8 +19,8 @@ import static com.bitsailer.yauc.data.PhotoDatabase.Tables.PHOTOS;
         packageName = PhotoProvider.PACKAGE_NAME)
 public final class PhotoProvider {
 
-    public static final String AUTHORITY = "com.bitsailer.yauc.provider";
-    public static final String PACKAGE_NAME = "com.bitsailer.yauc.provider";
+    static final String AUTHORITY = BuildConfig.APPLICATION_ID + ".provider";
+    static final String PACKAGE_NAME = "com.bitsailer.yauc.provider";
 
     private static final android.net.Uri BASE_CONTENT_URI = android.net.Uri.parse("content://" + AUTHORITY);
 

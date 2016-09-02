@@ -18,6 +18,9 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "UNSPLASH_CLIENT_ID", localProperties["unsplash_client_id"]
         buildConfigField "String", "UNSPLASH_CLIENT_SECRET", localProperties["unsplash_client_secret"]
+        resValue "string", "authorities", applicationId + '.provider'
+        resValue "string", "account_type", "yauc.bitsailer.com"
+        buildConfigField "String", "ACCOUNT_TYPE", '"yauc.bitsailer.com"'
     }
 
     signingConfigs {
@@ -30,6 +33,13 @@ android {
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix '.debug'
+            versionNameSuffix '-DEBUG'
+            resValue "string", "authorities", defaultConfig.applicationId + '.debug.provider'
+            resValue "string", "account_type", "yauc.bitsailer.com.debug"
+            buildConfigField "String", "ACCOUNT_TYPE", '"yauc.bitsailer.com.debug"'
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
