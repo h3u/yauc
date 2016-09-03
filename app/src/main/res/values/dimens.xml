@@ -14,6 +14,7 @@
     <dimen name="gradient_content_padding_bottom">16dp</dimen>
     <dimen name="information_avatar_size">40dp</dimen>
     <dimen name="information_map_height">300dp</dimen>
+    <dimen name="widget_padding">12dp</dimen>
     <dimen name="widget_margin">8dp</dimen>
     <dimen name="list_icon_size">56dp</dimen>
     <dimen name="edit_photo_horizontal_margin">8dp</dimen>

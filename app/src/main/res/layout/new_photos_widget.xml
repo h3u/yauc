@@ -1,10 +1,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/widget"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:background="@drawable/widget_background"
-    android:padding="@dimen/widget_margin">
+    android:padding="@dimen/widget_padding"
+    android:layout_margin="@dimen/widget_margin">
 
     <TextView
         android:id="@+id/appwidget_text"
@@ -17,7 +18,7 @@
         android:textSize="14sp"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
-        android:drawableStart="@drawable/ic_camera_white"
+        android:drawableStart="@drawable/ic_camera_yauc"
         android:drawablePadding="8dp"
-        tools:text="15 new" />
+        tools:text="15 new photos" />
 </RelativeLayout>

@@ -81,7 +81,7 @@
 
     <!-- new photos widget -->
     <string name="appwidget_text">YAUC</string>
-    <string name="widget_new_photos_text" tools:ignore="PluralsCandidate">%1$d new</string>
+    <string name="widget_new_photos_text" tools:ignore="PluralsCandidate">%1$d new photos</string>
 
     <!-- edit photo dialog -->
     <string name="ga_name_edit_photo_activity">PhotoEdit</string>
