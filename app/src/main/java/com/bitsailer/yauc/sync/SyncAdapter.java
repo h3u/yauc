@@ -14,6 +14,8 @@ import android.content.Intent;
 import android.content.SyncRequest;
 import android.content.SyncResult;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 
@@ -25,10 +27,12 @@ import com.bitsailer.yauc.data.ContentValuesBuilder;
 import com.bitsailer.yauc.data.PhotoColumns;
 import com.bitsailer.yauc.data.PhotoProvider;
 import com.bitsailer.yauc.ui.MainActivity;
+import com.bumptech.glide.Glide;
 import com.orhanobut.logger.Logger;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import retrofit2.Call;
 
@@ -53,6 +57,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             "com.bitsailer.yauc.sync.ACTION_DATA_UPDATED";
     public static final String EXTRA_NUM_INSERTED = "extra_num_inserted";
     private static final String KEY_INITIAL_SYNC = "key_initial_sync";
+    private static final String KEY_MANUAL_SYNC = "key_manual_sync";
 
     private static final int NEW_PHOTOS_NOTIFICATION_ID = 0;
 
@@ -65,7 +70,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         int inserted = 0;
         int perPage = UnsplashAPI.MAX_PER_PAGE;
         boolean firstSync = extras.getBoolean(KEY_INITIAL_SYNC, false);
+        boolean manualSync = extras.getBoolean(KEY_MANUAL_SYNC, false);
         int sumInsertedLastSync = 0;
+        SimplePhoto latestPhoto = null;
 
         // get api service
         UnsplashAPI api = UnsplashService.create(UnsplashAPI.class);
@@ -91,6 +98,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 List<SimplePhoto> list = listCall.execute().body();
                 inserted = insert(contentProviderClient, list);
                 sumInsertedLastSync += inserted;
+                if (page == 1) {
+                    latestPhoto = list.get(0);
+                }
             } catch (IOException e) {
                 Logger.e(e.getMessage());
             }
@@ -99,8 +109,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Logger.d("sum inserted %d", sumInsertedLastSync);
         // start widget update
         updateWidgets(sumInsertedLastSync);
-        if (!firstSync) {
-            createNotification(sumInsertedLastSync);
+        if (!firstSync && !manualSync) {
+            createNotification(sumInsertedLastSync, latestPhoto);
         }
 
         // clean up of photos (not favorites/own)
@@ -157,7 +167,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      * @param context activity context
      */
     public static void syncNow(Context context) {
-        sync(context, new Bundle());
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(KEY_MANUAL_SYNC, true);
+        sync(context, bundle);
     }
 
     private static void sync(Context context, Bundle bundle) {
@@ -216,15 +228,56 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         context.sendBroadcast(dataUpdatedIntent);
     }
 
-    private void createNotification(int insertedPhotos) {
+    private void createNotification(int insertedPhotos, SimplePhoto latestPhoto) {
         if (insertedPhotos > 0) {
+            int accentColor;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                accentColor = getContext().getResources()
+                        .getColor(R.color.colorAccent, getContext().getTheme());
+            } else {
+                //noinspection deprecation
+                accentColor = getContext().getResources().getColor(R.color.colorAccent);
+            }
+
             NotificationCompat.Builder mBuilder =
                     new NotificationCompat.Builder(getContext())
                             .setAutoCancel(true)
-                            .setSmallIcon(R.drawable.ic_camera_white)
+                            .setNumber(insertedPhotos)
+                            .setSmallIcon(R.drawable.ic_camera_yauc)
+                            .setColor(accentColor)
+                            .setLights(accentColor, 1000, 5000)
                             .setContentTitle(getContext().getString(R.string.notification_title))
                             .setContentText(String.format(getContext().getResources()
                                     .getQuantityString(R.plurals.notification_text, insertedPhotos), insertedPhotos));
+
+            // Retrieve photo for the big picture notification style
+            if (latestPhoto != null) {
+                int largeIconWidth = getContext().getResources()
+                        .getDimensionPixelSize(android.R.dimen.notification_large_icon_width);
+                int largeIconHeight = getContext().getResources()
+                        .getDimensionPixelSize(android.R.dimen.notification_large_icon_height);
+
+                Bitmap largeIcon;
+                try {
+                    largeIcon = Glide.with(getContext())
+                            .load(latestPhoto.getUrls().getThumb())
+                            .asBitmap()
+                            .error(R.drawable.lens)
+                            .fitCenter()
+                            .into(largeIconWidth, largeIconHeight).get();
+                } catch (InterruptedException | ExecutionException e) {
+                    Logger.e("Error retrieving large icon from %s",latestPhoto.getUrls().getThumb() , e);
+                    largeIcon = BitmapFactory.decodeResource(
+                            getContext().getResources(), R.drawable.lens);
+                }
+
+                NotificationCompat.BigPictureStyle bigPictureStyle = new NotificationCompat.BigPictureStyle();
+                bigPictureStyle.bigPicture(largeIcon)
+                        .setBigContentTitle(getContext().getString(R.string.notification_title))
+                        .setSummaryText(String.format(getContext().getResources()
+                                .getQuantityString(R.plurals.notification_text, insertedPhotos), insertedPhotos));
+                mBuilder.setStyle(bigPictureStyle);
+            }
 
             // open MainActivity with default tab new photos
             Intent resultIntent = new Intent(getContext(), MainActivity.class);
