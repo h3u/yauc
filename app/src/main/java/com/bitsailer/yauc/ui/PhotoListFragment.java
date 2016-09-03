@@ -23,6 +23,7 @@ import com.bitsailer.yauc.data.PhotoColumns;
 import com.bitsailer.yauc.data.PhotoProvider;
 import com.bitsailer.yauc.event.UserDataLoadedEvent;
 import com.bitsailer.yauc.event.UserDataRemovedEvent;
+import com.bitsailer.yauc.sync.PhotoManagement;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -61,6 +62,8 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
     LinearLayout emptyLayout;
     @BindView(R.id.buttonSignIn)
     Button buttonSignIn;
+    @BindView(R.id.buttonFetch)
+    Button buttonFetch;
     @BindView(R.id.textViewEmpty)
     TextView emptyText;
 
@@ -198,12 +201,13 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
             // data set empty
             emptyLayout.setVisibility(View.VISIBLE);
             if (Preferences.get(getContext()).isAuthenticated()) {
-                emptyText.setText(getString(mPhotoType == PHOTO_TYPE_FAVORITES ?
-                        R.string.text_empty_favorites : R.string.text_empty_own));
+                emptyText.setText(getString(R.string.text_empty_photo_list));
                 buttonSignIn.setVisibility(View.GONE);
+                buttonFetch.setVisibility(View.VISIBLE);
             } else {
                 emptyText.setText(getString(R.string.text_anonymous_photo_list));
                 buttonSignIn.setVisibility(View.VISIBLE);
+                buttonFetch.setVisibility(View.GONE);
             }
         } else {
             emptyLayout.setVisibility(View.GONE);
@@ -218,6 +222,12 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
     @OnClick(R.id.buttonSignIn)
     public void onLoginClick() {
         ((LoginCallback) getActivity()).onSignInSelected();
+    }
+
+    @OnClick(R.id.buttonFetch)
+    public void onFetchClick() {
+        PhotoManagement
+                .updateUsersPhotos(getActivity(), Preferences.get(getActivity()).getUserUsername());
     }
 
     @Override

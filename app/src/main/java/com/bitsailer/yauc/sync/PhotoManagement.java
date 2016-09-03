@@ -14,14 +14,17 @@ import com.bitsailer.yauc.api.UnsplashAPI;
 import com.bitsailer.yauc.api.UnsplashService;
 import com.bitsailer.yauc.api.model.Photo;
 import com.bitsailer.yauc.api.model.SimplePhoto;
+import com.bitsailer.yauc.api.model.User;
 import com.bitsailer.yauc.data.ContentValuesBuilder;
 import com.bitsailer.yauc.data.PhotoColumns;
 import com.bitsailer.yauc.data.PhotoProvider;
+import com.bitsailer.yauc.event.NetworkErrorEvent;
 import com.bitsailer.yauc.event.PhotoDataLoadedEvent;
 import com.bitsailer.yauc.event.PhotoLikedEvent;
 import com.bitsailer.yauc.event.PhotoUnlikedEvent;
 import com.bitsailer.yauc.event.UserDataLoadedEvent;
 import com.bitsailer.yauc.event.UserDataRemovedEvent;
+import com.bitsailer.yauc.event.UserLoadedEvent;
 import com.bitsailer.yauc.provider.values.PhotosValuesBuilder;
 import com.orhanobut.logger.Logger;
 
@@ -33,6 +36,7 @@ import java.util.List;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
@@ -51,6 +55,7 @@ public class PhotoManagement extends IntentService {
     private static final String ACTION_LIKE_PHOTO = "com.bitsailer.yauc.sync.action.like_photo";
     private static final String ACTION_UNLIKE_PHOTO = "com.bitsailer.yauc.sync.action.unlike_photo";
     private static final String ACTION_EDIT_PHOTO = "com.bitsailer.yauc.sync.action.edit_photo";
+    private static final String ACTION_GET_USER = "com.bitsailer.yauc.sync.action.get_user";
 
     private static final String EXTRA_USERNAME = "com.bitsailer.yauc.sync.extra.username";
     private static final String EXTRA_PHOTO_ID = "com.bitsailer.yauc.sync.extra.photo_id";
@@ -162,6 +167,18 @@ public class PhotoManagement extends IntentService {
         context.startService(intent);
     }
 
+    /**
+     * Get user data, e.g. name, username, photo-url, ...
+     *
+     * @param context calling context
+     * @see IntentService
+     */
+    public static void getUser(Context context) {
+        Intent intent = new Intent(context, PhotoManagement.class);
+        intent.setAction(ACTION_GET_USER);
+        context.startService(intent);
+    }
+
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
@@ -187,6 +204,8 @@ public class PhotoManagement extends IntentService {
             } else if (ACTION_EDIT_PHOTO.equals(action)) {
                 final Photo photo = intent.getParcelableExtra(EXTRA_PHOTO);
                 handleEditPhoto(photo);
+            } else if (ACTION_GET_USER.equals(action)) {
+                handleGetUser();
             }
         }
     }
@@ -431,6 +450,7 @@ public class PhotoManagement extends IntentService {
             }
         } catch (IOException e) {
             Logger.e(e.getMessage());
+            EventBus.getDefault().post(new NetworkErrorEvent());
         }
     }
 
@@ -461,6 +481,7 @@ public class PhotoManagement extends IntentService {
             }
         } catch (IOException e) {
             Logger.e(e.getMessage());
+            EventBus.getDefault().post(new NetworkErrorEvent());
         }
     }
 
@@ -533,5 +554,27 @@ public class PhotoManagement extends IntentService {
                 Logger.e(e.getMessage());
             }
         }
+    }
+
+    private void handleGetUser() {
+        UnsplashAPI api = UnsplashService.create(UnsplashAPI.class, this);
+        Call<User> call = api.getMe();
+        call.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                User user = response.body();
+                Preferences.get(getApplicationContext()).setUser(user);
+                String username = user.getUsername();
+                if (!TextUtils.isEmpty(username)) {
+                    PhotoManagement.updateUsersPhotos(getApplicationContext(), username);
+                }
+                EventBus.getDefault().post(new UserLoadedEvent());
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                Logger.e(t.getMessage());
+            }
+        });
     }
 }

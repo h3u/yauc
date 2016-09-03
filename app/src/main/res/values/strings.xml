@@ -34,6 +34,7 @@
     <string name="button_dialog_dismiss">Not now</string>
     <string name="button_dialog_positive">Sign in</string>
     <string name="button_empty_photo_list_login">Sign in</string>
+    <string name="button_empty_photo_list_fetch">Reload</string>
     <string name="button_detail_share">Share</string>
     <string name="button_detail_share_content_description">Share photo</string>
     <string name="button_detail_info">About</string>
@@ -45,10 +46,9 @@
     <string name="dialog_welcome_title">Welcome to YAUC</string>
     <string name="dialog_welcome_message">YAUC is your android unsplash client. To see your favorites and own photos you need to authorize YAUC and sing in to unsplash.com.</string>
 
-    <!-- empty anonymous photo list -->
+    <!-- photo list -->
     <string name="text_anonymous_photo_list">Please sign in to see photos.</string>
-    <string name="text_empty_favorites">You haven\'t liked a photo yet. </string>
-    <string name="text_empty_own">You haven\'t added a photo yet. </string>
+    <string name="text_empty_photo_list">Cannot find any photos.</string>
 
     <string name="title_activity_information">About Photo</string>
 
@@ -115,4 +115,8 @@
         <item quantity="one">Unsplash has %1$d new photo</item>
         <item quantity="other">Unsplash has %1$d new photos</item>
     </plurals>
+
+    <!-- general messages -->
+    <string name="message_network_failed">A network error occurred. Please check your connectivity and try again.</string>
+
 </resources>

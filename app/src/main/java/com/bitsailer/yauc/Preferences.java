@@ -21,6 +21,7 @@ public class Preferences {
     private static final String KEY_ACCESS_TOKEN_CREATED_AT = "key_access_token_created_at";
     private static final String KEY_REFRESH_TOKEN = "key_refresh_token";
     private static final String KEY_AUTH_CODE = "key_auth_code";
+    private static final String KEY_USER_ID = "key_user_id";
     private static final String KEY_USER_NAME = "key_user_name";
     private static final String KEY_USER_USERNAME = "key_user_username";
     private static final String KEY_USER_AVATAR = "key_user_avatar";
@@ -68,6 +69,10 @@ public class Preferences {
         return mPreferences.getString(KEY_USER_NAME, null);
     }
 
+    public String getUserId() {
+        return mPreferences.getString(KEY_USER_ID, null);
+    }
+
     public String getUserUsername() {
         return mPreferences.getString(KEY_USER_USERNAME, null);
     }
@@ -101,6 +106,7 @@ public class Preferences {
     public void setUser(User user) {
         if (user != null) {
             SharedPreferences.Editor editor = mPreferences.edit();
+            editor.putString(KEY_USER_ID, user.getId());
             editor.putString(KEY_USER_NAME, user.getName());
             editor.putString(KEY_USER_USERNAME, user.getUsername());
             editor.putString(KEY_USER_AVATAR, user.getProfileImage().getSmall());

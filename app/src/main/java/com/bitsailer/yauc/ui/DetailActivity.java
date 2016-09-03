@@ -10,6 +10,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -24,8 +25,10 @@ import com.bitsailer.yauc.R;
 import com.bitsailer.yauc.Util;
 import com.bitsailer.yauc.YaucApplication;
 import com.bitsailer.yauc.api.model.Photo;
+import com.bitsailer.yauc.event.NetworkErrorEvent;
 import com.bitsailer.yauc.event.PhotoLikedEvent;
 import com.bitsailer.yauc.event.PhotoUnlikedEvent;
+import com.bitsailer.yauc.event.UserLoadedEvent;
 import com.bitsailer.yauc.sync.PhotoManagement;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
@@ -50,6 +53,7 @@ import butterknife.OnClick;
 @SuppressWarnings("unused")
 public class DetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    private static final int RC_LOGIN_ACTIVITY = 4711;
     private static final int LOADER_ID = 0;
     private Uri mUri;
     private String mPhotoId;
@@ -170,6 +174,17 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
 
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == RC_LOGIN_ACTIVITY) {
+            if (resultCode == RESULT_OK) {
+                PhotoManagement.getUser(this);
+            } else {
+                Toast.makeText(this, R.string.message_failure_login, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     @OnClick(R.id.buttonShare)
     public void onShareButtonClicked() {
         if (mShareUrl != null) {
@@ -193,7 +208,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
             builder.setPositiveButton(R.string.button_dialog_positive, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     // User clicked Sign in button
-                    startActivity(new Intent(DetailActivity.this, LoginActivity.class));
+                    startActivityForResult(new Intent(DetailActivity.this, LoginActivity.class), RC_LOGIN_ACTIVITY);
                 }
             });
             builder.setNegativeButton(R.string.button_dialog_dismiss, null);
@@ -252,5 +267,23 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onPhotoUnliked(PhotoUnlikedEvent event) {
         Toast.makeText(this, R.string.unliked_message, Toast.LENGTH_SHORT).show();
+    }
+
+    @SuppressWarnings("UnusedParameters")
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onUserLoaded(UserLoadedEvent event) {
+        Toast.makeText(this,
+                String.format(getString(R.string.message_login), Preferences.get(this).getUserName()),
+                Toast.LENGTH_LONG).show();
+        // add user id to analytics
+        if (!TextUtils.isEmpty(Preferences.get(this).getUserId())) {
+            mTracker.set("&uid", Preferences.get(this).getUserId());
+        }
+    }
+
+    @SuppressWarnings("UnusedParameters")
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onNetworkError(NetworkErrorEvent event) {
+        Toast.makeText(this, R.string.message_network_failed, Toast.LENGTH_LONG).show();
     }
 }

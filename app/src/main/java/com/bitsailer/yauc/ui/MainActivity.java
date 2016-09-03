@@ -26,9 +26,8 @@ import com.bitsailer.yauc.Preferences;
 import com.bitsailer.yauc.R;
 import com.bitsailer.yauc.Util;
 import com.bitsailer.yauc.YaucApplication;
-import com.bitsailer.yauc.api.UnsplashAPI;
-import com.bitsailer.yauc.api.UnsplashService;
-import com.bitsailer.yauc.api.model.User;
+import com.bitsailer.yauc.event.NetworkErrorEvent;
+import com.bitsailer.yauc.event.UserLoadedEvent;
 import com.bitsailer.yauc.sync.PhotoManagement;
 import com.bitsailer.yauc.sync.SyncAdapter;
 import com.bitsailer.yauc.widget.NewPhotosWidgetIntentService;
@@ -36,11 +35,12 @@ import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 import com.orhanobut.logger.Logger;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 import static com.bitsailer.yauc.Util.AppStart.FIRST_TIME;
 import static com.bitsailer.yauc.widget.NewPhotosWidget.EXTRA_NUM_PHOTOS;
@@ -248,17 +248,42 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     protected void onStop() {
+        EventBus.getDefault().unregister(this);
         mTabLayout.setOnTabSelectedListener(null);
         super.onStop();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @SuppressWarnings("UnusedParameters")
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onNetworkError(NetworkErrorEvent event) {
+        Snackbar.make(mMainContent, R.string.message_network_failed, Snackbar.LENGTH_LONG).show();
+    }
+
+    @SuppressWarnings("UnusedParameters")
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onUserLoaded(UserLoadedEvent event) {
+        Snackbar.make(mMainContent,
+                String.format(getString(R.string.message_login), mPreferences.getUserName()),
+                Snackbar.LENGTH_LONG).show();
+        // add user id to analytics
+        if (!TextUtils.isEmpty(mPreferences.getUserId())) {
+            mTracker.set("&uid", mPreferences.getUserId());
+        }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == RC_LOGIN_ACTIVITY) {
             if (resultCode == RESULT_OK) {
-                sayHello();
+                PhotoManagement.getUser(this);
             } else {
-                loginError();
+                Snackbar.make(mMainContent, R.string.message_failure_login, Snackbar.LENGTH_SHORT).show();
             }
         }
     }
@@ -317,42 +342,6 @@ public class MainActivity extends AppCompatActivity implements
         } else {
             return getString(R.string.ga_name_tab_new);
         }
-    }
-
-    private void sayHello() {
-        UnsplashAPI api = UnsplashService.create(UnsplashAPI.class, this);
-        Call<User> call = api.getMe();
-        call.enqueue(new Callback<User>() {
-            @Override
-            public void onResponse(Call<User> call, Response<User> response) {
-                User user = response.body();
-                mPreferences.setUser(user);
-                String name = user.getName();
-                if (name == null || TextUtils.isEmpty(name)) {
-                    name = getString(R.string.unknown_user_name);
-                } else {
-                    PhotoManagement
-                            .updateUsersPhotos(MainActivity.this, user.getUsername());
-                }
-                Snackbar.make(mMainContent,
-                        String.format(getString(R.string.message_login), name),
-                        Snackbar.LENGTH_LONG).show();
-                // add user id to analytics
-                if (!TextUtils.isEmpty(user.getUid())) {
-                    mTracker.set("&uid", user.getUid());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<User> call, Throwable t) {
-                Logger.e(t.getMessage());
-            }
-        });
-
-    }
-
-    private void loginError() {
-        Snackbar.make(mMainContent, R.string.message_failure_login, Snackbar.LENGTH_SHORT).show();
     }
 
     @Override
