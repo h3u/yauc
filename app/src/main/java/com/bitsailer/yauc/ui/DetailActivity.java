@@ -1,6 +1,5 @@
 package com.bitsailer.yauc.ui;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -8,7 +7,6 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
@@ -51,10 +49,14 @@ import butterknife.OnClick;
  * Detail view of Photo.
  */
 @SuppressWarnings("unused")
-public class DetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class DetailActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<Cursor>,
+        SimpleDialogFragment.PositiveClickListener {
 
     private static final int RC_LOGIN_ACTIVITY = 4711;
     private static final int LOADER_ID = 0;
+    private static final int DIALOG_LOGIN = 0;
+    private static final String TAG_DIALOG_LOGIN = "tag_dialog_login";
     private Uri mUri;
     private String mPhotoId;
     private String mShareUrl;
@@ -202,19 +204,13 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     @OnClick(R.id.buttonLike)
     public void onLikeButtonClicked() {
         if (!Preferences.get(this).isAuthenticated()) {
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage(R.string.like_dialog_sign_in_message);
-            builder.setPositiveButton(R.string.button_dialog_positive, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    // User clicked Sign in button
-                    startActivityForResult(new Intent(DetailActivity.this, LoginActivity.class), RC_LOGIN_ACTIVITY);
-                }
-            });
-            builder.setNegativeButton(R.string.button_dialog_dismiss, null);
-            AlertDialog dialog = builder.create();
-            dialog.show();
-
+            SimpleDialogFragment loginDialogFragment = SimpleDialogFragment.newInstance(
+                    DIALOG_LOGIN, null,
+                    getString(R.string.like_dialog_sign_in_message),
+                    getString(R.string.button_dialog_dismiss),
+                    getString(R.string.button_dialog_positive)
+            );
+            loginDialogFragment.show(getSupportFragmentManager(), TAG_DIALOG_LOGIN);
         } else {
             if (mFavorite) {
                 // already liked => unlike
@@ -285,5 +281,12 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onNetworkError(NetworkErrorEvent event) {
         Toast.makeText(this, R.string.message_network_failed, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onDialogPositiveClick(int id) {
+        if (id == DIALOG_LOGIN) {
+            startActivityForResult(new Intent(DetailActivity.this, LoginActivity.class), RC_LOGIN_ACTIVITY);
+        }
     }
 }

@@ -1,6 +1,5 @@
 package com.bitsailer.yauc.ui;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -12,7 +11,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -51,16 +49,17 @@ import static com.bitsailer.yauc.widget.NewPhotosWidget.EXTRA_NUM_PHOTOS;
  */
 @SuppressWarnings("unused")
 public class MainActivity extends AppCompatActivity implements
-        PhotoListFragment.ClickCallback, PhotoListFragment.LoginCallback {
+        PhotoListFragment.ClickCallback, PhotoListFragment.LoginCallback,
+        SimpleDialogFragment.PositiveClickListener {
 
     private static final String STATE_TAB_POSITION = "state_tab_position";
-    private static final String STATE_WELCOME_VISIBLE = "state_welcome_visible";
     private static final int RC_LOGIN_ACTIVITY = 4711;
+    private static final int DIALOG_LOGIN = 0;
+    private static final String TAG_DIALOG_LOGIN = "tag_dialog_login";
 
     private static Preferences mPreferences;
     private int mTabPosition = SectionsPagerAdapter.POSITION_NEW;
     private Tracker mTracker;
-    private boolean mWelcomeVisible = false;
 
     @BindView(R.id.main_content) CoordinatorLayout mMainContent;
     /**
@@ -94,8 +93,6 @@ public class MainActivity extends AppCompatActivity implements
         if (savedInstanceState != null) {
             mTabPosition = savedInstanceState
                     .getInt(STATE_TAB_POSITION, SectionsPagerAdapter.POSITION_NEW);
-            mWelcomeVisible = savedInstanceState
-                    .getBoolean(STATE_WELCOME_VISIBLE, false);
         }
 
         if (FIRST_TIME == Util.checkAppStart(this, mPreferences)
@@ -125,23 +122,15 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void welcome() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.dialog_welcome_title)
-                .setMessage(R.string.dialog_welcome_message);
-        builder.setPositiveButton(R.string.button_dialog_positive, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                // User clicked Sign in button
-                startActivity(new Intent(MainActivity.this, LoginActivity.class));
-            }
-        });
-        builder.setNegativeButton(R.string.button_dialog_dismiss, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                mWelcomeVisible = false;
-            }
-        });
-        AlertDialog dialog = builder.create();
-        dialog.show();
-        mWelcomeVisible = true;
+
+        SimpleDialogFragment dialogFragment = SimpleDialogFragment.newInstance(
+                DIALOG_LOGIN,
+                getString(R.string.dialog_welcome_title),
+                getString(R.string.dialog_welcome_message),
+                getString(R.string.button_dialog_dismiss),
+                getString(R.string.button_dialog_positive)
+        );
+        dialogFragment.show(getSupportFragmentManager(), TAG_DIALOG_LOGIN);
     }
 
     private void arrange(TabLayout.Tab tab) {
@@ -242,7 +231,6 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putInt(STATE_TAB_POSITION, mTabPosition);
-        outState.putBoolean(STATE_WELCOME_VISIBLE, mWelcomeVisible);
         super.onSaveInstanceState(outState);
     }
 
@@ -356,6 +344,14 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onSignInSelected() {
         startLogin();
+    }
+
+    @Override
+    public void onDialogPositiveClick(int id) {
+        if (id == DIALOG_LOGIN) {
+            // User clicked Sign in button
+            startActivity(new Intent(MainActivity.this, LoginActivity.class));
+        }
     }
 
     /**
