@@ -61,6 +61,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private static final int NEW_PHOTOS_NOTIFICATION_ID = 0;
 
+    public static final String BROADCAST_ACTION_STATE_CHANGE
+            = "com.bitsailer.yauc.sync.action.STATE_CHANGE";
+    public static final String EXTRA_REFRESHING
+            = "com.bitsailer.yauc.sync.extra.REFRESHING";
+
+
     public SyncAdapter(Context context) {
         super(context, true, false);
     }
@@ -73,6 +79,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         boolean manualSync = extras.getBoolean(KEY_MANUAL_SYNC, false);
         int sumInsertedLastSync = 0;
         SimplePhoto latestPhoto = null;
+
+        // send broadcast to notify swipe refresh layout
+        getContext().sendBroadcast(
+                new Intent(BROADCAST_ACTION_STATE_CHANGE).putExtra(EXTRA_REFRESHING, true));
 
         // get api service
         UnsplashAPI api = UnsplashService.create(UnsplashAPI.class);
@@ -112,6 +122,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         if (!firstSync && !manualSync) {
             createNotification(sumInsertedLastSync, latestPhoto);
         }
+
+        // send broadcast to notify swipe refresh layout
+        getContext().sendBroadcast(
+                new Intent(BROADCAST_ACTION_STATE_CHANGE).putExtra(EXTRA_REFRESHING, false));
 
         // clean up of photos (not favorites/own)
         // yauc should not run into issues with thousands of photos ...

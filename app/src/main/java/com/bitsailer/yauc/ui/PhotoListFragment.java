@@ -40,12 +40,12 @@ import butterknife.Unbinder;
 @SuppressWarnings("unused")
 public class PhotoListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private static final String ARG_PHOTO_TYPE = "photo-type";
+    protected static final String ARG_PHOTO_TYPE = "photo-type";
     private static final int LOADER_ID = 0;
     static final int PHOTO_TYPE_NEW = 1;
     static final int PHOTO_TYPE_FAVORITES = 2;
     static final int PHOTO_TYPE_OWN = 3;
-    private int mPhotoType = PHOTO_TYPE_NEW;
+    protected int mPhotoType = PHOTO_TYPE_NEW;
     private static final String[] PHOTO_COLUMNS = {
             PhotoColumns.PHOTO_ID,
             PhotoColumns.PHOTO_COLOR,
@@ -53,8 +53,8 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
             PhotoColumns.PHOTO_HEIGHT,
             PhotoColumns.URLS_SMALL
     };
-    private PhotoListAdapter mAdapter;
-    private Unbinder butterknife;
+    protected PhotoListAdapter mAdapter;
+    protected Unbinder mButterKnife;
 
     @BindView(R.id.list)
     RecyclerView recyclerView;
@@ -94,8 +94,14 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_photo_list, container, false);
-        butterknife = ButterKnife.bind(this, view);
+        return setupFragment(
+                inflater.inflate(R.layout.fragment_photo_list, container, false));
+    }
+
+    protected View setupFragment(View view) {
+
+        mButterKnife = ButterKnife.bind(this, view);
+
         // get column count
         int columnCount = getResources().getInteger(R.integer.photo_grid_columns);
         if (mPhotoType == PHOTO_TYPE_FAVORITES) {
@@ -127,7 +133,7 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        butterknife.unbind();
+        mButterKnife.unbind();
     }
 
     /**
@@ -197,8 +203,15 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mAdapter.changeCursor(data);
-        if (data.getCount() == 0 && mPhotoType != PHOTO_TYPE_NEW) {
-            // data set empty
+        if (data.getCount() == 0) {
+            emptyLayoutChange(true);
+        } else {
+            emptyLayoutChange(false);
+        }
+    }
+
+    protected void emptyLayoutChange(boolean empty) {
+        if (empty) {
             emptyLayout.setVisibility(View.VISIBLE);
             if (Preferences.get(getContext()).isAuthenticated()) {
                 emptyText.setText(getString(R.string.text_empty_photo_list));

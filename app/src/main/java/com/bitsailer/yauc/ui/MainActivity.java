@@ -406,7 +406,7 @@ public class MainActivity extends AppCompatActivity implements
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
             if (position == POSITION_NEW) {
-                return PhotoListFragment.newInstance(PhotoListFragment.PHOTO_TYPE_NEW);
+                return RefreshPhotoListFragment.newInstance(PhotoListFragment.PHOTO_TYPE_NEW);
             } else if (position == POSITION_FAVORITES) {
                 return PhotoListFragment.newInstance(PhotoListFragment.PHOTO_TYPE_FAVORITES);
             } else if (position == POSITION_OWN) {
