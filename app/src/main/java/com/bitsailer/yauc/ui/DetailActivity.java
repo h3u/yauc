@@ -29,6 +29,7 @@ import com.bitsailer.yauc.event.PhotoUnlikedEvent;
 import com.bitsailer.yauc.event.UserLoadedEvent;
 import com.bitsailer.yauc.sync.PhotoManagement;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
@@ -135,6 +136,7 @@ public class DetailActivity extends AppCompatActivity implements
             mAuthor.setText(getString(R.string.text_author, photo.getUser().getName()));
             Glide.with(this)
                     .load(photo.getUrls().getRegular())
+                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                     .listener(new RequestListener<String, GlideDrawable>() {
 
                         @Override

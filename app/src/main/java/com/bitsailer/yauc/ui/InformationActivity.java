@@ -117,7 +117,7 @@ public class InformationActivity extends AppCompatActivity
                     .findFragmentById(R.id.locationMap);
             mMapFragment.getMapAsync(this);
         } else {
-            mapWrapper.setVisibility(View.GONE);
+            mapWrapper.setVisibility(View.INVISIBLE);
         }
     }
 

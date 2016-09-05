@@ -39,6 +39,7 @@ android {
             resValue "string", "authorities", defaultConfig.applicationId + '.debug.provider'
             resValue "string", "account_type", "yauc.bitsailer.com.debug"
             buildConfigField "String", "ACCOUNT_TYPE", '"yauc.bitsailer.com.debug"'
+            signingConfig signingConfigs.config
         }
         release {
             minifyEnabled false
