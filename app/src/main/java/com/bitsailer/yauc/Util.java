@@ -107,6 +107,7 @@ public class Util {
     public static String[] getAllPhotoColumns() {
         return new String[] {
                 PhotoColumns.PHOTO_ID,
+                PhotoColumns.PHOTO_COMPLETED_AT,
                 PhotoColumns.PHOTO_CREATED_AT,
                 PhotoColumns.PHOTO_WIDTH,
                 PhotoColumns.PHOTO_HEIGHT,

@@ -146,7 +146,6 @@ public class InformationActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.action_edit && isPhotoOwnedByUser) {
-            PhotoManagement.amendPhoto(this, mUri.getLastPathSegment(), true);
             Intent intent = new Intent(this, EditPhotoActivity.class)
                     .setData(mUri);
             startActivity(intent);
@@ -186,6 +185,7 @@ public class InformationActivity extends AppCompatActivity
             Photo photo = Photo.fromCursor(data);
             isPhotoOwnedByUser = photo.getUser().getUsername()
                     .equals(Preferences.get(this).getUserUsername());
+            PhotoManagement.completePhoto(this, mUri.getLastPathSegment(), true);
             invalidateOptionsMenu();
             avatar.setContentDescription(
                     getString(R.string.content_description_profile,photo.getUser().getName()));

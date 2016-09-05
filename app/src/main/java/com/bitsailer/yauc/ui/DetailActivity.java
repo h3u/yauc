@@ -95,7 +95,7 @@ public class DetailActivity extends AppCompatActivity implements
         // get content uri from intent
         mUri = getIntent().getData();
 
-        PhotoManagement.amendPhoto(this, mUri.getLastPathSegment(), false);
+        PhotoManagement.completePhoto(this, mUri.getLastPathSegment(), false);
 
         getSupportLoaderManager().initLoader(LOADER_ID, null, this);
 

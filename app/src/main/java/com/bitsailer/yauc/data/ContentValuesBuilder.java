@@ -30,6 +30,7 @@ public class ContentValuesBuilder {
         }
         builder
                 .photoId(photo.getId())
+                .photoCompletedAt(0)
                 .photoColor(photo.getColor())
                 .photoCreatedAt(createdAt.getTime())
                 .photoLikedByUser(photo.getLikedByUser() ? 1 : 0)
@@ -51,9 +52,11 @@ public class ContentValuesBuilder {
     }
 
     public static ContentValues from(Photo photo) {
+        Date date = new Date();
         PhotosValuesBuilder builder = new PhotosValuesBuilder();
         builder = buildBase(builder, photo);
         builder
+                .photoCompletedAt(date.getTime())
                 .photoDownloads(photo.getDownloads())
                 .exifAperture(photo.getExif().getAperture())
                 .exifExposureTime(photo.getExif().getExposureTime())

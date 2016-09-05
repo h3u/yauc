@@ -51,7 +51,7 @@ public class PhotoManagement extends IntentService {
     private static final String ACTION_UPDATE_USERS_PHOTOS = "com.bitsailer.yauc.sync.action.update_users_photos";
     private static final String ACTION_CLEANUP_NEW_PHOTOS = "com.bitsailer.yauc.sync.action.cleanup_new_photos";
     private static final String ACTION_CLEANUP_USERS_PHOTOS = "com.bitsailer.yauc.sync.action.cleanup_users_photos";
-    private static final String ACTION_AMEND_PHOTO = "com.bitsailer.yauc.sync.action.amend_photo";
+    private static final String ACTION_COMPLETE_PHOTO = "com.bitsailer.yauc.sync.action.complete_photo";
     private static final String ACTION_LIKE_PHOTO = "com.bitsailer.yauc.sync.action.like_photo";
     private static final String ACTION_UNLIKE_PHOTO = "com.bitsailer.yauc.sync.action.unlike_photo";
     private static final String ACTION_EDIT_PHOTO = "com.bitsailer.yauc.sync.action.edit_photo";
@@ -115,9 +115,9 @@ public class PhotoManagement extends IntentService {
      * @param force do a forced fetch/update
      * @see IntentService
      */
-    public static void amendPhoto(Context context, String photoId, boolean force) {
+    public static void completePhoto(Context context, String photoId, boolean force) {
         Intent intent = new Intent(context, PhotoManagement.class);
-        intent.setAction(ACTION_AMEND_PHOTO);
+        intent.setAction(ACTION_COMPLETE_PHOTO);
         intent.putExtra(EXTRA_PHOTO_ID, photoId);
         intent.putExtra(EXTRA_FORCE, force);
         context.startService(intent);
@@ -191,10 +191,10 @@ public class PhotoManagement extends IntentService {
                 handleCleanupUsersPhotos(username);
             } else if (ACTION_CLEANUP_NEW_PHOTOS.equals(action)) {
                 handleCleanupNewPhotos();
-            } else if (ACTION_AMEND_PHOTO.equals(action)) {
+            } else if (ACTION_COMPLETE_PHOTO.equals(action)) {
                 final String photoId = intent.getStringExtra(EXTRA_PHOTO_ID);
                 final boolean force = intent.getBooleanExtra(EXTRA_FORCE, false);
-                handleAmendPhoto(photoId, force);
+                handleCompletePhoto(photoId, force);
             } else if (ACTION_LIKE_PHOTO.equals(action)) {
                 final String photoId = intent.getStringExtra(EXTRA_PHOTO_ID);
                 handleLikePhoto(photoId);
@@ -231,7 +231,7 @@ public class PhotoManagement extends IntentService {
                     }
                 } else {
                     // update existing
-                    handleAmendPhoto(item.getId(), false);
+                    handleCompletePhoto(item.getId(), false);
                 }
             }
         }
@@ -392,15 +392,16 @@ public class PhotoManagement extends IntentService {
     }
 
     /**
-     * Handle action to amend photo.
-     * This only fetches and updates if the photo data is incomplete.
+     * Handle action to complete photo data.
+     * This only fetches and updates if the photo data is incompleteor
+     * parameter force is set to true.
      *
-     * @param photoId id of photo to amend data
+     * @param photoId id of photo to complete the data
      * @param force do a forced fetch/update
      */
-    private void handleAmendPhoto(String photoId, boolean force) {
+    private void handleCompletePhoto(String photoId, boolean force) {
         Photo photo = getById(photoId);
-        if (photo != null && (photo.isIncomplete() || force)) {
+        if (photo != null && (!photo.isComplete() || force)) {
             // get api service
             UnsplashAPI api = UnsplashService.create(UnsplashAPI.class, this);
             Call<Photo> call = api.getPhoto(photoId);

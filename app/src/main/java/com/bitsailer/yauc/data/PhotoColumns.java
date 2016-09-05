@@ -18,6 +18,13 @@ public interface PhotoColumns {
     String PHOTO_ID = "id";
 
     /**
+     * Timestamp when photo has been filled up with
+     * all it's data (from SimplePhoto to Photo)
+     */
+    @DataType(INTEGER)
+    String PHOTO_COMPLETED_AT = "completed_at";
+
+    /**
      * Unixtime in UTC
      */
     @DataType(INTEGER)

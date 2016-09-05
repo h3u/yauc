@@ -24,6 +24,8 @@ public class SimplePhoto implements Parcelable {
     @Expose
     protected String id;
 
+    protected long completedAt;
+
     @SerializedName("created_at")
     @Expose
     protected String createdAt;
@@ -84,6 +86,14 @@ public class SimplePhoto implements Parcelable {
      */
     public void setId(String id) {
         this.id = id;
+    }
+
+    public long getCompletedAt() {
+        return completedAt;
+    }
+
+    public void setCompletedAt(long completedAt) {
+        this.completedAt = completedAt;
     }
 
     /**

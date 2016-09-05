@@ -94,13 +94,12 @@ public class Photo extends SimplePhoto {
 
 
     /**
-     * Check given photo for incomplete data.
-     *
-     * @return true if there is data missing
+     * Returns true if completed at has been set which is done when fetching
+     * full photo data.
+     * @return
      */
-    public boolean isIncomplete() {
-        return exif.isCameraEmpty() || exif.getIso() == 0
-                || location.getPosition() == null || location.isEmpty();
+    public boolean isComplete() {
+        return getCompletedAt() != 0;
     }
 
     @Override
@@ -136,6 +135,7 @@ public class Photo extends SimplePhoto {
         Photo photo = new Photo();
         if (cursor != null) {
             photo.setId(cursor.getString(cursor.getColumnIndex(PhotoColumns.PHOTO_ID)));
+            photo.setCompletedAt(cursor.getLong(cursor.getColumnIndex(PhotoColumns.PHOTO_COMPLETED_AT)));
             photo.setColor(cursor.getString(cursor.getColumnIndex(PhotoColumns.PHOTO_COLOR)));
             photo.setWidth(cursor.getInt(cursor.getColumnIndex(PhotoColumns.PHOTO_WIDTH)));
             photo.setHeight(cursor.getInt(cursor.getColumnIndex(PhotoColumns.PHOTO_HEIGHT)));
