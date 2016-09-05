@@ -266,19 +266,20 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
             // Retrieve photo for the big picture notification style
             if (latestPhoto != null) {
-                int largeIconWidth = getContext().getResources()
-                        .getDimensionPixelSize(android.R.dimen.notification_large_icon_width);
-                int largeIconHeight = getContext().getResources()
-                        .getDimensionPixelSize(android.R.dimen.notification_large_icon_height);
+                // big picture ratio with 2:1
+                int pictureWidth = getContext().getResources()
+                        .getInteger(R.integer.notification_big_picture_width);
+                int pictureHeight = getContext().getResources()
+                        .getInteger(R.integer.notification_big_picture_height);
 
                 Bitmap largeIcon;
                 try {
                     largeIcon = Glide.with(getContext())
-                            .load(latestPhoto.getUrls().getThumb())
+                            .load(latestPhoto.getUrls().getSmall())
                             .asBitmap()
                             .error(R.drawable.lens)
                             .fitCenter()
-                            .into(largeIconWidth, largeIconHeight).get();
+                            .into(pictureWidth, pictureHeight).get();
                 } catch (InterruptedException | ExecutionException e) {
                     Logger.e("Error retrieving large icon from %s",latestPhoto.getUrls().getThumb() , e);
                     largeIcon = BitmapFactory.decodeResource(

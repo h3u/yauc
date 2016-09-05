@@ -19,4 +19,6 @@
     <dimen name="list_icon_size">56dp</dimen>
     <dimen name="edit_photo_horizontal_margin">8dp</dimen>
     <dimen name="edit_photo_text_input_margin_left">64dp</dimen>
+    <integer name="notification_big_picture_width">400</integer>
+    <integer name="notification_big_picture_height">200</integer>
 </resources>
