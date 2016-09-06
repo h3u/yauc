@@ -44,7 +44,7 @@
 
     <!-- welcome dialog -->
     <string name="dialog_welcome_title">Welcome to YAUC</string>
-    <string name="dialog_welcome_message">YAUC is your android unsplash client. To see your favorites and own photos you need to authorize YAUC and sing in to unsplash.com.</string>
+    <string name="dialog_welcome_message">YAUC helps you staying up-to-date with https://unsplash.com. To see your favorites and own photos you need to authorize YAUC and sign in to unsplash.com.</string>
 
     <!-- photo list -->
     <string name="text_anonymous_photo_list">Please sign in to see photos.</string>
