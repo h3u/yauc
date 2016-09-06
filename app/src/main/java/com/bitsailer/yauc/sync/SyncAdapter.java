@@ -108,7 +108,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 List<SimplePhoto> list = listCall.execute().body();
                 inserted = insert(contentProviderClient, list);
                 sumInsertedLastSync += inserted;
-                if (page == 1) {
+                if (list != null && page == 1) {
                     latestPhoto = list.get(0);
                 }
             } catch (IOException e) {
