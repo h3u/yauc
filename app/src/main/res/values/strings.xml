@@ -103,6 +103,8 @@
     <string name="edit_text_exif_exposure_iso">ISO</string>
     <string name="edit_text_exif_exposure_iso_min">Should be greater than 25</string>
     <string name="edit_text_exif_exposure_iso_max">Should be less than 409600</string>
+    <string name="edit_photo_loading">Just one moment, fetching actual photo data …</string>
+    <string name="edit_photo_loading_failed_message">Cannot fetch actual data, watch out not to overwrite attributes.</string>
 
     <!-- Google Analytics -->
     <string name="ga_category_action">Action</string>

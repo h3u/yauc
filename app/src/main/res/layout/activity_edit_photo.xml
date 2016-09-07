@@ -14,7 +14,29 @@
         android:layout_height="match_parent"
         android:background="@color/colorPrimary">
 
-        <include layout="@layout/edit_photo_form" />
+        <LinearLayout
+            android:id="@+id/layoutLoading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            android:orientation="vertical"
+            android:layout_gravity="center">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:text="@string/edit_photo_loading"/>
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:indeterminateTint="@color/colorAccent"
+                tools:targetApi="lollipop" />
+        </LinearLayout>
+
+        <include layout="@layout/edit_photo_form"
+            android:id="@+id/layoutEditPhotoForm"
+            android:visibility="invisible"/>
 
     </FrameLayout>
 

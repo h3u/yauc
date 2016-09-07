@@ -28,7 +28,6 @@ import com.bitsailer.yauc.Util;
 import com.bitsailer.yauc.YaucApplication;
 import com.bitsailer.yauc.api.model.Photo;
 import com.bitsailer.yauc.event.PhotoDataLoadedEvent;
-import com.bitsailer.yauc.sync.PhotoManagement;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.google.android.gms.analytics.HitBuilders;
@@ -185,7 +184,6 @@ public class InformationActivity extends AppCompatActivity
             Photo photo = Photo.fromCursor(data);
             isPhotoOwnedByUser = photo.getUser().getUsername()
                     .equals(Preferences.get(this).getUserUsername());
-            PhotoManagement.completePhoto(this, mUri.getLastPathSegment(), true);
             invalidateOptionsMenu();
             avatar.setContentDescription(
                     getString(R.string.content_description_profile,photo.getUser().getName()));

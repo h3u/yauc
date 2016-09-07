@@ -413,6 +413,7 @@ public class PhotoManagement extends IntentService {
                 }
             } catch (IOException e) {
                 Logger.e(e.getMessage());
+                EventBus.getDefault().post(new NetworkErrorEvent());
             }
         }
     }
@@ -515,13 +516,15 @@ public class PhotoManagement extends IntentService {
      * @return the fetched photo
      */
     private Photo getById(String photoId) {
+        Photo photo = null;
         Cursor cursor = getContentResolver()
                 .query(PhotoProvider.Uri.withId(photoId), Util.getAllPhotoColumns(), null, null, null);
         if (cursor != null && cursor.moveToFirst()) {
-            return Photo.fromCursor(cursor);
+            photo = Photo.fromCursor(cursor);
+            cursor.close();
         }
 
-        return null;
+        return photo;
     }
 
     /**

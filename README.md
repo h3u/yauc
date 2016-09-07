@@ -1,6 +1,6 @@
 # ![YAUC](app/src/main/res/mipmap-mdpi/ic_launcher.png) YAUC
 
-YAUC is an android app helping you to keep up-to-date
+YAUC is an Android™ app helping you to keep up-to-date
 with [Unsplash | Free high-resolution photos](https://unsplash.com/new).
 
 ## Features

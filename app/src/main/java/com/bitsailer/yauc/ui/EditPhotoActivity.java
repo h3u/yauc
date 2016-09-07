@@ -3,6 +3,8 @@ package com.bitsailer.yauc.ui;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.LoaderManager;
@@ -16,12 +18,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewParent;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.bitsailer.yauc.R;
 import com.bitsailer.yauc.Util;
 import com.bitsailer.yauc.YaucApplication;
 import com.bitsailer.yauc.api.model.Photo;
+import com.bitsailer.yauc.event.NetworkErrorEvent;
+import com.bitsailer.yauc.event.PhotoDataLoadedEvent;
 import com.bitsailer.yauc.sync.PhotoManagement;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
@@ -32,6 +37,10 @@ import com.mobsandgeeks.saripaar.annotation.DecimalMin;
 import com.mobsandgeeks.saripaar.annotation.Max;
 import com.mobsandgeeks.saripaar.annotation.Min;
 import com.mobsandgeeks.saripaar.annotation.Optional;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.List;
 import java.util.Locale;
@@ -47,6 +56,15 @@ public class EditPhotoActivity extends AppCompatActivity
     private Uri mUri;
     private Photo mPhoto;
     private Validator mValidator;
+
+    @BindView(R.id.activity_edit_photo)
+    CoordinatorLayout mMainContent;
+
+    @BindView(R.id.layoutLoading)
+    LinearLayout mLayoutLoading;
+
+    @BindView(R.id.layoutEditPhotoForm)
+    View mLayoutEditPhotoForm;
 
     @Optional
     @BindView(R.id.exifCameraMaker) TextInputEditText mExifCameraMaker;
@@ -107,6 +125,9 @@ public class EditPhotoActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        mLayoutEditPhotoForm.setVisibility(View.INVISIBLE);
+        mLayoutLoading.setVisibility(View.VISIBLE);
+        PhotoManagement.completePhoto(this, mUri.getLastPathSegment(), true);
         // Analytics track screen name
         Tracker tracker = ((YaucApplication) getApplication()).getDefaultTracker();
         tracker.setScreenName(getString(R.string.ga_name_edit_photo_activity));
@@ -244,5 +265,38 @@ public class EditPhotoActivity extends AppCompatActivity
         public void afterTextChanged(Editable s) {
             mValidator.validate();
         }
+    }
+
+    @SuppressWarnings("UnusedParameters")
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onPhotoLoaded(PhotoDataLoadedEvent event) {
+        getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
+        mLayoutLoading.setVisibility(View.INVISIBLE);
+        mLayoutEditPhotoForm.setVisibility(View.VISIBLE);
+    }
+
+    @SuppressWarnings("UnusedParameters")
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onNetworkError(NetworkErrorEvent event) {
+        mLayoutLoading.setVisibility(View.INVISIBLE);
+        mLayoutEditPhotoForm.setVisibility(View.VISIBLE);
+        Snackbar.make(mMainContent, R.string.edit_photo_loading_failed_message, Snackbar.LENGTH_INDEFINITE)
+                .setAction(android.R.string.ok, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                    }
+                }).show();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
     }
 }
