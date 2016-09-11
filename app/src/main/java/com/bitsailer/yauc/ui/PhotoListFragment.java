@@ -11,6 +11,9 @@ import android.support.v4.content.Loader;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -42,9 +45,9 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
 
     protected static final String ARG_PHOTO_TYPE = "photo-type";
     private static final int LOADER_ID = 0;
-    static final int PHOTO_TYPE_NEW = 1;
-    static final int PHOTO_TYPE_FAVORITES = 2;
-    static final int PHOTO_TYPE_OWN = 3;
+    public static final int PHOTO_TYPE_NEW = 1;
+    public static final int PHOTO_TYPE_FAVORITES = 2;
+    public static final int PHOTO_TYPE_OWN = 3;
     protected int mPhotoType = PHOTO_TYPE_NEW;
     private static final String[] PHOTO_COLUMNS = {
             PhotoColumns.PHOTO_ID,
@@ -55,17 +58,18 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
     };
     protected PhotoListAdapter mAdapter;
     protected Unbinder mButterKnife;
+    private boolean mMultiColumn;
 
     @BindView(R.id.list)
-    RecyclerView recyclerView;
+    RecyclerView mRecyclerView;
     @BindView(R.id.emptyLayout)
-    LinearLayout emptyLayout;
+    LinearLayout mEmptyLayout;
     @BindView(R.id.buttonSignIn)
-    Button buttonSignIn;
+    Button mButtonSignIn;
     @BindView(R.id.buttonFetch)
-    Button buttonFetch;
+    Button mButtonFetch;
     @BindView(R.id.textViewEmpty)
-    TextView emptyText;
+    TextView mEmptyText;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -79,6 +83,7 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
         Bundle args = new Bundle();
         args.putInt(ARG_PHOTO_TYPE, photoType);
         fragment.setArguments(args);
+        fragment.setHasOptionsMenu(true);
         return fragment;
     }
 
@@ -102,14 +107,16 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
 
         mButterKnife = ButterKnife.bind(this, view);
 
+        // get user setting for columns
+        mMultiColumn = Preferences.get(getActivity()).getLayoutPhotoGrid(mPhotoType);
         // get column count
         int columnCount = getResources().getInteger(R.integer.photo_grid_columns);
-        if (mPhotoType == PHOTO_TYPE_FAVORITES) {
-            columnCount = getResources().getInteger(R.integer.favorite_photo_columns);
+        if (!mMultiColumn) {
+            columnCount = getResources().getInteger(R.integer.reduced_photo_columns);
         }
 
         // Set the adapter
-        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(
+        mRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(
                 columnCount, StaggeredGridLayoutManager.VERTICAL));
 
         mAdapter = new PhotoListAdapter(view.getContext(), columnCount,
@@ -120,7 +127,7 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
                                 .onItemSelected(PhotoProvider.Uri.withId(photoId), vh);
                     }
                 });
-        recyclerView.setAdapter(mAdapter);
+        mRecyclerView.setAdapter(mAdapter);
         return view;
     }
 
@@ -134,6 +141,53 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
     public void onDestroyView() {
         super.onDestroyView();
         mButterKnife.unbind();
+    }
+
+    private void changeColumnCount() {
+        // get column count
+        int columnCount = getResources().getInteger(R.integer.photo_grid_columns);
+        if (!mMultiColumn) {
+            columnCount = getResources().getInteger(R.integer.reduced_photo_columns);
+        }
+
+        // Set the adapter
+        mRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(
+                columnCount, StaggeredGridLayoutManager.VERTICAL));
+        mAdapter.setColumnCount(columnCount);
+        mRecyclerView.setAdapter(mAdapter);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_photo_list, menu);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        // change menu item if grid is set or not
+        if (Preferences.get(getActivity()).getLayoutPhotoGrid(mPhotoType)) {
+            menu.findItem(R.id.action_layout)
+                    .setTitle(R.string.action_layout_columns)
+                    .setIcon(R.drawable.ic_action_grid);
+        } else {
+            menu.findItem(R.id.action_layout)
+                    .setTitle(R.string.action_layout_column)
+                    .setIcon(R.drawable.ic_action_list);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_layout) {
+            if (mMultiColumn) {
+                mMultiColumn = false;
+            } else {
+                mMultiColumn = true;
+            }
+            changeColumnCount();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -212,18 +266,18 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
 
     protected void emptyLayoutChange(boolean empty) {
         if (empty) {
-            emptyLayout.setVisibility(View.VISIBLE);
+            mEmptyLayout.setVisibility(View.VISIBLE);
             if (Preferences.get(getContext()).isAuthenticated()) {
-                emptyText.setText(getString(R.string.text_empty_photo_list));
-                buttonSignIn.setVisibility(View.GONE);
-                buttonFetch.setVisibility(View.VISIBLE);
+                mEmptyText.setText(getString(R.string.text_empty_photo_list));
+                mButtonSignIn.setVisibility(View.GONE);
+                mButtonFetch.setVisibility(View.VISIBLE);
             } else {
-                emptyText.setText(getString(R.string.text_anonymous_photo_list));
-                buttonSignIn.setVisibility(View.VISIBLE);
-                buttonFetch.setVisibility(View.GONE);
+                mEmptyText.setText(getString(R.string.text_anonymous_photo_list));
+                mButtonSignIn.setVisibility(View.VISIBLE);
+                mButtonFetch.setVisibility(View.GONE);
             }
         } else {
-            emptyLayout.setVisibility(View.GONE);
+            mEmptyLayout.setVisibility(View.GONE);
         }
     }
 

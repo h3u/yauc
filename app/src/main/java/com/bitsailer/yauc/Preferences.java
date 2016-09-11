@@ -8,6 +8,7 @@ import android.text.TextUtils;
 
 import com.bitsailer.yauc.api.model.AccessToken;
 import com.bitsailer.yauc.api.model.User;
+import com.bitsailer.yauc.ui.PhotoListFragment;
 
 /**
  * Store some user attributes, tokens and auth code to
@@ -25,6 +26,9 @@ public class Preferences {
     private static final String KEY_USER_NAME = "key_user_name";
     private static final String KEY_USER_USERNAME = "key_user_username";
     private static final String KEY_USER_AVATAR = "key_user_avatar";
+    private static final String KEY_LAYOUT_GRID_NEW = "key_layout_grid_new";
+    private static final String KEY_LAYOUT_GRID_FAVORITES = "key_layout_grid_favorites";
+    private static final String KEY_LAYOUT_GRID_OWN = "key_layout_grid_own";
 
     private final SharedPreferences mPreferences;
     private Boolean mAuthenticated = false;
@@ -124,5 +128,33 @@ public class Preferences {
                 .remove(KEY_USER_AVATAR)
                 .remove(KEY_USER_NAME)
                 .remove(KEY_USER_USERNAME).commit();
+    }
+
+    public boolean getLayoutPhotoGrid(int photoType) {
+        switch (photoType) {
+            case PhotoListFragment.PHOTO_TYPE_NEW:
+                return mPreferences.getBoolean(KEY_LAYOUT_GRID_NEW, true);
+            case PhotoListFragment.PHOTO_TYPE_FAVORITES:
+                return mPreferences.getBoolean(KEY_LAYOUT_GRID_FAVORITES, false);
+            case PhotoListFragment.PHOTO_TYPE_OWN:
+                return mPreferences.getBoolean(KEY_LAYOUT_GRID_OWN, true);
+            default:
+                return true;
+        }
+    }
+
+    public void setLayoutPhotoGrid(int photoType, boolean grid) {
+        SharedPreferences.Editor editor = mPreferences.edit();
+        switch (photoType) {
+            case PhotoListFragment.PHOTO_TYPE_NEW:
+                editor.putBoolean(KEY_LAYOUT_GRID_NEW, grid);
+                editor.apply();
+            case PhotoListFragment.PHOTO_TYPE_FAVORITES:
+                editor.putBoolean(KEY_LAYOUT_GRID_FAVORITES, grid);
+                editor.apply();
+            case PhotoListFragment.PHOTO_TYPE_OWN:
+                editor.putBoolean(KEY_LAYOUT_GRID_OWN, grid);
+                editor.apply();
+        }
     }
 }

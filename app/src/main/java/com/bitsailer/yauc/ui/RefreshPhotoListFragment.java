@@ -33,6 +33,7 @@ public class RefreshPhotoListFragment extends PhotoListFragment {
         RefreshPhotoListFragment fragment = new RefreshPhotoListFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_PHOTO_TYPE, photoType);
+        fragment.setHasOptionsMenu(true);
         fragment.setArguments(args);
         return fragment;
     }
@@ -89,10 +90,10 @@ public class RefreshPhotoListFragment extends PhotoListFragment {
 
     protected void emptyLayoutChange(boolean empty) {
         if (empty) {
-            emptyLayout.setVisibility(View.VISIBLE);
-            emptyText.setText(getString(R.string.text_empty_photo_list_swipe_to_refresh));
+            mEmptyLayout.setVisibility(View.VISIBLE);
+            mEmptyText.setText(getString(R.string.text_empty_photo_list_swipe_to_refresh));
         } else {
-            emptyLayout.setVisibility(View.GONE);
+            mEmptyLayout.setVisibility(View.GONE);
         }
     }
 }

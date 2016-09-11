@@ -50,7 +50,8 @@ import static com.bitsailer.yauc.widget.NewPhotosWidget.EXTRA_NUM_PHOTOS;
 @SuppressWarnings("unused")
 public class MainActivity extends AppCompatActivity implements
         PhotoListFragment.ClickCallback, PhotoListFragment.LoginCallback,
-        SimpleDialogFragment.PositiveClickListener {
+        SimpleDialogFragment.PositiveClickListener,
+        ViewPager.OnPageChangeListener {
 
     private static final String STATE_TAB_POSITION = "state_tab_position";
     private static final int RC_LOGIN_ACTIVITY = 4711;
@@ -352,6 +353,21 @@ public class MainActivity extends AppCompatActivity implements
             // User clicked Sign in button
             startActivity(new Intent(MainActivity.this, LoginActivity.class));
         }
+    }
+
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+        invalidateOptionsMenu();
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+
     }
 
     /**

@@ -38,6 +38,10 @@ class PhotoListAdapter extends CursorRecyclerViewAdapter<PhotoListAdapter.PhotoL
         void onClick(String photoId, PhotoListItemViewHolder vh);
     }
 
+    public PhotoListAdapter setColumnCount(int columnCount) {
+        mColumnCount = columnCount;
+        return this;
+    }
 
     @Override
     public int getItemViewType(int position) {
