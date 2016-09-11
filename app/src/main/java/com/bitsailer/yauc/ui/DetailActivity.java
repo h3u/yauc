@@ -28,6 +28,7 @@ import com.bitsailer.yauc.event.PhotoLikedEvent;
 import com.bitsailer.yauc.event.PhotoUnlikedEvent;
 import com.bitsailer.yauc.event.UserLoadedEvent;
 import com.bitsailer.yauc.sync.PhotoManagement;
+import com.bumptech.glide.DrawableRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
@@ -134,13 +135,21 @@ public class DetailActivity extends AppCompatActivity implements
             mLikes = photo.getLikes();
             toggleLikeButton(mFavorite, mLikes);
             mAuthor.setText(getString(R.string.text_author, photo.getUser().getName()));
+            mProgressBar.setVisibility(View.VISIBLE);
+            // request to load thumbnail as preview
+            DrawableRequestBuilder thumbnailRequest = Glide.with(this)
+                    .load(photo.getUrls().getSmall())
+                    .centerCrop();
+            // load big size image
             Glide.with(this)
                     .load(photo.getUrls().getRegular())
+                    .thumbnail(thumbnailRequest)
                     .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                     .listener(new RequestListener<String, GlideDrawable>() {
 
                         @Override
                         public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                            mProgressBar.setVisibility(View.GONE);
                             return false;
                         }
 
@@ -151,7 +160,7 @@ public class DetailActivity extends AppCompatActivity implements
                         }
                     })
                     .centerCrop()
-                    .crossFade()
+                    .dontAnimate()
                     .into(mContentView);
         } else {
             // photo not found

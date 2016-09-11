@@ -4,12 +4,19 @@
     android:layout_height="fill_parent"
     tools:context="com.bitsailer.yauc.ui.DetailActivity">
 
+    <ImageView
+        android:id="@+id/fullscreenPhoto"
+        android:contentDescription="@string/content_description_photo"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:indeterminateTint="@color/colorAccent"
+        android:indeterminateTint="@android:color/white"
+        android:visibility="gone"
         tools:targetApi="lollipop" />
     <TextView
         android:id="@+id/textViewEmpty"
@@ -18,12 +25,6 @@
         android:layout_gravity="center"
         android:visibility="gone"
         android:text="@string/photo_not_found"/>
-
-    <ImageView
-        android:id="@+id/fullscreenPhoto"
-        android:contentDescription="@string/content_description_photo"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
 
     <FrameLayout
         android:layout_width="match_parent"

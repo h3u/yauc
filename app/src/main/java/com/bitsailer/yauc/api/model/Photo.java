@@ -147,6 +147,7 @@ public class Photo extends SimplePhoto {
             d.setTime(cursor.getLong(cursor.getColumnIndex(PhotoColumns.PHOTO_CREATED_AT)));
             photo.setCreatedAt(sdf.format(d));
             Urls urls = new Urls();
+            urls.setSmall(cursor.getString(cursor.getColumnIndex(PhotoColumns.URLS_SMALL)));
             urls.setRegular(cursor.getString(cursor.getColumnIndex(PhotoColumns.URLS_REGULAR)));
             urls.setFull(cursor.getString(cursor.getColumnIndex(PhotoColumns.URLS_FULL)));
             photo.setUrls(urls);
