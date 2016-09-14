@@ -30,8 +30,6 @@ import com.bitsailer.yauc.api.model.Photo;
 import com.bitsailer.yauc.event.PhotoDataLoadedEvent;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -118,15 +116,6 @@ public class InformationActivity extends AppCompatActivity
         } else {
             mapWrapper.setVisibility(View.INVISIBLE);
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // Analytics track screen name
-        Tracker tracker = ((YaucApplication) getApplication()).getDefaultTracker();
-        tracker.setScreenName(getString(R.string.ga_name_information_activity));
-        tracker.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
     @Override
@@ -235,7 +224,8 @@ public class InformationActivity extends AppCompatActivity
                         focalLength = Double.parseDouble(photo.getExif().getFocalLength());
                     }
                 } catch (NumberFormatException e) {
-                    Logger.e(e.getMessage());
+                    YaucApplication.reportException(e);
+                    Logger.e(e, e.getMessage());
                 }
                 if (aperture != 0.0) {
                     photoAperture
@@ -310,7 +300,8 @@ public class InformationActivity extends AppCompatActivity
                 mMapFragment.getView().setVisibility(View.INVISIBLE);
             }
         } catch (Exception e) {
-            Logger.e(e.getMessage());
+            YaucApplication.reportException(e);
+            Logger.e(e, e.getMessage());
         }
     }
 

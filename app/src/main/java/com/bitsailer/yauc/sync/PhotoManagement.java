@@ -6,10 +6,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.text.TextUtils;
 
 import com.bitsailer.yauc.Preferences;
 import com.bitsailer.yauc.Util;
+import com.bitsailer.yauc.YaucApplication;
 import com.bitsailer.yauc.api.UnsplashAPI;
 import com.bitsailer.yauc.api.UnsplashService;
 import com.bitsailer.yauc.api.model.Photo;
@@ -26,6 +28,8 @@ import com.bitsailer.yauc.event.UserDataLoadedEvent;
 import com.bitsailer.yauc.event.UserDataRemovedEvent;
 import com.bitsailer.yauc.event.UserLoadedEvent;
 import com.bitsailer.yauc.provider.values.PhotosValuesBuilder;
+import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.crash.FirebaseCrash;
 import com.orhanobut.logger.Logger;
 
 import org.greenrobot.eventbus.EventBus;
@@ -261,7 +265,7 @@ public class PhotoManagement extends IntentService {
                 fetched = part.size();
                 list.addAll(part);
             } catch (IOException e) {
-                Logger.e(e.getMessage());
+                Logger.e(e, e.getMessage());
             }
         }
         int favorites = insertList(list);
@@ -281,7 +285,7 @@ public class PhotoManagement extends IntentService {
                 fetched = part.size();
                 list.addAll(part);
             } catch (IOException e) {
-                Logger.e(e.getMessage());
+                Logger.e(e, e.getMessage());
             }
         }
         int own = insertList(list);
@@ -412,7 +416,8 @@ public class PhotoManagement extends IntentService {
                     Logger.d("%d photos updated", num);
                 }
             } catch (IOException e) {
-                Logger.e(e.getMessage());
+                Logger.e(e, e.getMessage());
+                YaucApplication.reportException(e);
                 EventBus.getDefault().post(new NetworkErrorEvent());
             }
         }
@@ -451,7 +456,7 @@ public class PhotoManagement extends IntentService {
                 EventBus.getDefault().post(new PhotoLikedEvent(photoId));
             }
         } catch (IOException e) {
-            Logger.e(e.getMessage());
+            Logger.e(e, e.getMessage());
             EventBus.getDefault().post(new NetworkErrorEvent());
         }
     }
@@ -482,7 +487,7 @@ public class PhotoManagement extends IntentService {
                 EventBus.getDefault().post(new PhotoUnlikedEvent(photoId));
             }
         } catch (IOException e) {
-            Logger.e(e.getMessage());
+            Logger.e(e, e.getMessage());
             EventBus.getDefault().post(new NetworkErrorEvent());
         }
     }
@@ -504,7 +509,8 @@ public class PhotoManagement extends IntentService {
                 cursor.close();
             }
         } catch (Exception e) {
-            Logger.e(e.getMessage());
+            Logger.e(e, e.getMessage());
+            YaucApplication.reportException(e);
         }
         return have;
     }
@@ -555,7 +561,7 @@ public class PhotoManagement extends IntentService {
                     updatePhoto(photo);
                 }
             } catch (IOException e) {
-                Logger.e(e.getMessage());
+                Logger.e(e, e.getMessage());
             }
         }
     }
@@ -573,12 +579,18 @@ public class PhotoManagement extends IntentService {
                     PhotoManagement.updateUsersPhotos(getApplicationContext(), username);
                 }
                 EventBus.getDefault().post(new UserLoadedEvent());
+                trackSignIn();
             }
 
             @Override
             public void onFailure(Call<User> call, Throwable t) {
-                Logger.e(t.getMessage());
+                Logger.e(t, t.getMessage());
             }
         });
+    }
+
+    private void trackSignIn() {
+        FirebaseAnalytics tracker = ((YaucApplication) getApplication()).getDefaultTracker();
+        tracker.logEvent(FirebaseAnalytics.Event.LOGIN, new Bundle());
     }
 }

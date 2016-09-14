@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 
 import com.bitsailer.yauc.R;
+import com.bitsailer.yauc.YaucApplication;
 import com.bitsailer.yauc.api.UnsplashAPI;
 import com.bitsailer.yauc.api.UnsplashService;
 import com.bitsailer.yauc.api.model.SimplePhoto;
@@ -112,7 +113,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     latestPhoto = list.get(0);
                 }
             } catch (IOException e) {
-                Logger.e(e.getMessage());
+                Logger.e(e, e.getMessage());
             }
         }
 
@@ -150,6 +151,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         ContentValues cv = ContentValuesBuilder.from(item);
                         provider.insert(PhotoProvider.Uri.BASE, cv);
                     } catch (Exception e) {
+                        YaucApplication.reportException(e);
                         Logger.e(e, "insert failed");
                     }
                     inserted++;
@@ -170,7 +172,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 cursor.close();
             }
         } catch (Exception e) {
-            Logger.e(e.getMessage());
+            YaucApplication.reportException(e);
+            Logger.e(e, e.getMessage());
         }
         return have;
     }
@@ -281,7 +284,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             .fitCenter()
                             .into(pictureWidth, pictureHeight).get();
                 } catch (InterruptedException | ExecutionException e) {
-                    Logger.e("Error retrieving large icon from %s",latestPhoto.getUrls().getThumb() , e);
+                    Logger.e(e, "Error retrieving large icon from %s", latestPhoto.getUrls().getThumb());
+                    YaucApplication.reportException(e);
                     largeIcon = BitmapFactory.decodeResource(
                             getContext().getResources(), R.drawable.lens);
                 }

@@ -7,6 +7,8 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
+import com.bitsailer.yauc.YaucApplication;
+
 /**
  * A simple {@link DialogFragment} subclass.
  * Use the {@link SimpleDialogFragment#newInstance} factory method to
@@ -87,6 +89,7 @@ public class SimpleDialogFragment extends DialogFragment {
                         try {
                             ((PositiveClickListener) getActivity()).onDialogPositiveClick(mId);
                         } catch (Exception e) {
+                            YaucApplication.reportException(e);
                             dismiss();
                         }
                     }
@@ -97,6 +100,7 @@ public class SimpleDialogFragment extends DialogFragment {
                         try {
                             ((NegativeClickListener) getActivity()).onDialogNegativeClick(mId);
                         } catch (Exception e) {
+                            YaucApplication.reportException(e);
                             dismiss();
                         }
                     }

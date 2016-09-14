@@ -14,6 +14,7 @@ import android.webkit.WebViewClient;
 import com.bitsailer.yauc.BuildConfig;
 import com.bitsailer.yauc.Preferences;
 import com.bitsailer.yauc.R;
+import com.bitsailer.yauc.YaucApplication;
 import com.bitsailer.yauc.api.UnsplashAPI;
 import com.bitsailer.yauc.api.UnsplashService;
 import com.bitsailer.yauc.api.model.AccessToken;
@@ -77,7 +78,8 @@ public class LoginActivity extends AppCompatActivity {
                         return false; // continue redirect
                     }
                 } catch (Exception e) {
-                    Logger.e(e.getMessage());
+                    YaucApplication.reportException(e);
+                    Logger.e(e, e.getMessage());
                 }
                 return true; // stop redirection
             }
@@ -120,7 +122,8 @@ public class LoginActivity extends AppCompatActivity {
 
                 @Override
                 public void onFailure(Call<AccessToken> call, Throwable t) {
-                    Logger.e(t.getMessage());
+                    Logger.e(t, t.getMessage());
+                    YaucApplication.reportException(t);
                     setResult(RESULT_CANCELED);
                     finish();
                 }

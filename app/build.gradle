@@ -27,8 +27,14 @@ android {
         debug {
             keyAlias 'yauc'
             keyPassword 'password'
-            storeFile file("$rootDir/keyStore.jks")
+            storeFile file("$rootDir/yaucDebug.jks")
             storePassword 'password'
+        }
+        release {
+            keyAlias 'yauc'
+            keyPassword localProperties["key_password"]
+            storeFile file("$rootDir/yaucRelease.jks")
+            storePassword localProperties["keyStore_password"]
         }
     }
 
@@ -39,11 +45,15 @@ android {
             resValue "string", "authorities", defaultConfig.applicationId + '.debug.provider'
             resValue "string", "account_type", "yauc.bitsailer.com.debug"
             buildConfigField "String", "ACCOUNT_TYPE", '"yauc.bitsailer.com.debug"'
+            buildConfigField "Boolean", "REPORT_CRASH", 'false'
             signingConfig signingConfigs.debug
         }
         release {
+            buildConfigField "Boolean", "REPORT_CRASH", 'true'
+            debuggable false
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }
@@ -56,6 +66,7 @@ ext {
     butterKnifeVersion = '8.2.1'
     retrofitVersion = '2.1.0'
     okHttpVersion = '3.4.1'
+    firebaseVersion = '9.4.0'
 }
 
 dependencies {
@@ -89,9 +100,6 @@ dependencies {
     compile "com.github.bumptech.glide:glide:3.7.0"
     compile "com.android.support:support-v4:${supportLibVersion}"
 
-    // Google Analytics
-    compile "com.google.android.gms:play-services-analytics:${playServicesVersion}"
-
     // Google Maps
     compile "com.google.android.gms:play-services-maps:${playServicesVersion}"
 
@@ -103,6 +111,10 @@ dependencies {
 
     // Validation of user input
     compile 'com.mobsandgeeks:android-saripaar:2.0.3'
+
+    // Firebase services
+    compile "com.google.firebase:firebase-core:${firebaseVersion}"
+    compile "com.google.firebase:firebase-crash:${firebaseVersion}"
 
     // Testing
     testCompile 'junit:junit:4.12'

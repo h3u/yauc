@@ -1,6 +1,7 @@
 package com.bitsailer.yauc.ui;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -8,7 +9,6 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -34,8 +34,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -53,7 +52,8 @@ import butterknife.OnClick;
 @SuppressWarnings("unused")
 public class DetailActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor>,
-        SimpleDialogFragment.PositiveClickListener {
+        SimpleDialogFragment.PositiveClickListener,
+        SimpleDialogFragment.NegativeClickListener {
 
     private static final int RC_LOGIN_ACTIVITY = 4711;
     private static final int LOADER_ID = 0;
@@ -64,7 +64,7 @@ public class DetailActivity extends AppCompatActivity implements
     private String mShareUrl;
     private boolean mFavorite = false;
     private int mLikes = 0;
-    private Tracker mTracker;
+    private FirebaseAnalytics mTracker;
 
     @BindView(R.id.fullscreen_content_controls)
     View mControlsView;
@@ -107,9 +107,17 @@ public class DetailActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        // Analytics track screen name
-        mTracker.setScreenName(getString(R.string.ga_name_detail_activity));
-        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+        // send analytics event
+        // id of photo can be null (photo not found)
+        int orientation = getResources().getConfiguration().orientation;
+        Bundle bundle = new Bundle();
+        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "image");
+        bundle.putString(FirebaseAnalytics.Param.ITEM_ID, mPhotoId);
+        bundle.putString(YaucApplication.FB_PARAM_ORIENTATION,
+                orientation == Configuration.ORIENTATION_LANDSCAPE ?
+                        YaucApplication.FB_PARAM_ORIENTATION_LANDSCAPE :
+                        YaucApplication.FB_PARAM_ORIENTATION_PORTRAIT);
+        mTracker.logEvent(FirebaseAnalytics.Event.VIEW_ITEM, bundle);
     }
 
     @Override
@@ -201,10 +209,13 @@ public class DetailActivity extends AppCompatActivity implements
     @OnClick(R.id.buttonShare)
     public void onShareButtonClicked() {
         if (mShareUrl != null) {
-            mTracker.send(new HitBuilders.EventBuilder()
-                    .setCategory(getString(R.string.ga_category_action))
-                    .setAction(getString(R.string.ga_action_share))
-                    .build());
+            // send analytics event
+            // id of photo can be null (photo not found)
+            Bundle bundle = new Bundle();
+            bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "image");
+            bundle.putString(FirebaseAnalytics.Param.ITEM_ID, mPhotoId);
+            mTracker.logEvent(FirebaseAnalytics.Event.SHARE, bundle);
+            // build & start Intent
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text, mShareUrl));
             shareIntent.setType("text/plain");
@@ -228,19 +239,21 @@ public class DetailActivity extends AppCompatActivity implements
                 mFavorite = false;
                 toggleLikeButton(false, mLikes);
                 PhotoManagement.unlikePhoto(this, mPhotoId);
-                mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory(getString(R.string.ga_category_action))
-                        .setAction(getString(R.string.ga_action_unlike))
-                        .build());
+                // send analytics event
+                // id of photo can be null (photo not found)
+                Bundle bundle = new Bundle();
+                bundle.putString(FirebaseAnalytics.Param.ITEM_ID, mPhotoId);
+                mTracker.logEvent(YaucApplication.FB_EVENT_UNLIKE_ITEM, bundle);
             } else {
                 // like it
                 mFavorite = true;
                 toggleLikeButton(true, mLikes);
                 PhotoManagement.likePhoto(this, mPhotoId);
-                mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory(getString(R.string.ga_category_action))
-                        .setAction(getString(R.string.ga_action_like))
-                        .build());
+                // send analytics event
+                // id of photo can be null (photo not found)
+                Bundle bundle = new Bundle();
+                bundle.putString(FirebaseAnalytics.Param.ITEM_ID, mPhotoId);
+                mTracker.logEvent(YaucApplication.FB_EVENT_LIKE_ITEM, bundle);
             }
         }
     }
@@ -282,10 +295,6 @@ public class DetailActivity extends AppCompatActivity implements
         Toast.makeText(this,
                 String.format(getString(R.string.message_login), Preferences.get(this).getUserName()),
                 Toast.LENGTH_LONG).show();
-        // add user id to analytics
-        if (!TextUtils.isEmpty(Preferences.get(this).getUserId())) {
-            mTracker.set("&uid", Preferences.get(this).getUserId());
-        }
     }
 
     @SuppressWarnings("UnusedParameters")
@@ -299,5 +308,9 @@ public class DetailActivity extends AppCompatActivity implements
         if (id == DIALOG_LOGIN) {
             startActivityForResult(new Intent(DetailActivity.this, LoginActivity.class), RC_LOGIN_ACTIVITY);
         }
+    }
+
+    @Override
+    public void onDialogNegativeClick(int id) {
     }
 }

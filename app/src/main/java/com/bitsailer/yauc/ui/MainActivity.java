@@ -1,6 +1,7 @@
 package com.bitsailer.yauc.ui;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
@@ -13,7 +14,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,8 +30,7 @@ import com.bitsailer.yauc.event.UserLoadedEvent;
 import com.bitsailer.yauc.sync.PhotoManagement;
 import com.bitsailer.yauc.sync.SyncAdapter;
 import com.bitsailer.yauc.widget.NewPhotosWidgetIntentService;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.orhanobut.logger.Logger;
 
 import org.greenrobot.eventbus.EventBus;
@@ -50,7 +50,8 @@ import static com.bitsailer.yauc.widget.NewPhotosWidget.EXTRA_NUM_PHOTOS;
 @SuppressWarnings("unused")
 public class MainActivity extends AppCompatActivity implements
         PhotoListFragment.ClickCallback, PhotoListFragment.LoginCallback,
-        SimpleDialogFragment.PositiveClickListener {
+        SimpleDialogFragment.PositiveClickListener,
+        SimpleDialogFragment.NegativeClickListener {
 
     private static final String STATE_TAB_POSITION = "state_tab_position";
     private static final int RC_LOGIN_ACTIVITY = 4711;
@@ -59,7 +60,6 @@ public class MainActivity extends AppCompatActivity implements
 
     private static Preferences mPreferences;
     private int mTabPosition = SectionsPagerAdapter.POSITION_NEW;
-    private Tracker mTracker;
 
     @BindView(R.id.main_content) CoordinatorLayout mMainContent;
     /**
@@ -98,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements
         if (FIRST_TIME == Util.checkAppStart(this, mPreferences)
                 && !mPreferences.isAuthenticated()) {
             welcome();
+            trackScreenSize();
         }
 
         // todo: enable this after app approval (without hourly rate limit)
@@ -115,10 +116,7 @@ public class MainActivity extends AppCompatActivity implements
         // setup icons
         initTabs(mTabPosition);
 
-        // Obtain the shared Tracker instance.
-        YaucApplication application = (YaucApplication) getApplication();
-        mTracker = application.getDefaultTracker();
-        trackScreen();
+        trackSelectedTab();
     }
 
     private void welcome() {
@@ -216,7 +214,10 @@ public class MainActivity extends AppCompatActivity implements
                             }
                         }).show();
             } else {
-                startLogin();
+                try {
+                    startLogin();
+                } catch (Exception e) {
+                }
             }
             return true;
         }
@@ -259,10 +260,6 @@ public class MainActivity extends AppCompatActivity implements
         Snackbar.make(mMainContent,
                 String.format(getString(R.string.message_login), mPreferences.getUserName()),
                 Snackbar.LENGTH_LONG).show();
-        // add user id to analytics
-        if (!TextUtils.isEmpty(mPreferences.getUserId())) {
-            mTracker.set("&uid", mPreferences.getUserId());
-        }
     }
 
     @Override
@@ -292,7 +289,7 @@ public class MainActivity extends AppCompatActivity implements
             public void onTabSelected(TabLayout.Tab tab) {
                 mTabPosition = tab.getPosition();
                 initTabs(mTabPosition);
-                trackScreen();
+                trackSelectedTab();
             }
 
             @Override
@@ -314,12 +311,34 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     /**
-     * Analytics track screen name
+     * Analytics track tab visibility
      */
-    private void trackScreen() {
+    private void trackSelectedTab() {
         String name = String.format("Tab%s", getTabName(mTabPosition));
-        mTracker.setScreenName(name);
-        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+        FirebaseAnalytics tracker = ((YaucApplication) getApplication()).getDefaultTracker();
+        int orientation = getResources().getConfiguration().orientation;
+        Bundle bundle = new Bundle();
+        bundle.putString(YaucApplication.FB_PARAM_TAB_NAME, name);
+        bundle.putString(YaucApplication.FB_PARAM_ORIENTATION,
+                orientation == Configuration.ORIENTATION_LANDSCAPE ?
+                        YaucApplication.FB_PARAM_ORIENTATION_LANDSCAPE :
+                        YaucApplication.FB_PARAM_ORIENTATION_PORTRAIT);
+        tracker.logEvent(YaucApplication.FB_EVENT_PHOTO_LIST_TAB_VISITED, bundle);
+    }
+
+    /**
+     * Analytics track screen size
+     */
+    private void trackScreenSize() {
+        FirebaseAnalytics tracker = ((YaucApplication) getApplication()).getDefaultTracker();
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getRealMetrics(displaymetrics);
+        int height = displaymetrics.heightPixels;
+        int width = displaymetrics.widthPixels;
+        Bundle bundle = new Bundle();
+        bundle.putString(YaucApplication.FB_PARAM_DEVICE_SCREEN_WIDTH, Integer.toString(width));
+        bundle.putString(YaucApplication.FB_PARAM_DEVICE_SCREEN_HEIGHT, Integer.toString(height));
+        tracker.logEvent(YaucApplication.FB_EVENT_APP_FIRST_OPEN, bundle);
     }
 
     private String getTabName(int tabPosition) {
@@ -352,6 +371,10 @@ public class MainActivity extends AppCompatActivity implements
             // User clicked Sign in button
             startActivity(new Intent(MainActivity.this, LoginActivity.class));
         }
+    }
+
+    @Override
+    public void onDialogNegativeClick(int id) {
     }
 
     /**

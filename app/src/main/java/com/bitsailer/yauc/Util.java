@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.text.TextUtils;
 
 import com.bitsailer.yauc.data.PhotoColumns;
+import com.google.firebase.crash.FirebaseCrash;
 import com.orhanobut.logger.Logger;
 
 /**
@@ -71,7 +72,10 @@ public class Util {
             // Update version in preferences
             preferences.setAppVersion(currentVersionCode);
         } catch (PackageManager.NameNotFoundException e) {
-            Logger.w("Unable to determine current app version from package manager. Defensively assuming normal app start.");
+            String message = "Unable to determine current app version from package manager. "
+                + "Defensively assuming normal app start.";
+            Logger.w(message);
+            FirebaseCrash.log(message);
         }
         return appStart;
     }
