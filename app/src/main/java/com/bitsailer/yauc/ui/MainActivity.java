@@ -101,12 +101,11 @@ public class MainActivity extends AppCompatActivity implements
             trackScreenSize();
         }
 
-        // todo: enable this after app approval (without hourly rate limit)
         // update users photos on to keep things synchronized
-        /* if (savedInstanceState == null && mPreferences.isAuthenticated()) {
-            PhotoManagement.updateUsersPhotos(MainActivity.this,
+        if (savedInstanceState == null && mPreferences.isAuthenticated()) {
+            PhotoManagement.syncUsersPhotos(MainActivity.this,
                     mPreferences.getUserUsername());
-        } */
+        }
 
         // reset widget
         Intent intentService = new Intent(this, NewPhotosWidgetIntentService.class);

@@ -29,7 +29,6 @@ import com.bitsailer.yauc.event.UserDataRemovedEvent;
 import com.bitsailer.yauc.event.UserLoadedEvent;
 import com.bitsailer.yauc.provider.values.PhotosValuesBuilder;
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.google.firebase.crash.FirebaseCrash;
 import com.orhanobut.logger.Logger;
 
 import org.greenrobot.eventbus.EventBus;
@@ -43,6 +42,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static com.bitsailer.yauc.sync.PhotoManagement.ItemType.FAVORITES;
+
 /**
  * An {@link IntentService} subclass for handling asynchronous actions that
  * fetch data or do crud database operations mainly to keep local database and
@@ -52,7 +53,8 @@ public class PhotoManagement extends IntentService {
 
     private static final int PHOTO_AMOUNT_TO_KEEP = 200;
 
-    private static final String ACTION_UPDATE_USERS_PHOTOS = "com.bitsailer.yauc.sync.action.update_users_photos";
+    private static final String ACTION_INIT_USERS_PHOTOS = "com.bitsailer.yauc.sync.action.init_users_photos";
+    private static final String ACTION_SYNC_USERS_PHOTOS = "com.bitsailer.yauc.sync.action.sync_users_photos";
     private static final String ACTION_CLEANUP_NEW_PHOTOS = "com.bitsailer.yauc.sync.action.cleanup_new_photos";
     private static final String ACTION_CLEANUP_USERS_PHOTOS = "com.bitsailer.yauc.sync.action.cleanup_users_photos";
     private static final String ACTION_COMPLETE_PHOTO = "com.bitsailer.yauc.sync.action.complete_photo";
@@ -66,21 +68,40 @@ public class PhotoManagement extends IntentService {
     private static final String EXTRA_PHOTO = "com.bitsailer.yauc.sync.extra.photo";
     private static final String EXTRA_FORCE = "com.bitsailer.yauc.sync.extra.force";
 
+    enum ItemType {
+        FAVORITES, OWN
+    }
+
     public PhotoManagement() {
         super("PhotoManagement");
     }
 
     /**
-     * Starts this service to perform update of users photos with the given parameters. If
+     * Starts this service to perform initialization of users photos with the given parameters. If
      * the service is already performing a task this action will be queued.
      *
      * @param context The context
      * @param username username whose photos should be updated
      * @see IntentService
      */
-    public static void updateUsersPhotos(Context context, String username) {
+    public static void initUsersPhotos(Context context, String username) {
         Intent intent = new Intent(context, PhotoManagement.class);
-        intent.setAction(ACTION_UPDATE_USERS_PHOTOS);
+        intent.setAction(ACTION_INIT_USERS_PHOTOS);
+        intent.putExtra(EXTRA_USERNAME, username);
+        context.startService(intent);
+    }
+
+    /**
+     * Starts this service to perform synchronization of users photos with the given parameters. If
+     * the service is already performing a task this action will be queued.
+     *
+     * @param context The context
+     * @param username username whose photos should be updated
+     * @see IntentService
+     */
+    public static void syncUsersPhotos(Context context, String username) {
+        Intent intent = new Intent(context, PhotoManagement.class);
+        intent.setAction(ACTION_SYNC_USERS_PHOTOS);
         intent.putExtra(EXTRA_USERNAME, username);
         context.startService(intent);
     }
@@ -187,9 +208,12 @@ public class PhotoManagement extends IntentService {
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
-            if (ACTION_UPDATE_USERS_PHOTOS.equals(action)) {
+            if (ACTION_INIT_USERS_PHOTOS.equals(action)) {
                 final String username = intent.getStringExtra(EXTRA_USERNAME);
-                handleUpdateUsersPhotos(username);
+                initUsersPhotos(username);
+            } else if (ACTION_SYNC_USERS_PHOTOS.equals(action)) {
+                final String username = intent.getStringExtra(EXTRA_USERNAME);
+                handleSyncUsersPhotos(username);
             } else if (ACTION_CLEANUP_USERS_PHOTOS.equals(action)) {
                 final String username = intent.getStringExtra(EXTRA_USERNAME);
                 handleCleanupUsersPhotos(username);
@@ -239,58 +263,114 @@ public class PhotoManagement extends IntentService {
                 }
             }
         }
-         return inserted;
+        return inserted;
     }
 
     /**
-     * Fetch favorites and own photos of given user and save them
-     * to the database.
-     * @param username given username of user
+     * Iterate the list and update items.
+     *
+     * @param list list of photos
+     * @return number of inserted items
      */
-    private void handleUpdateUsersPhotos(String username) {
+    private int updateList(List<SimplePhoto> list) {
+        int updated = 0;
+        if (list != null && !list.isEmpty()) {
 
-        // get api service
-        UnsplashAPI api = UnsplashService.create(UnsplashAPI.class, this);
-        List<SimplePhoto> list = new ArrayList<>();
-
-        int fetched = UnsplashAPI.MAX_PER_PAGE;
-
-        // get list of favorites
-        for (int page = 1; fetched == UnsplashAPI.MAX_PER_PAGE; page++) {
-
-            Call<List<SimplePhoto>> listFavoritesCall = api
-                    .listFavoritePhotos(username, page, UnsplashAPI.MAX_PER_PAGE, null);
-            try {
-                List<SimplePhoto> part = listFavoritesCall.execute().body();
-                fetched = part.size();
-                list.addAll(part);
-            } catch (IOException e) {
-                Logger.e(e, e.getMessage());
+            for (SimplePhoto item : list) {
+                ContentValues values = ContentValuesBuilder.from(item);
+                updated += getContentResolver()
+                        .update(PhotoProvider.Uri.withId(item.getId()), values, null, null);
             }
         }
+        return updated;
+    }
+
+    /**
+     * Iterate the list and delete these items.
+     *
+     * @param list list of photos
+     * @return number of inserted items
+     */
+    private int deleteList(List<SimplePhoto> list) {
+        int deleted = 0;
+        if (list != null && !list.isEmpty()) {
+
+            for (SimplePhoto item : list) {
+                deleted += getContentResolver()
+                        .delete(PhotoProvider.Uri.withId(item.getId()), null, null);
+            }
+        }
+        return deleted;
+    }
+
+    /**
+     * Init local database and fetch favorites and own photos of given user and save them.
+     *
+     * @param username given username of user
+     */
+    private void initUsersPhotos(String username) {
+        List<SimplePhoto> list;
+        // get list of favorites
+        list = fetchUserItems(FAVORITES, username);
         int favorites = insertList(list);
         Logger.i("%d favorites inserted", favorites);
 
         // get list of own photos
-        fetched = UnsplashAPI.MAX_PER_PAGE;
         list.clear();
-
-        // get list of favorites
-        for (int page = 1; fetched == UnsplashAPI.MAX_PER_PAGE; page++) {
-
-            Call<List<SimplePhoto>> listOwnPhotosCall = api
-                    .listUsersPhotos(username, page, UnsplashAPI.MAX_PER_PAGE, null);
-            try {
-                List<SimplePhoto> part = listOwnPhotosCall.execute().body();
-                fetched = part.size();
-                list.addAll(part);
-            } catch (IOException e) {
-                Logger.e(e, e.getMessage());
-            }
-        }
+        list = fetchUserItems(ItemType.OWN, username);
         int own = insertList(list);
         Logger.i("%d own photos inserted", own);
-        EventBus.getDefault().post(new UserDataLoadedEvent(favorites, own));
+        EventBus.getDefault().post(new UserDataLoadedEvent());
+    }
+
+    /**
+     * Sync local database of favorites and own photos of given user
+     * with freshly fetched items from Unsplash API.
+     *
+     * @param username given username of user
+     */
+    private void handleSyncUsersPhotos(String username) {
+        List<SimplePhoto> itemsToDelete = new ArrayList<>();
+        // process favorites
+        itemsToDelete.addAll(syncLocalItems(ItemType.FAVORITES, username));
+
+        // process own photos
+        itemsToDelete.addAll(syncLocalItems(ItemType.OWN, username));
+
+        int deleted = deleteList(itemsToDelete);
+        Logger.i("%d photos deleted during sync", deleted);
+        EventBus.getDefault().post(new UserDataLoadedEvent());
+    }
+
+    /**
+     * Sync local stored items (favorite/own photos) with api for
+     * given user.
+     *
+     * @param type Favorite or own photos
+     * @param username username of given user
+     * @return list of photos that should be deleted
+     */
+    private List<SimplePhoto> syncLocalItems(ItemType type, String username) {
+        PhotoArrayList<SimplePhoto> remoteItems;
+        PhotoArrayList<SimplePhoto> localItems;
+
+        // process favorites
+        remoteItems = fetchUserItems(type, username);
+        localItems = readUserItems(type, username);
+        for (SimplePhoto photo : remoteItems) {
+            SimplePhoto localItem = localItems.getByIdentifier(photo.getId());
+            if (localItem != null) {
+                if (type == FAVORITES) {
+                    like(photo.getId());
+                }
+                localItems.removeByIdentifier(photo.getId());
+            } else {
+                ContentValues values = ContentValuesBuilder.from(photo);
+                getContentResolver().insert(PhotoProvider.Uri.BASE, values);
+                Logger.i("add photo %s", photo.getId());
+            }
+        }
+        return localItems;
     }
 
     /**
@@ -391,7 +471,6 @@ public class PhotoManagement extends IntentService {
             countNew = cursor.getCount();
             cursor.close();
         }
-
         return countNew;
     }
 
@@ -444,21 +523,34 @@ public class PhotoManagement extends IntentService {
             Response response = call.execute();
             if (response.isSuccessful()) {
                 Logger.d("photo %s liked", photoId);
-                Photo photo = getById(photoId);
-                if (photo != null) {
-                    PhotosValuesBuilder builder = new PhotosValuesBuilder();
-                    ContentValues values = builder
-                            .photoLikedByUser(1)
-                            .photoLikes(photo.getLikes() + 1L)
-                            .values();
-                    getContentResolver().update(PhotoProvider.Uri.withId(photoId), values, null, null);
-                }
-                EventBus.getDefault().post(new PhotoLikedEvent(photoId));
+                like(photoId);
             }
         } catch (IOException e) {
             Logger.e(e, e.getMessage());
             EventBus.getDefault().post(new NetworkErrorEvent());
         }
+    }
+
+    /**
+     * Sign local stored photo as favorite.
+     *
+     * @param photoId identifier or photo
+     * @return number of updated items
+     */
+    private int like(String photoId) {
+        int updated = 0;
+        Photo photo = getById(photoId);
+        if (photo != null) {
+            PhotosValuesBuilder builder = new PhotosValuesBuilder();
+            ContentValues values = builder
+                    .photoLikedByUser(1)
+                    .photoLikes(photo.getLikes() + 1L)
+                    .values();
+            updated = getContentResolver()
+                    .update(PhotoProvider.Uri.withId(photoId), values, null, null);
+        }
+        EventBus.getDefault().post(new PhotoLikedEvent(photoId));
+        return updated;
     }
 
     /**
@@ -475,21 +567,34 @@ public class PhotoManagement extends IntentService {
             Response response = call.execute();
             if (response.isSuccessful()) {
                 Logger.i("photo %s unliked", photoId);
-                Photo photo = getById(photoId);
-                if (photo != null) {
-                    PhotosValuesBuilder builder = new PhotosValuesBuilder();
-                    ContentValues values = builder
-                            .photoLikedByUser(0)
-                            .photoLikes(photo.getLikes() - 1L)
-                            .values();
-                    getContentResolver().update(PhotoProvider.Uri.withId(photoId), values, null, null);
-                }
-                EventBus.getDefault().post(new PhotoUnlikedEvent(photoId));
+                unlike(photoId);
             }
         } catch (IOException e) {
             Logger.e(e, e.getMessage());
             EventBus.getDefault().post(new NetworkErrorEvent());
         }
+    }
+
+    /**
+     * Remove local stored photo from favorites.
+     *
+     * @param photoId identifier or photo
+     * @return number of updated items
+     */
+    private int unlike(String photoId) {
+        int updated = 0;
+        Photo photo = getById(photoId);
+        if (photo != null) {
+            PhotosValuesBuilder builder = new PhotosValuesBuilder();
+            ContentValues values = builder
+                    .photoLikedByUser(0)
+                    .photoLikes(photo.getLikes() - 1L)
+                    .values();
+            updated = getContentResolver()
+                    .update(PhotoProvider.Uri.withId(photoId), values, null, null);
+        }
+        EventBus.getDefault().post(new PhotoUnlikedEvent(photoId));
+        return updated;
     }
 
     /**
@@ -529,7 +634,6 @@ public class PhotoManagement extends IntentService {
             photo = Photo.fromCursor(cursor);
             cursor.close();
         }
-
         return photo;
     }
 
@@ -576,7 +680,7 @@ public class PhotoManagement extends IntentService {
                 Preferences.get(getApplicationContext()).setUser(user);
                 String username = user.getUsername();
                 if (!TextUtils.isEmpty(username)) {
-                    PhotoManagement.updateUsersPhotos(getApplicationContext(), username);
+                    PhotoManagement.initUsersPhotos(getApplicationContext(), username);
                 }
                 EventBus.getDefault().post(new UserLoadedEvent());
                 trackSignIn();
@@ -592,5 +696,75 @@ public class PhotoManagement extends IntentService {
     private void trackSignIn() {
         FirebaseAnalytics tracker = ((YaucApplication) getApplication()).getDefaultTracker();
         tracker.logEvent(FirebaseAnalytics.Event.LOGIN, new Bundle());
+    }
+
+    /**
+     * Fetch list of photos for given type and user.
+     *
+     * @param type the item type needed, e.g. favorites, own photos
+     * @param username username of user
+     * @return list of requested photos
+     */
+    private PhotoArrayList<SimplePhoto> fetchUserItems(ItemType type, String username) {
+        UnsplashAPI api = UnsplashService.create(UnsplashAPI.class, this);
+        PhotoArrayList<SimplePhoto> list = new PhotoArrayList<>();
+        int fetched = UnsplashAPI.MAX_PER_PAGE;
+        Call<List<SimplePhoto>> listPhotosCall;
+
+        // get list of photos
+        for (int page = 1; fetched == UnsplashAPI.MAX_PER_PAGE; page++) {
+
+            if (FAVORITES == type) {
+                listPhotosCall = api
+                        .listFavoritePhotos(username, page, UnsplashAPI.MAX_PER_PAGE, null);
+            } else {
+                listPhotosCall = api
+                        .listUsersPhotos(username, page, UnsplashAPI.MAX_PER_PAGE, null);
+            }
+
+            try {
+                List<SimplePhoto> part = listPhotosCall.execute().body();
+                fetched = part.size();
+                list.addAll(part);
+            } catch (IOException e) {
+                Logger.e(e, e.getMessage());
+            }
+        }
+        return list;
+    }
+
+    /**
+     * Read list of photos from Content provider for given type and username.
+     *
+     * @param type the item type needed, e.g. favorites, own photos
+     * @param username username of user
+     * @return list of read photos
+     */
+    private PhotoArrayList<SimplePhoto> readUserItems(ItemType type, String username) {
+        PhotoArrayList<SimplePhoto> list = new PhotoArrayList<>();
+        Cursor cursor;
+
+        if (username != null) {
+            if (type == FAVORITES) {
+                cursor = getContentResolver().query(
+                        PhotoProvider.Uri.BASE,
+                        Util.getAllPhotoColumns(),
+                        PhotoColumns.PHOTO_LIKED_BY_USER + " = ?"
+                                + " AND " + PhotoColumns.USER_USERNAME + " <> ?",
+                        new String[]{ "1", username }, null);
+            } else {
+                cursor = getContentResolver().query(
+                        PhotoProvider.Uri.withUsername(username),
+                        Util.getAllPhotoColumns(), null, null, null);
+            }
+
+            if (cursor != null && cursor.getCount() > 0) {
+                while (cursor.moveToNext()) {
+                    list.add(SimplePhoto.fromCursor(cursor));
+                }
+                cursor.close();
+            }
+        }
+        return list;
     }
 }
