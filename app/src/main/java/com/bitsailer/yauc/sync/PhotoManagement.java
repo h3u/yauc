@@ -1,5 +1,6 @@
 package com.bitsailer.yauc.sync;
 
+import android.app.DownloadManager;
 import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Context;
@@ -7,9 +8,11 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 
 import com.bitsailer.yauc.Preferences;
+import com.bitsailer.yauc.R;
 import com.bitsailer.yauc.Util;
 import com.bitsailer.yauc.YaucApplication;
 import com.bitsailer.yauc.api.UnsplashAPI;
@@ -23,6 +26,7 @@ import com.bitsailer.yauc.data.PhotoProvider;
 import com.bitsailer.yauc.event.NetworkErrorEvent;
 import com.bitsailer.yauc.event.PhotoDataLoadedEvent;
 import com.bitsailer.yauc.event.PhotoLikedEvent;
+import com.bitsailer.yauc.event.PhotoSavedEvent;
 import com.bitsailer.yauc.event.PhotoUnlikedEvent;
 import com.bitsailer.yauc.event.UserDataLoadedEvent;
 import com.bitsailer.yauc.event.UserDataRemovedEvent;
@@ -62,6 +66,7 @@ public class PhotoManagement extends IntentService {
     private static final String ACTION_UNLIKE_PHOTO = "com.bitsailer.yauc.sync.action.unlike_photo";
     private static final String ACTION_EDIT_PHOTO = "com.bitsailer.yauc.sync.action.edit_photo";
     private static final String ACTION_GET_USER = "com.bitsailer.yauc.sync.action.get_user";
+    private static final String ACTION_DOWNLOAD_PHOTO = "com.bitsailer.yauc.sync.action.download_photo";
 
     private static final String EXTRA_USERNAME = "com.bitsailer.yauc.sync.extra.username";
     private static final String EXTRA_PHOTO_ID = "com.bitsailer.yauc.sync.extra.photo_id";
@@ -204,6 +209,20 @@ public class PhotoManagement extends IntentService {
         context.startService(intent);
     }
 
+    /**
+     * Download a given photo to the appropriate location.
+     *
+     * @param context calling context
+     * @param photoId id of photo to like
+     * @see IntentService
+     */
+    public static void downloadPhoto(Context context, String photoId) {
+        Intent intent = new Intent(context, PhotoManagement.class);
+        intent.setAction(ACTION_DOWNLOAD_PHOTO);
+        intent.putExtra(EXTRA_PHOTO_ID, photoId);
+        context.startService(intent);
+    }
+
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
@@ -234,6 +253,9 @@ public class PhotoManagement extends IntentService {
                 handleEditPhoto(photo);
             } else if (ACTION_GET_USER.equals(action)) {
                 handleGetUser();
+            } else if (ACTION_DOWNLOAD_PHOTO.equals(action)) {
+                final String photoId = intent.getStringExtra(EXTRA_PHOTO_ID);
+                handleDownload(photoId);
             }
         }
     }
@@ -766,5 +788,33 @@ public class PhotoManagement extends IntentService {
             }
         }
         return list;
+    }
+
+    /**
+     * Download given photo to local file in
+     * {@link android.os.Environment.DIRECTORY_PICTURES}
+     *
+     * @param photoId id of photo to download
+     */
+    private void handleDownload(String photoId) {
+        Photo photo = getById(photoId);
+        if (photo != null) {
+            String url = photo.getUrls().getFull();
+            Uri target = Util.getOutputMediaFileUri(photo);
+            DownloadManager.Request request =
+                    new DownloadManager.Request(Uri.parse(url));
+            request.setAllowedNetworkTypes(
+                    DownloadManager.Request.NETWORK_MOBILE | DownloadManager.Request.NETWORK_WIFI)
+                    .setAllowedOverRoaming(false)
+                    .setTitle(getString(R.string.downloaded_title))
+                    .setMimeType("image/jpeg")
+                    .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
+                    .setDestinationUri(target)
+                    .allowScanningByMediaScanner();
+            DownloadManager downloadManager = (DownloadManager)getApplicationContext()
+                    .getSystemService(FragmentActivity.DOWNLOAD_SERVICE);
+            downloadManager.enqueue(request);
+            EventBus.getDefault().post(new PhotoSavedEvent(target.getLastPathSegment()));
+        }
     }
 }

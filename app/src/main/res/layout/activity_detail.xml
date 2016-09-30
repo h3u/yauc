@@ -78,6 +78,15 @@
                 android:text="0"
                 tools:ignore="HardcodedText" />
             <Button
+                android:id="@+id/buttonDownload"
+                style="@style/FullscreenTheme.Button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableTop="@android:drawable/stat_sys_download"
+                android:contentDescription="@string/button_detail_info_content_description"
+                android:text="@string/button_detail_download" />
+            <Button
                 android:id="@+id/buttonInfo"
                 style="@style/FullscreenTheme.Button"
                 android:layout_width="0dp"

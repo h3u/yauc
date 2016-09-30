@@ -4,11 +4,21 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.Uri;
+import android.os.Environment;
 import android.text.TextUtils;
 
+import com.bitsailer.yauc.api.model.Photo;
 import com.bitsailer.yauc.data.PhotoColumns;
 import com.google.firebase.crash.FirebaseCrash;
 import com.orhanobut.logger.Logger;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * Utilities
@@ -16,6 +26,8 @@ import com.orhanobut.logger.Logger;
  */
 
 public class Util {
+
+    private static final String PHOTO_PATH = "Unsplash";
 
     /**
      * Distinguishes different kinds of app starts: <li>
@@ -149,5 +161,65 @@ public class Util {
                 PhotoColumns.USER_LINKS_PHOTOS,
                 PhotoColumns.USER_LINKS_LIKES
         };
+    }
+
+    /**
+     *  Create a file Uri for saving a photo
+     */
+    public static Uri getOutputMediaFileUri(Photo photo){
+        return Uri.fromFile(getOutputMediaFile(photo));
+    }
+
+    /**
+     * Create a File for saving an image of given type
+     * @link http://developer.android.com/guide/topics/media/camera.html#saving-media
+     */
+    private static File getOutputMediaFile(Photo photo) {
+        File mediaStorageDir;
+
+        // check that the SDCard is mounted
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+            // try shared files directory first
+            mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_PICTURES), PHOTO_PATH);
+
+        } else {
+            // take application associated directory if the public one fails
+            mediaStorageDir = new File(YaucApplication.getContext()
+                    .getExternalFilesDir(Environment.DIRECTORY_PICTURES), PHOTO_PATH);
+        }
+
+        // Create the storage directory if it does not exist
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
+                Logger.d("getOutputMediaFile: cannot create dir %s", mediaStorageDir.getAbsolutePath());
+                return null;
+            }
+        }
+
+        // Create a media file name
+        String filename;
+        if (photo.getUser() != null && !TextUtils.isEmpty(photo.getUser().getName())) {
+            String name = photo.getUser().getName();
+            filename = String.format("%s_%s.jpg", photo.getId(), name.replaceAll("\\W+", ""));
+        } else {
+            filename = String.format("%s.jpg", photo.getId());
+        }
+
+        return new File(mediaStorageDir.getPath(), filename);
+    }
+
+    public void copy(File src, File dst) throws IOException {
+        InputStream in = new FileInputStream(src);
+        OutputStream out = new FileOutputStream(dst);
+
+        // Transfer bytes from in to out
+        byte[] buf = new byte[1024];
+        int len;
+        while ((len = in.read(buf)) > 0) {
+            out.write(buf, 0, len);
+        }
+        in.close();
+        out.close();
     }
 }

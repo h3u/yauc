@@ -1,6 +1,7 @@
 package com.bitsailer.yauc;
 
 import android.app.Application;
+import android.content.Context;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crash.FirebaseCrash;
@@ -25,6 +26,16 @@ public class YaucApplication extends Application {
     public static final String FB_PARAM_ORIENTATION_PORTRAIT = "portrait";
     public static final String FB_PARAM_ORIENTATION_LANDSCAPE = "landscape";
 
+    private static Context sContext;
+
+    public static Context getContext() {
+        return sContext;
+    }
+
+    public static void setContext(Context context) {
+        sContext = context;
+    }
+
     public FirebaseAnalytics getDefaultTracker() {
         return FirebaseAnalytics.getInstance(this);
     }
@@ -32,6 +43,8 @@ public class YaucApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        setContext(this);
 
         // disable logging for release builds
         if (!BuildConfig.DEBUG) {

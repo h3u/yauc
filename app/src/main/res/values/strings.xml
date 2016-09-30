@@ -38,7 +38,9 @@
     <string name="button_detail_share">Share</string>
     <string name="button_detail_share_content_description">Share photo</string>
     <string name="button_detail_info">About</string>
+    <string name="button_detail_download">Download</string>
     <string name="button_detail_info_content_description">Information about photo</string>
+    <string name="button_detail_download_content_description">Download photo</string>
     <string name="button_detail_like_content_description">Like photo</string>
     <string name="button_detail_unlike_content_description">Unlike photo</string>
 
@@ -62,6 +64,9 @@
     <string name="like_dialog_sign_in_message">You have to sign in to like photos.</string>
     <string name="liked_message">Photo added to favorites.</string>
     <string name="unliked_message">Photo removed from favorites.</string>
+    <string name="downloaded_title">YAUC Download</string>
+    <string name="downloaded_message">Saved %1$s.</string>
+    <string name="downloaded_permission_denied">Sorry, cannot download without permission to write.</string>
     <string name="photo_not_found">Arrrgh, photo not found, sorry.</string>
 
     <!-- information about photo -->

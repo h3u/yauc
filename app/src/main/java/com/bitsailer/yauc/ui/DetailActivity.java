@@ -1,11 +1,14 @@
 package com.bitsailer.yauc.ui;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
@@ -25,6 +28,7 @@ import com.bitsailer.yauc.YaucApplication;
 import com.bitsailer.yauc.api.model.Photo;
 import com.bitsailer.yauc.event.NetworkErrorEvent;
 import com.bitsailer.yauc.event.PhotoLikedEvent;
+import com.bitsailer.yauc.event.PhotoSavedEvent;
 import com.bitsailer.yauc.event.PhotoUnlikedEvent;
 import com.bitsailer.yauc.event.UserLoadedEvent;
 import com.bitsailer.yauc.sync.PhotoManagement;
@@ -58,6 +62,7 @@ public class DetailActivity extends AppCompatActivity implements
     private static final int RC_LOGIN_ACTIVITY = 4711;
     private static final int LOADER_ID = 0;
     private static final int DIALOG_LOGIN = 0;
+    private static final int PERMISSION_WRITE_EXTERNAL_STORAGE = 5;
     private static final String TAG_DIALOG_LOGIN = "tag_dialog_login";
     private Uri mUri;
     private String mPhotoId;
@@ -265,6 +270,42 @@ public class DetailActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
+    @OnClick(R.id.buttonDownload)
+    public void onDownloadButtonClicked() {
+        // Permission check
+        int permissionCheck = ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+            // start download
+            PhotoManagement.downloadPhoto(this, mPhotoId);
+        } else {
+            // missing permission, request it
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    PERMISSION_WRITE_EXTERNAL_STORAGE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_WRITE_EXTERNAL_STORAGE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted
+                    PhotoManagement.downloadPhoto(this, mPhotoId);
+                } else {
+                    // permission denied
+                    Toast.makeText(this, R.string.downloaded_permission_denied,
+                            Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+        }
+    }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -301,6 +342,14 @@ public class DetailActivity extends AppCompatActivity implements
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onNetworkError(NetworkErrorEvent event) {
         Toast.makeText(this, R.string.message_network_failed, Toast.LENGTH_LONG).show();
+    }
+
+    @SuppressWarnings("UnusedParameters")
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onPhotoSaved(PhotoSavedEvent event) {
+        Toast.makeText(this,
+                String.format(getString(R.string.downloaded_message), event.getName()),
+                Toast.LENGTH_SHORT).show();
     }
 
     @Override
