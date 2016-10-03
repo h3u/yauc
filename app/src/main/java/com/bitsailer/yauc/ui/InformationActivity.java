@@ -51,6 +51,7 @@ import butterknife.ButterKnife;
 public class InformationActivity extends AppCompatActivity
         implements LoaderManager.LoaderCallbacks<Cursor>, OnMapReadyCallback {
 
+    private static final String EMPTY_PLACEHOLDER = "--";
     private static final int LOADER_ID = 0;
     private Uri mUri;
     private SupportMapFragment mMapFragment;
@@ -210,47 +211,32 @@ public class InformationActivity extends AppCompatActivity
                 } else {
                     photoIso.setVisibility(View.GONE);
                 }
-                Double aperture = 0.0;
-                Double exposureTime = 0.0;
-                Double focalLength = 0.0;
-                try {
-                    if (!TextUtils.isEmpty(photo.getExif().getAperture())) {
-                        aperture = Double.parseDouble(photo.getExif().getAperture());
-                    }
-                    if (!TextUtils.isEmpty(photo.getExif().getExposureTime())) {
-                        exposureTime = Double.parseDouble(photo.getExif().getExposureTime());
-                    }
-                    if (!TextUtils.isEmpty(photo.getExif().getFocalLength())) {
-                        focalLength = Double.parseDouble(photo.getExif().getFocalLength());
-                    }
-                } catch (NumberFormatException e) {
-                    YaucApplication.reportException(e);
-                    Logger.e(e, e.getMessage());
-                }
-                if (aperture != 0.0) {
+                if (!TextUtils.isEmpty(photo.getExif().getAperture())) {
                     photoAperture
-                            .setText(getString(R.string.information_photo_aperture, aperture));
+                            .setText(getString(R.string.information_photo_aperture,
+                                    photo.getExif().getAperture()));
                 } else {
-                    photoAperture.setVisibility(View.GONE);
+                    photoAperture
+                            .setText(getString(R.string.information_photo_aperture,
+                                    EMPTY_PLACEHOLDER));
                 }
-                if (exposureTime != 0.0) {
-                    if (exposureTime < 1) {
-                        photoExposureTime
-                                .setText(getString(R.string.information_photo_exposure_time_short,
-                                        1 / exposureTime));
-                    } else {
-                        photoExposureTime
-                                .setText(getString(R.string.information_photo_exposure_time_long,
-                                        exposureTime));
-                    }
+                if (!TextUtils.isEmpty(photo.getExif().getExposureTime())) {
+                    photoExposureTime
+                            .setText(getString(R.string.information_photo_exposure_time,
+                                    photo.getExif().getExposureTime()));
                 } else {
-                    photoExposureTime.setVisibility(View.GONE);
+                    photoExposureTime
+                            .setText(getString(R.string.information_photo_exposure_time,
+                                    EMPTY_PLACEHOLDER));
                 }
-                if (focalLength != 0.0) {
+                if (!TextUtils.isEmpty(photo.getExif().getFocalLength())) {
                     photoFocalLength
-                            .setText(getString(R.string.information_photo_focal_length, focalLength));
+                            .setText(getString(R.string.information_photo_focal_length,
+                                    photo.getExif().getFocalLength()));
                 } else {
-                    photoFocalLength.setVisibility(View.GONE);
+                    photoFocalLength
+                            .setText(getString(R.string.information_photo_focal_length,
+                                    EMPTY_PLACEHOLDER));
                 }
             }
             if (!photo.getLocation().isEmpty()) {

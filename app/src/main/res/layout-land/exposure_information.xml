@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="16dp"
+    android:gravity="center_vertical"
+    android:orientation="vertical">
+
+    <TextView
+        style="?android:attr/listPreferredItemHeightLarge"
+        android:textAppearance="?android:attr/textAppearanceListItem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="start|bottom"
+        android:textDirection="locale"
+        android:text="@string/information_exposure"/>
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/textViewPhotoSize"
+                style="?android:attr/listPreferredItemHeightSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textDirection="locale"
+                tools:text="4896 x 2917"/>
+            <TextView
+                android:id="@+id/textViewPhotoIso"
+                style="?android:attr/listPreferredItemHeightSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                tools:text="ISO 200"/>
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/textViewPhotoAperture"
+                style="?android:attr/listPreferredItemHeightSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                tools:text="Aperture 2.9"/>
+            <TextView
+                android:id="@+id/textViewPhotoFocalLength"
+                style="?android:attr/listPreferredItemHeightSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                tools:text="Focal length 3.5"/>
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/textViewPhotoExposureTime"
+                style="?android:attr/listPreferredItemHeightSmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="Exposure Time 0.01"/>
+        </TableRow>
+    </TableLayout>
+</LinearLayout>

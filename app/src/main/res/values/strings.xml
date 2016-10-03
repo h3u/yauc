@@ -77,12 +77,11 @@
     <string name="information_exposure">Exposure</string>
     <string name="information_location">Location</string>
     <string name="information_make_model">%1$s %2$s</string>
-    <string name="information_photo_size">%1$d x %2$d</string>
-    <string name="information_photo_iso">ISO%1$d</string>
-    <string name="information_photo_aperture">f/%1$.1f</string>
-    <string name="information_photo_exposure_time_short">1/%1$.0fs</string>
-    <string name="information_photo_exposure_time_long">%1$.1fs</string>
-    <string name="information_photo_focal_length">%1$.1fmm</string>
+    <string name="information_photo_size">Dimensions %1$d x %2$d</string>
+    <string name="information_photo_iso">ISO %1$d</string>
+    <string name="information_photo_aperture">Aperture %1$s</string>
+    <string name="information_photo_exposure_time">Exposure Time %1$s</string>
+    <string name="information_photo_focal_length">Focal Length %1$s</string>
     <string name="information_location_data">%1$s %2$s</string>
 
     <!-- new photos widget -->
