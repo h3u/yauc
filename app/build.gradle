@@ -114,7 +114,9 @@ dependencies {
 
     // Firebase services
     compile "com.google.firebase:firebase-core:${firebaseVersion}"
+    compile "com.google.firebase:firebase-config:${firebaseVersion}"
     compile "com.google.firebase:firebase-crash:${firebaseVersion}"
+    compile "com.google.firebase:firebase-invites:${firebaseVersion}"
 
     // Testing
     testCompile 'junit:junit:4.12'

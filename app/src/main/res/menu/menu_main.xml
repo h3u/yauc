@@ -8,6 +8,16 @@
         android:title="@string/action_login"
         app:showAsAction="never" />
     <item
+        android:id="@+id/action_invite"
+        android:orderInCategory="120"
+        android:title="@string/action_invite"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_feedback"
+        android:orderInCategory="140"
+        android:title="@string/action_feedback"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_refresh"
         android:orderInCategory="200"
         android:title="@string/action_refresh"

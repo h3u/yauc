@@ -166,15 +166,15 @@ public class Util {
     /**
      *  Create a file Uri for saving a photo
      */
-    public static Uri getOutputMediaFileUri(Photo photo){
-        return Uri.fromFile(getOutputMediaFile(photo));
+    public static Uri getOutputMediaFileUri(Context context, Photo photo){
+        return Uri.fromFile(getOutputMediaFile(context, photo));
     }
 
     /**
      * Create a File for saving an image of given type
      * @link http://developer.android.com/guide/topics/media/camera.html#saving-media
      */
-    private static File getOutputMediaFile(Photo photo) {
+    private static File getOutputMediaFile(Context context, Photo photo) {
         File mediaStorageDir;
 
         // check that the SDCard is mounted
@@ -185,8 +185,8 @@ public class Util {
 
         } else {
             // take application associated directory if the public one fails
-            mediaStorageDir = new File(YaucApplication.getContext()
-                    .getExternalFilesDir(Environment.DIRECTORY_PICTURES), PHOTO_PATH);
+            mediaStorageDir = new File(
+                    context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), PHOTO_PATH);
         }
 
         // Create the storage directory if it does not exist

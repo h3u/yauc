@@ -4,6 +4,8 @@
     <!--menu-->
     <string name="action_login">Sign in</string>
     <string name="action_logout">Sign out</string>
+    <string name="action_invite">Recommend YAUC</string>
+    <string name="action_feedback">Feedback</string>
     <string name="action_refresh">Refresh</string>
     <string name="action_edit">Edit</string>
     <string name="action_save">Save</string>
@@ -126,4 +128,18 @@
     <!-- general messages -->
     <string name="message_network_failed">A network error occurred. Please check your connectivity and try again.</string>
 
+    <!-- app invites -->
+    <string name="invitation_title">Recommend YAUC</string>
+    <string name="invitation_message">Hey! Do you know YAUC?\n</string>
+    <string name="invitation_email_subject">YAUC: Stay up-to-date with Unsplash</string>
+    <string name="invitation_email_body"><![CDATA[
+        <div style=\"font-family: sans-serif;text-align:center;\">
+        <a href=\"%%APPINVITE_LINK_PLACEHOLDER%%\"><img src=\"https://fir-yauc.firebaseapp.com/i/invitationImage.jpg\"></a>
+        <p>Have a look at <a href=\"%%APPINVITE_LINK_PLACEHOLDER%%\">YAUC</a>, the Android&trade; App that keeps you up-to-date with <a href=\"https://unsplash.com/\">Unsplash - Free (do whatever you want) high-resolution photos.</a>.</p>
+        <p><a href=\"%%APPINVITE_LINK_PLACEHOLDER%%\"><img alt=\"Get it on Google Play\" width=\"200px\" src=\"https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png\"/></a></p>
+        </div>
+    ]]></string>
+
+    <!-- Feedback -->
+    <string name="feedback_email_subject">Problems/Wishes using YAUC</string>
 </resources>

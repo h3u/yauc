@@ -3,6 +3,7 @@ package com.bitsailer.yauc.ui;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
@@ -30,6 +31,7 @@ import com.bitsailer.yauc.event.UserLoadedEvent;
 import com.bitsailer.yauc.sync.PhotoManagement;
 import com.bitsailer.yauc.sync.SyncAdapter;
 import com.bitsailer.yauc.widget.NewPhotosWidgetIntentService;
+import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.orhanobut.logger.Logger;
 
@@ -40,6 +42,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static android.content.Intent.ACTION_SENDTO;
 import static com.bitsailer.yauc.Util.AppStart.FIRST_TIME;
 import static com.bitsailer.yauc.widget.NewPhotosWidget.EXTRA_NUM_PHOTOS;
 
@@ -55,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private static final String STATE_TAB_POSITION = "state_tab_position";
     private static final int RC_LOGIN_ACTIVITY = 4711;
+    private static final int RC_INVITE = 4712;
     private static final int DIALOG_LOGIN = 0;
     private static final String TAG_DIALOG_LOGIN = "tag_dialog_login";
 
@@ -220,6 +224,27 @@ public class MainActivity extends AppCompatActivity implements
             }
             return true;
         }
+        if (id == R.id.action_invite) {
+            Intent intent = new AppInviteInvitation.IntentBuilder(getString(R.string.invitation_title))
+                    .setMessage(getString(R.string.invitation_message))
+                    .setEmailHtmlContent(getString(R.string.invitation_email_body))
+                    .setEmailSubject(getString(R.string.invitation_email_subject))
+                    .setAndroidMinimumVersionCode(Build.VERSION_CODES.KITKAT)
+                    .build();
+            startActivityForResult(intent, RC_INVITE);
+        }
+        if (id == R.id.action_feedback) {
+            Intent feedback = new Intent(ACTION_SENDTO);
+            feedback.setData(Uri.parse("mailto:"));
+            feedback.putExtra(Intent.EXTRA_EMAIL, new String[] {
+                    ((YaucApplication)getApplication()).getFirebaseRemoteConfig()
+                            .getString("feedback_email")
+            });
+            feedback.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.feedback_email_subject));
+            if (feedback.resolveActivity(getPackageManager()) != null) {
+                startActivity(feedback);
+            }
+        }
         if (id == R.id.action_refresh) {
             SyncAdapter.syncNow(this);
             return true;
@@ -268,6 +293,18 @@ public class MainActivity extends AppCompatActivity implements
                 PhotoManagement.getUser(this);
             } else {
                 Snackbar.make(mMainContent, R.string.message_failure_login, Snackbar.LENGTH_SHORT).show();
+            }
+        }
+        if (requestCode == RC_INVITE) {
+            if (resultCode == RESULT_OK) {
+                // Get the invitation IDs of all sent messages
+                String[] ids = AppInviteInvitation.getInvitationIds(resultCode, data);
+                for (String id : ids) {
+                    Logger.d("onActivityResult: sent invitation " + id);
+                }
+            } else {
+                // Sending failed or it was canceled, show failure message to the user
+                Logger.e("invite failed: %d", resultCode);
             }
         }
     }

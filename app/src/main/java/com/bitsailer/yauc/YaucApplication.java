@@ -1,10 +1,15 @@
 package com.bitsailer.yauc;
 
 import android.app.Application;
-import android.content.Context;
+import android.support.annotation.NonNull;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crash.FirebaseCrash;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.orhanobut.logger.LogLevel;
 import com.orhanobut.logger.Logger;
 
@@ -26,25 +31,23 @@ public class YaucApplication extends Application {
     public static final String FB_PARAM_ORIENTATION_PORTRAIT = "portrait";
     public static final String FB_PARAM_ORIENTATION_LANDSCAPE = "landscape";
 
-    private static Context sContext;
+    private static final long REMOTE_CONFIG_EXPIRE = 3600L;
 
-    public static Context getContext() {
-        return sContext;
-    }
-
-    public static void setContext(Context context) {
-        sContext = context;
-    }
+    private FirebaseRemoteConfig firebaseRemoteConfig;
 
     public FirebaseAnalytics getDefaultTracker() {
         return FirebaseAnalytics.getInstance(this);
+    }
+
+    public FirebaseRemoteConfig getFirebaseRemoteConfig() {
+        return firebaseRemoteConfig;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        setContext(this);
+        setupRemoteConfig();
 
         // disable logging for release builds
         if (!BuildConfig.DEBUG) {
@@ -55,6 +58,26 @@ public class YaucApplication extends Application {
     public static void reportException(Throwable throwable) {
         if (BuildConfig.REPORT_CRASH) {
             FirebaseCrash.report(throwable);
+        }
+    }
+
+    private void setupRemoteConfig() {
+        if (!FirebaseApp.getApps(this).isEmpty()) {
+            firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+            FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
+                    .setDeveloperModeEnabled(BuildConfig.DEBUG)
+                    .build();
+            firebaseRemoteConfig.setConfigSettings(configSettings);
+
+            firebaseRemoteConfig.setDefaults(R.xml.remote_config_defaults);
+            firebaseRemoteConfig.fetch(REMOTE_CONFIG_EXPIRE).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()) {
+                        firebaseRemoteConfig.activateFetched();
+                    }
+                }
+            });
         }
     }
 }

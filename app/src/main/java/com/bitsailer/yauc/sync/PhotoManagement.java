@@ -800,7 +800,7 @@ public class PhotoManagement extends IntentService {
         Photo photo = getById(photoId);
         if (photo != null) {
             String url = photo.getUrls().getFull();
-            Uri target = Util.getOutputMediaFileUri(photo);
+            Uri target = Util.getOutputMediaFileUri(this, photo);
             DownloadManager.Request request =
                     new DownloadManager.Request(Uri.parse(url));
             request.setAllowedNetworkTypes(
