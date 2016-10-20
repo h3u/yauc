@@ -27,7 +27,6 @@ public class Preferences {
     private static final String KEY_USER_AVATAR = "key_user_avatar";
 
     private final SharedPreferences mPreferences;
-    private Boolean mAuthenticated = false;
 
     private static volatile Preferences sInstance;
 
@@ -43,15 +42,14 @@ public class Preferences {
     private Preferences(Context context) {
         mPreferences = context.getApplicationContext()
                 .getSharedPreferences(APP_PREF, Context.MODE_PRIVATE);
-        mAuthenticated = !TextUtils.isEmpty(mPreferences.getString(KEY_ACCESS_TOKEN, null));
     }
 
     @SuppressLint("CommitPrefEdits")
-    public void setAppVersion(int version) {
+    void setAppVersion(int version) {
         mPreferences.edit().putInt(KEY_APP_VERSION, version).commit();
     }
 
-    public int getAppVersion() {
+    int getAppVersion() {
         return mPreferences.getInt(KEY_APP_VERSION, -1);
     }
 
@@ -69,16 +67,13 @@ public class Preferences {
         return mPreferences.getString(KEY_USER_NAME, null);
     }
 
-    public String getUserId() {
-        return mPreferences.getString(KEY_USER_ID, null);
-    }
-
     public String getUserUsername() {
         return mPreferences.getString(KEY_USER_USERNAME, null);
     }
 
     public Boolean isAuthenticated() {
-        return mAuthenticated;
+        return !TextUtils.isEmpty(mPreferences.getString(KEY_USER_USERNAME, null))
+                && !TextUtils.isEmpty(mPreferences.getString(KEY_ACCESS_TOKEN, null));
     }
 
     public void saveAuthorizationCode(String authorizationCode) {
@@ -91,7 +86,6 @@ public class Preferences {
     public void setAccessToken(@NonNull AccessToken response) {
         SharedPreferences.Editor editor = mPreferences.edit();
         if (!TextUtils.isEmpty(response.getAccessToken())) {
-            mAuthenticated = true;
             editor.putString(KEY_ACCESS_TOKEN, response.getAccessToken());
         }
         if (response.getCreatedAt() != null) {
@@ -116,13 +110,13 @@ public class Preferences {
 
     @SuppressLint("CommitPrefEdits")
     public void destroyAuthorization() {
-        mAuthenticated = false;
-        mPreferences.edit()
-                .remove(KEY_ACCESS_TOKEN)
-                .remove(KEY_ACCESS_TOKEN_CREATED_AT)
-                .remove(KEY_REFRESH_TOKEN)
-                .remove(KEY_USER_AVATAR)
-                .remove(KEY_USER_NAME)
-                .remove(KEY_USER_USERNAME).commit();
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.remove(KEY_ACCESS_TOKEN);
+        editor.remove(KEY_ACCESS_TOKEN_CREATED_AT);
+        editor.remove(KEY_REFRESH_TOKEN);
+        editor.remove(KEY_USER_AVATAR);
+        editor.remove(KEY_USER_NAME);
+        editor.remove(KEY_USER_USERNAME);
+        editor.commit();
     }
 }

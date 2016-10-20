@@ -352,16 +352,18 @@ public class PhotoManagement extends IntentService {
      * @param username given username of user
      */
     private void handleSyncUsersPhotos(String username) {
-        List<SimplePhoto> itemsToDelete = new ArrayList<>();
-        // process favorites
-        itemsToDelete.addAll(syncLocalItems(ItemType.FAVORITES, username));
+        if (!TextUtils.isEmpty(username)) {
+            List<SimplePhoto> itemsToDelete = new ArrayList<>();
+            // process favorites
+            itemsToDelete.addAll(syncLocalItems(ItemType.FAVORITES, username));
 
-        // process own photos
-        itemsToDelete.addAll(syncLocalItems(ItemType.OWN, username));
+            // process own photos
+            itemsToDelete.addAll(syncLocalItems(ItemType.OWN, username));
 
-        int deleted = deleteList(itemsToDelete);
-        Logger.i("%d photos deleted during sync", deleted);
-        EventBus.getDefault().post(new UserDataLoadedEvent());
+            int deleted = deleteList(itemsToDelete);
+            Logger.i("%d photos deleted during sync", deleted);
+            EventBus.getDefault().post(new UserDataLoadedEvent());
+        }
     }
 
     /**
