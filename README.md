@@ -1,7 +1,9 @@
 # ![YAUC](app/src/main/res/mipmap-mdpi/ic_launcher.png) YAUC
 
-YAUC is an Android™ app helping you to keep up-to-date
-with [Unsplash | Free high-resolution photos](https://unsplash.com/new).
+YAUC - stay up-to-date with [Unsplash | Free high-resolution photos](https://unsplash.com/new)
+on your Android™ Device.
+
+<a href="https://play.google.com/apps/testing/com.bitsailer.yauc"><img alt="Get it on Google Play" width="200px" src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png"/></a>
 
 ## Features
 
@@ -9,7 +11,7 @@ with [Unsplash | Free high-resolution photos](https://unsplash.com/new).
 * fetch updates from [Unsplash API](https://unsplash.com/documentation) at regular intervals
 * notify user about new photos
 * list of favorites and own photos for joined (and authenticated) users of [Unsplash](https://unsplash.com/join)
-* detail view in "full screen"
+* detail view in "full screen" with share, like and download of photo
 * about photo with information of author, exif data and location
 * editing of own photos
 

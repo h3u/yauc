@@ -294,7 +294,7 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
     @OnClick(R.id.buttonFetch)
     public void onFetchClick() {
         PhotoManagement
-                .updateUsersPhotos(getActivity(), Preferences.get(getActivity()).getUserUsername());
+                .initUsersPhotos(getActivity(), Preferences.get(getActivity()).getUserUsername());
     }
 
     @Override

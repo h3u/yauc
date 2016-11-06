@@ -383,4 +383,12 @@ public class SimplePhoto implements Parcelable {
             return new SimplePhoto[size];
         }
     };
+
+    public boolean isOwnedBy(String username) {
+        if (user != null && user.getUsername().equals(username)) {
+            return true;
+        }
+
+        return false;
+    }
 }

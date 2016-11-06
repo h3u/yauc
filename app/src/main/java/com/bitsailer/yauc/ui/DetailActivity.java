@@ -1,14 +1,17 @@
 package com.bitsailer.yauc.ui;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -25,6 +28,7 @@ import com.bitsailer.yauc.YaucApplication;
 import com.bitsailer.yauc.api.model.Photo;
 import com.bitsailer.yauc.event.NetworkErrorEvent;
 import com.bitsailer.yauc.event.PhotoLikedEvent;
+import com.bitsailer.yauc.event.PhotoSavedEvent;
 import com.bitsailer.yauc.event.PhotoUnlikedEvent;
 import com.bitsailer.yauc.event.UserLoadedEvent;
 import com.bitsailer.yauc.sync.PhotoManagement;
@@ -34,8 +38,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -53,18 +56,20 @@ import butterknife.OnClick;
 @SuppressWarnings("unused")
 public class DetailActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor>,
-        SimpleDialogFragment.PositiveClickListener {
+        SimpleDialogFragment.PositiveClickListener,
+        SimpleDialogFragment.NegativeClickListener {
 
     private static final int RC_LOGIN_ACTIVITY = 4711;
     private static final int LOADER_ID = 0;
     private static final int DIALOG_LOGIN = 0;
+    private static final int PERMISSION_WRITE_EXTERNAL_STORAGE = 5;
     private static final String TAG_DIALOG_LOGIN = "tag_dialog_login";
     private Uri mUri;
     private String mPhotoId;
     private String mShareUrl;
     private boolean mFavorite = false;
     private int mLikes = 0;
-    private Tracker mTracker;
+    private FirebaseAnalytics mTracker;
 
     @BindView(R.id.fullscreen_content_controls)
     View mControlsView;
@@ -107,9 +112,17 @@ public class DetailActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        // Analytics track screen name
-        mTracker.setScreenName(getString(R.string.ga_name_detail_activity));
-        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+        // send analytics event
+        // id of photo can be null (photo not found)
+        int orientation = getResources().getConfiguration().orientation;
+        Bundle bundle = new Bundle();
+        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "image");
+        bundle.putString(FirebaseAnalytics.Param.ITEM_ID, mPhotoId);
+        bundle.putString(YaucApplication.FB_PARAM_ORIENTATION,
+                orientation == Configuration.ORIENTATION_LANDSCAPE ?
+                        YaucApplication.FB_PARAM_ORIENTATION_LANDSCAPE :
+                        YaucApplication.FB_PARAM_ORIENTATION_PORTRAIT);
+        mTracker.logEvent(FirebaseAnalytics.Event.VIEW_ITEM, bundle);
     }
 
     @Override
@@ -201,10 +214,13 @@ public class DetailActivity extends AppCompatActivity implements
     @OnClick(R.id.buttonShare)
     public void onShareButtonClicked() {
         if (mShareUrl != null) {
-            mTracker.send(new HitBuilders.EventBuilder()
-                    .setCategory(getString(R.string.ga_category_action))
-                    .setAction(getString(R.string.ga_action_share))
-                    .build());
+            // send analytics event
+            // id of photo can be null (photo not found)
+            Bundle bundle = new Bundle();
+            bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "image");
+            bundle.putString(FirebaseAnalytics.Param.ITEM_ID, mPhotoId);
+            mTracker.logEvent(FirebaseAnalytics.Event.SHARE, bundle);
+            // build & start Intent
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text, mShareUrl));
             shareIntent.setType("text/plain");
@@ -228,19 +244,21 @@ public class DetailActivity extends AppCompatActivity implements
                 mFavorite = false;
                 toggleLikeButton(false, mLikes);
                 PhotoManagement.unlikePhoto(this, mPhotoId);
-                mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory(getString(R.string.ga_category_action))
-                        .setAction(getString(R.string.ga_action_unlike))
-                        .build());
+                // send analytics event
+                // id of photo can be null (photo not found)
+                Bundle bundle = new Bundle();
+                bundle.putString(FirebaseAnalytics.Param.ITEM_ID, mPhotoId);
+                mTracker.logEvent(YaucApplication.FB_EVENT_UNLIKE_ITEM, bundle);
             } else {
                 // like it
                 mFavorite = true;
                 toggleLikeButton(true, mLikes);
                 PhotoManagement.likePhoto(this, mPhotoId);
-                mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory(getString(R.string.ga_category_action))
-                        .setAction(getString(R.string.ga_action_like))
-                        .build());
+                // send analytics event
+                // id of photo can be null (photo not found)
+                Bundle bundle = new Bundle();
+                bundle.putString(FirebaseAnalytics.Param.ITEM_ID, mPhotoId);
+                mTracker.logEvent(YaucApplication.FB_EVENT_LIKE_ITEM, bundle);
             }
         }
     }
@@ -250,6 +268,42 @@ public class DetailActivity extends AppCompatActivity implements
         Intent intent = new Intent(this, InformationActivity.class)
                 .setData(mUri);
         startActivity(intent);
+    }
+
+    @OnClick(R.id.buttonDownload)
+    public void onDownloadButtonClicked() {
+        // Permission check
+        int permissionCheck = ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+            // start download
+            PhotoManagement.downloadPhoto(this, mPhotoId);
+        } else {
+            // missing permission, request it
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    PERMISSION_WRITE_EXTERNAL_STORAGE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_WRITE_EXTERNAL_STORAGE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted
+                    PhotoManagement.downloadPhoto(this, mPhotoId);
+                } else {
+                    // permission denied
+                    Toast.makeText(this, R.string.downloaded_permission_denied,
+                            Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+        }
     }
 
     @Override
@@ -282,10 +336,6 @@ public class DetailActivity extends AppCompatActivity implements
         Toast.makeText(this,
                 String.format(getString(R.string.message_login), Preferences.get(this).getUserName()),
                 Toast.LENGTH_LONG).show();
-        // add user id to analytics
-        if (!TextUtils.isEmpty(Preferences.get(this).getUserId())) {
-            mTracker.set("&uid", Preferences.get(this).getUserId());
-        }
     }
 
     @SuppressWarnings("UnusedParameters")
@@ -294,10 +344,22 @@ public class DetailActivity extends AppCompatActivity implements
         Toast.makeText(this, R.string.message_network_failed, Toast.LENGTH_LONG).show();
     }
 
+    @SuppressWarnings("UnusedParameters")
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onPhotoSaved(PhotoSavedEvent event) {
+        Toast.makeText(this,
+                String.format(getString(R.string.downloaded_message), event.getName()),
+                Toast.LENGTH_SHORT).show();
+    }
+
     @Override
     public void onDialogPositiveClick(int id) {
         if (id == DIALOG_LOGIN) {
             startActivityForResult(new Intent(DetailActivity.this, LoginActivity.class), RC_LOGIN_ACTIVITY);
         }
+    }
+
+    @Override
+    public void onDialogNegativeClick(int id) {
     }
 }

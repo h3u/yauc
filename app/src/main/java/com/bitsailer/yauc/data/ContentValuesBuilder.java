@@ -3,6 +3,7 @@ package com.bitsailer.yauc.data;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 
+import com.bitsailer.yauc.YaucApplication;
 import com.bitsailer.yauc.api.model.Photo;
 import com.bitsailer.yauc.api.model.SimplePhoto;
 import com.bitsailer.yauc.provider.values.PhotosValuesBuilder;
@@ -26,7 +27,8 @@ public class ContentValuesBuilder {
         try {
             createdAt = mDateFormat.parse(photo.getCreatedAt());
         } catch (ParseException e) {
-            Logger.e(e.getMessage());
+            Logger.e(e, e.getMessage());
+            YaucApplication.reportException(e);
         }
         builder
                 .photoId(photo.getId())

@@ -1,7 +1,9 @@
 package com.bitsailer.yauc.ui;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
@@ -13,7 +15,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,8 +31,8 @@ import com.bitsailer.yauc.event.UserLoadedEvent;
 import com.bitsailer.yauc.sync.PhotoManagement;
 import com.bitsailer.yauc.sync.SyncAdapter;
 import com.bitsailer.yauc.widget.NewPhotosWidgetIntentService;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
+import com.google.android.gms.appinvite.AppInviteInvitation;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.orhanobut.logger.Logger;
 
 import org.greenrobot.eventbus.EventBus;
@@ -40,6 +42,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static android.content.Intent.ACTION_SENDTO;
 import static com.bitsailer.yauc.Util.AppStart.FIRST_TIME;
 import static com.bitsailer.yauc.widget.NewPhotosWidget.EXTRA_NUM_PHOTOS;
 
@@ -51,16 +54,16 @@ import static com.bitsailer.yauc.widget.NewPhotosWidget.EXTRA_NUM_PHOTOS;
 public class MainActivity extends AppCompatActivity implements
         PhotoListFragment.ClickCallback, PhotoListFragment.LoginCallback,
         SimpleDialogFragment.PositiveClickListener,
-        ViewPager.OnPageChangeListener {
+        SimpleDialogFragment.NegativeClickListener {
 
     private static final String STATE_TAB_POSITION = "state_tab_position";
     private static final int RC_LOGIN_ACTIVITY = 4711;
+    private static final int RC_INVITE = 4712;
     private static final int DIALOG_LOGIN = 0;
     private static final String TAG_DIALOG_LOGIN = "tag_dialog_login";
 
     private static Preferences mPreferences;
     private int mTabPosition = SectionsPagerAdapter.POSITION_NEW;
-    private Tracker mTracker;
 
     @BindView(R.id.main_content) CoordinatorLayout mMainContent;
     /**
@@ -99,14 +102,14 @@ public class MainActivity extends AppCompatActivity implements
         if (FIRST_TIME == Util.checkAppStart(this, mPreferences)
                 && !mPreferences.isAuthenticated()) {
             welcome();
+            trackScreenSize();
         }
 
-        // todo: enable this after app approval (without hourly rate limit)
         // update users photos on to keep things synchronized
-        /* if (savedInstanceState == null && mPreferences.isAuthenticated()) {
-            PhotoManagement.updateUsersPhotos(MainActivity.this,
+        if (savedInstanceState == null && mPreferences.isAuthenticated()) {
+            PhotoManagement.syncUsersPhotos(MainActivity.this,
                     mPreferences.getUserUsername());
-        } */
+        }
 
         // reset widget
         Intent intentService = new Intent(this, NewPhotosWidgetIntentService.class);
@@ -116,10 +119,7 @@ public class MainActivity extends AppCompatActivity implements
         // setup icons
         initTabs(mTabPosition);
 
-        // Obtain the shared Tracker instance.
-        YaucApplication application = (YaucApplication) getApplication();
-        mTracker = application.getDefaultTracker();
-        trackScreen();
+        trackSelectedTab();
     }
 
     private void welcome() {
@@ -217,9 +217,33 @@ public class MainActivity extends AppCompatActivity implements
                             }
                         }).show();
             } else {
-                startLogin();
+                try {
+                    startLogin();
+                } catch (Exception e) {
+                }
             }
             return true;
+        }
+        if (id == R.id.action_invite) {
+            Intent intent = new AppInviteInvitation.IntentBuilder(getString(R.string.invitation_title))
+                    .setMessage(getString(R.string.invitation_message))
+                    .setEmailHtmlContent(getString(R.string.invitation_email_body))
+                    .setEmailSubject(getString(R.string.invitation_email_subject))
+                    .setAndroidMinimumVersionCode(Build.VERSION_CODES.KITKAT)
+                    .build();
+            startActivityForResult(intent, RC_INVITE);
+        }
+        if (id == R.id.action_feedback) {
+            Intent feedback = new Intent(ACTION_SENDTO);
+            feedback.setData(Uri.parse("mailto:"));
+            feedback.putExtra(Intent.EXTRA_EMAIL, new String[] {
+                    ((YaucApplication)getApplication()).getFirebaseRemoteConfig()
+                            .getString("feedback_email")
+            });
+            feedback.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.feedback_email_subject));
+            if (feedback.resolveActivity(getPackageManager()) != null) {
+                startActivity(feedback);
+            }
         }
         if (id == R.id.action_refresh) {
             SyncAdapter.syncNow(this);
@@ -260,10 +284,6 @@ public class MainActivity extends AppCompatActivity implements
         Snackbar.make(mMainContent,
                 String.format(getString(R.string.message_login), mPreferences.getUserName()),
                 Snackbar.LENGTH_LONG).show();
-        // add user id to analytics
-        if (!TextUtils.isEmpty(mPreferences.getUserId())) {
-            mTracker.set("&uid", mPreferences.getUserId());
-        }
     }
 
     @Override
@@ -273,6 +293,18 @@ public class MainActivity extends AppCompatActivity implements
                 PhotoManagement.getUser(this);
             } else {
                 Snackbar.make(mMainContent, R.string.message_failure_login, Snackbar.LENGTH_SHORT).show();
+            }
+        }
+        if (requestCode == RC_INVITE) {
+            if (resultCode == RESULT_OK) {
+                // Get the invitation IDs of all sent messages
+                String[] ids = AppInviteInvitation.getInvitationIds(resultCode, data);
+                for (String id : ids) {
+                    Logger.d("onActivityResult: sent invitation " + id);
+                }
+            } else {
+                // Sending failed or it was canceled, show failure message to the user
+                Logger.e("invite failed: %d", resultCode);
             }
         }
     }
@@ -293,7 +325,7 @@ public class MainActivity extends AppCompatActivity implements
             public void onTabSelected(TabLayout.Tab tab) {
                 mTabPosition = tab.getPosition();
                 initTabs(mTabPosition);
-                trackScreen();
+                trackSelectedTab();
             }
 
             @Override
@@ -315,12 +347,34 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     /**
-     * Analytics track screen name
+     * Analytics track tab visibility
      */
-    private void trackScreen() {
+    private void trackSelectedTab() {
         String name = String.format("Tab%s", getTabName(mTabPosition));
-        mTracker.setScreenName(name);
-        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+        FirebaseAnalytics tracker = ((YaucApplication) getApplication()).getDefaultTracker();
+        int orientation = getResources().getConfiguration().orientation;
+        Bundle bundle = new Bundle();
+        bundle.putString(YaucApplication.FB_PARAM_TAB_NAME, name);
+        bundle.putString(YaucApplication.FB_PARAM_ORIENTATION,
+                orientation == Configuration.ORIENTATION_LANDSCAPE ?
+                        YaucApplication.FB_PARAM_ORIENTATION_LANDSCAPE :
+                        YaucApplication.FB_PARAM_ORIENTATION_PORTRAIT);
+        tracker.logEvent(YaucApplication.FB_EVENT_PHOTO_LIST_TAB_VISITED, bundle);
+    }
+
+    /**
+     * Analytics track screen size
+     */
+    private void trackScreenSize() {
+        FirebaseAnalytics tracker = ((YaucApplication) getApplication()).getDefaultTracker();
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getRealMetrics(displaymetrics);
+        int height = displaymetrics.heightPixels;
+        int width = displaymetrics.widthPixels;
+        Bundle bundle = new Bundle();
+        bundle.putString(YaucApplication.FB_PARAM_DEVICE_SCREEN_WIDTH, Integer.toString(width));
+        bundle.putString(YaucApplication.FB_PARAM_DEVICE_SCREEN_HEIGHT, Integer.toString(height));
+        tracker.logEvent(YaucApplication.FB_EVENT_APP_FIRST_OPEN, bundle);
     }
 
     private String getTabName(int tabPosition) {
@@ -355,19 +409,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    @Override
-    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-    }
-
-    @Override
-    public void onPageSelected(int position) {
-        invalidateOptionsMenu();
-    }
-
-    @Override
-    public void onPageScrollStateChanged(int state) {
-
+    public void onDialogNegativeClick(int id) {
     }
 
     /**
