@@ -16,11 +16,9 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.bitsailer.yauc.Preferences;
 import com.bitsailer.yauc.R;
@@ -44,6 +42,7 @@ import butterknife.ButterKnife;
 
 import static android.content.Intent.ACTION_SENDTO;
 import static com.bitsailer.yauc.Util.AppStart.FIRST_TIME;
+import static com.bitsailer.yauc.ui.PhotoType.*;
 import static com.bitsailer.yauc.widget.NewPhotosWidget.EXTRA_NUM_PHOTOS;
 
 /**
@@ -63,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements
     private static final String TAG_DIALOG_LOGIN = "tag_dialog_login";
 
     private static Preferences mPreferences;
-    private int mTabPosition = SectionsPagerAdapter.POSITION_NEW;
+    private int mTabPosition = NEW.getTabPosition();
 
     @BindView(R.id.main_content) CoordinatorLayout mMainContent;
     /**
@@ -96,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements
         mTabLayout.setupWithViewPager(mViewPager);
         if (savedInstanceState != null) {
             mTabPosition = savedInstanceState
-                    .getInt(STATE_TAB_POSITION, SectionsPagerAdapter.POSITION_NEW);
+                    .getInt(STATE_TAB_POSITION, NEW.getTabPosition());
         }
 
         if (FIRST_TIME == Util.checkAppStart(this, mPreferences)
@@ -135,19 +134,19 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void arrange(TabLayout.Tab tab) {
-        if (tab.getPosition() == SectionsPagerAdapter.POSITION_NEW) {
+        if (tab.getPosition() == NEW.getTabPosition()) {
             if (tab.isSelected()) {
                 tab.setIcon(R.drawable.ic_new_releases_accent);
             } else {
                 tab.setIcon(R.drawable.ic_new_releases);
             }
-        } else if (tab.getPosition() == SectionsPagerAdapter.POSITION_FAVORITES) {
+        } else if (tab.getPosition() == FAVORITES.getTabPosition()) {
             if (tab.isSelected()) {
                 tab.setIcon(R.drawable.ic_favorite_accent);
             } else {
                 tab.setIcon(R.drawable.ic_favorite);
             }
-        } else if (tab.getPosition() == SectionsPagerAdapter.POSITION_OWN) {
+        } else if (tab.getPosition() == OWN.getTabPosition()) {
             if (tab.isSelected()) {
                 tab.setIcon(R.drawable.ic_account_accent);
             } else {
@@ -162,16 +161,12 @@ public class MainActivity extends AppCompatActivity implements
             TabLayout.Tab tab = mTabLayout.getTabAt(i);
             if (tab != null) {
                 arrange(tab);
-                switch (i) {
-                    case SectionsPagerAdapter.POSITION_NEW:
-                        tab.setContentDescription(R.string.content_description_tab_new);
-                        break;
-                    case SectionsPagerAdapter.POSITION_FAVORITES:
-                        tab.setContentDescription(R.string.content_description_tab_favorite);
-                        break;
-                    case SectionsPagerAdapter.POSITION_OWN:
-                        tab.setContentDescription(R.string.content_description_tab_own);
-                        break;
+                if (i == NEW.getTabPosition()) {
+                    tab.setContentDescription(R.string.content_description_tab_new);
+                } else if (i == FAVORITES.getTabPosition()) {
+                    tab.setContentDescription(R.string.content_description_tab_favorite);
+                } else if (i == OWN.getTabPosition()) {
+                    tab.setContentDescription(R.string.content_description_tab_own);
                 }
             }
         }
@@ -330,11 +325,11 @@ public class MainActivity extends AppCompatActivity implements
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
-                if (tab.getPosition() == SectionsPagerAdapter.POSITION_NEW) {
+                if (tab.getPosition() == NEW.getTabPosition()) {
                     tab.setIcon(R.drawable.ic_new_releases);
-                } else if (tab.getPosition() == SectionsPagerAdapter.POSITION_FAVORITES) {
+                } else if (tab.getPosition() == FAVORITES.getTabPosition()) {
                     tab.setIcon(R.drawable.ic_favorite);
-                } else if (tab.getPosition() == SectionsPagerAdapter.POSITION_OWN) {
+                } else if (tab.getPosition() == OWN.getTabPosition()) {
                     tab.setIcon(R.drawable.ic_account);
                 }
             }
@@ -378,12 +373,14 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private String getTabName(int tabPosition) {
-        if (tabPosition == SectionsPagerAdapter.POSITION_FAVORITES) {
+        if (tabPosition == NEW.getTabPosition()) {
+            return getString(R.string.ga_name_tab_new);
+        } if (tabPosition == FAVORITES.getTabPosition()) {
             return getString(R.string.ga_name_tab_favorite);
-        } else if (tabPosition == SectionsPagerAdapter.POSITION_OWN) {
+        } else if (tabPosition == OWN.getTabPosition()) {
             return getString(R.string.ga_name_tab_own);
         } else {
-            return getString(R.string.ga_name_tab_new);
+            return "";
         }
     }
 
@@ -413,47 +410,12 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
-
-        public PlaceholderFragment() {
-        }
-
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.fragment_main, container, false);
-        }
-    }
-
-    /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
         static final int PAGES = 3;
-        static final int POSITION_NEW = 0;
-        static final int POSITION_FAVORITES = 1;
-        static final int POSITION_OWN = 2;
 
         SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -462,15 +424,14 @@ public class MainActivity extends AppCompatActivity implements
         @Override
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
-            if (position == POSITION_NEW) {
-                return RefreshPhotoListFragment.newInstance(PhotoListFragment.PHOTO_TYPE_NEW);
-            } else if (position == POSITION_FAVORITES) {
-                return PhotoListFragment.newInstance(PhotoListFragment.PHOTO_TYPE_FAVORITES);
-            } else if (position == POSITION_OWN) {
-                return PhotoListFragment.newInstance(PhotoListFragment.PHOTO_TYPE_OWN);
+            if (position == PhotoType.NEW.getTabPosition()) {
+                return RefreshPhotoListFragment.newInstance(NEW);
+            } else if (position == FAVORITES.getTabPosition()) {
+                return PhotoListFragment.newInstance(FAVORITES);
+            } else if (position == OWN.getTabPosition()) {
+                return PhotoListFragment.newInstance(OWN);
             }
-            return PlaceholderFragment.newInstance(position + 1);
+            return new Fragment();
         }
 
         @Override

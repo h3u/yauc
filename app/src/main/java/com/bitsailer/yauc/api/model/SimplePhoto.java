@@ -325,6 +325,8 @@ public class SimplePhoto implements Parcelable {
             photo.setHeight(cursor.getInt(cursor.getColumnIndex(PhotoColumns.PHOTO_HEIGHT)));
             Urls urls = new Urls();
             urls.setSmall(cursor.getString(cursor.getColumnIndex(PhotoColumns.URLS_SMALL)));
+            urls.setRegular(cursor.getString(cursor.getColumnIndex(PhotoColumns.URLS_REGULAR)));
+            urls.setFull(cursor.getString(cursor.getColumnIndex(PhotoColumns.URLS_FULL)));
             photo.setUrls(urls);
         }
 

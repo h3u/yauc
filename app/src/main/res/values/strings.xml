@@ -4,8 +4,8 @@
     <!--menu-->
     <string name="action_login">Sign in</string>
     <string name="action_logout">Sign out</string>
-    <string name="action_layout_columns">Multiple columns</string>
-    <string name="action_layout_column">Single column</string>
+    <string name="action_layout_grid">Grid</string>
+    <string name="action_layout_list">List</string>
     <string name="action_invite">Recommend YAUC</string>
     <string name="action_feedback">Feedback</string>
 

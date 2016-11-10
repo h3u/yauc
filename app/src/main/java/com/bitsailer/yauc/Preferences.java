@@ -8,7 +8,7 @@ import android.text.TextUtils;
 
 import com.bitsailer.yauc.api.model.AccessToken;
 import com.bitsailer.yauc.api.model.User;
-import com.bitsailer.yauc.ui.PhotoListFragment;
+import com.bitsailer.yauc.ui.PhotoType;
 
 /**
  * Store some user attributes, tokens and auth code to
@@ -124,31 +124,29 @@ public class Preferences {
         editor.commit();
     }
 
-    public boolean getLayoutPhotoGrid(int photoType) {
-        switch (photoType) {
-            case PhotoListFragment.PHOTO_TYPE_NEW:
-                return mPreferences.getBoolean(KEY_LAYOUT_GRID_NEW, true);
-            case PhotoListFragment.PHOTO_TYPE_FAVORITES:
-                return mPreferences.getBoolean(KEY_LAYOUT_GRID_FAVORITES, false);
-            case PhotoListFragment.PHOTO_TYPE_OWN:
-                return mPreferences.getBoolean(KEY_LAYOUT_GRID_OWN, true);
-            default:
-                return true;
+    public boolean displayGrid(PhotoType photoType) {
+        if (photoType == PhotoType.NEW) {
+            return mPreferences.getBoolean(KEY_LAYOUT_GRID_NEW, true);
+        } else if (photoType == PhotoType.FAVORITES) {
+            return mPreferences.getBoolean(KEY_LAYOUT_GRID_FAVORITES, false);
+        } else if (photoType == PhotoType.OWN) {
+            return mPreferences.getBoolean(KEY_LAYOUT_GRID_OWN, true);
         }
+
+        return true;
     }
 
-    public void setLayoutPhotoGrid(int photoType, boolean grid) {
+    public void setDisplayGrid(PhotoType photoType, boolean grid) {
         SharedPreferences.Editor editor = mPreferences.edit();
-        switch (photoType) {
-            case PhotoListFragment.PHOTO_TYPE_NEW:
-                editor.putBoolean(KEY_LAYOUT_GRID_NEW, grid);
-                editor.apply();
-            case PhotoListFragment.PHOTO_TYPE_FAVORITES:
-                editor.putBoolean(KEY_LAYOUT_GRID_FAVORITES, grid);
-                editor.apply();
-            case PhotoListFragment.PHOTO_TYPE_OWN:
-                editor.putBoolean(KEY_LAYOUT_GRID_OWN, grid);
-                editor.apply();
+        if (photoType == PhotoType.NEW) {
+            editor.putBoolean(KEY_LAYOUT_GRID_NEW, grid);
+            editor.apply();
+        } else if (photoType == PhotoType.FAVORITES) {
+            editor.putBoolean(KEY_LAYOUT_GRID_FAVORITES, grid);
+            editor.apply();
+        } else if (photoType == PhotoType.OWN) {
+            editor.putBoolean(KEY_LAYOUT_GRID_OWN, grid);
+            editor.apply();
         }
     }
 }

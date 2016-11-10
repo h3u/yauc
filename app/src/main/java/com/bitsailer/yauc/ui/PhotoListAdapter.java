@@ -27,6 +27,7 @@ class PhotoListAdapter extends CursorRecyclerViewAdapter<PhotoListAdapter.PhotoL
     private static final int VIEW_TYPE_LIST = 1;
     private int mColumnCount = 2;
     private final PhotoOnClickHandler mClickHandler;
+    private boolean mUseRegularPhotoSize = false;
 
     PhotoListAdapter(Context context, int columns, PhotoOnClickHandler clickHandler) {
         super(context, null);
@@ -34,12 +35,17 @@ class PhotoListAdapter extends CursorRecyclerViewAdapter<PhotoListAdapter.PhotoL
         mClickHandler = clickHandler;
     }
 
-    public interface PhotoOnClickHandler {
+    interface PhotoOnClickHandler {
         void onClick(String photoId, PhotoListItemViewHolder vh);
     }
 
-    public PhotoListAdapter setColumnCount(int columnCount) {
+    PhotoListAdapter setColumnCount(int columnCount) {
         mColumnCount = columnCount;
+        return this;
+    }
+
+    PhotoListAdapter setUseRegularPhotoSize(boolean useRegularPhotoSize) {
+        mUseRegularPhotoSize = useRegularPhotoSize;
         return this;
     }
 
@@ -62,11 +68,16 @@ class PhotoListAdapter extends CursorRecyclerViewAdapter<PhotoListAdapter.PhotoL
     @Override
     public void onBindViewHolder(PhotoListItemViewHolder viewHolder, Cursor cursor) {
         SimplePhoto photo = SimplePhoto.fromCursor(cursor);
+        String url = photo.getUrls().getSmall();
+        // for bigger screens using the list layout prevent blurry photos
+        if (mUseRegularPhotoSize && mColumnCount == 1) {
+            url = photo.getUrls().getRegular();
+        }
         viewHolder.setPhotoId(photo.getId());
         viewHolder.imageViewPhoto.setBackgroundColor(Util.getBackgroundColor(photo.getColor()));
         viewHolder.imageViewPhoto.setAspectRatio((photo.getWidth() / (float) photo.getHeight()));
         Glide.with(getContext())
-                .load(photo.getUrls().getSmall())
+                .load(url)
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .fitCenter()
                 .into(viewHolder.imageViewPhoto);

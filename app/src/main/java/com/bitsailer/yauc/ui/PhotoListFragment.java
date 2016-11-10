@@ -10,6 +10,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -37,6 +38,10 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 
+import static android.R.attr.columnCount;
+import static com.bitsailer.yauc.ui.PhotoType.FAVORITES;
+import static com.bitsailer.yauc.ui.PhotoType.OWN;
+
 /**
  * Fragment to display grid of photos.
  */
@@ -44,17 +49,17 @@ import butterknife.Unbinder;
 public class PhotoListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     protected static final String ARG_PHOTO_TYPE = "photo-type";
+    private static final String KEY_MULTICOLUMNS = "key_multicolumns";
     private static final int LOADER_ID = 0;
-    public static final int PHOTO_TYPE_NEW = 1;
-    public static final int PHOTO_TYPE_FAVORITES = 2;
-    public static final int PHOTO_TYPE_OWN = 3;
-    protected int mPhotoType = PHOTO_TYPE_NEW;
+    protected PhotoType mPhotoType;
     private static final String[] PHOTO_COLUMNS = {
             PhotoColumns.PHOTO_ID,
             PhotoColumns.PHOTO_COLOR,
             PhotoColumns.PHOTO_WIDTH,
             PhotoColumns.PHOTO_HEIGHT,
-            PhotoColumns.URLS_SMALL
+            PhotoColumns.URLS_SMALL,
+            PhotoColumns.URLS_REGULAR,
+            PhotoColumns.URLS_FULL
     };
     protected PhotoListAdapter mAdapter;
     protected Unbinder mButterKnife;
@@ -78,21 +83,29 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
     public PhotoListFragment() {
     }
 
-    public static PhotoListFragment newInstance(int photoType) {
+    public static PhotoListFragment newInstance(PhotoType type) {
         PhotoListFragment fragment = new PhotoListFragment();
         Bundle args = new Bundle();
-        args.putInt(ARG_PHOTO_TYPE, photoType);
+        args.putSerializable(ARG_PHOTO_TYPE, type);
         fragment.setArguments(args);
-        fragment.setHasOptionsMenu(true);
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // enable menu for fragment
+        setHasOptionsMenu(true);
 
         if (getArguments() != null) {
-            mPhotoType = getArguments().getInt(ARG_PHOTO_TYPE);
+            mPhotoType = (PhotoType) getArguments().getSerializable(ARG_PHOTO_TYPE);
+        }
+
+        if (savedInstanceState != null) {
+            mMultiColumn = savedInstanceState.getBoolean(KEY_MULTICOLUMNS, true);
+        } else {
+            // get setting from preferences
+            mMultiColumn = Preferences.get(getActivity()).displayGrid(mPhotoType);
         }
     }
 
@@ -107,18 +120,7 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
 
         mButterKnife = ButterKnife.bind(this, view);
 
-        // get user setting for columns
-        mMultiColumn = Preferences.get(getActivity()).getLayoutPhotoGrid(mPhotoType);
-        // get column count
-        int columnCount = getResources().getInteger(R.integer.photo_grid_columns);
-        if (!mMultiColumn) {
-            columnCount = getResources().getInteger(R.integer.reduced_photo_columns);
-        }
-
         // Set the adapter
-        mRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(
-                columnCount, StaggeredGridLayoutManager.VERTICAL));
-
         mAdapter = new PhotoListAdapter(view.getContext(), columnCount,
                 new PhotoListAdapter.PhotoOnClickHandler() {
                     @Override
@@ -127,7 +129,8 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
                                 .onItemSelected(PhotoProvider.Uri.withId(photoId), vh);
                     }
                 });
-        mRecyclerView.setAdapter(mAdapter);
+        mAdapter.setUseRegularPhotoSize(useRegularPhotoSize());
+        setupLayout();
         return view;
     }
 
@@ -143,11 +146,11 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
         mButterKnife.unbind();
     }
 
-    private void changeColumnCount() {
+    private void setupLayout() {
         // get column count
         int columnCount = getResources().getInteger(R.integer.photo_grid_columns);
         if (!mMultiColumn) {
-            columnCount = getResources().getInteger(R.integer.reduced_photo_columns);
+            columnCount = 1;
         }
 
         // Set the adapter
@@ -155,24 +158,36 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
                 columnCount, StaggeredGridLayoutManager.VERTICAL));
         mAdapter.setColumnCount(columnCount);
         mRecyclerView.setAdapter(mAdapter);
+        getActivity().invalidateOptionsMenu();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean(KEY_MULTICOLUMNS, mMultiColumn);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_photo_list, menu);
+        prepareMenu(menu);
     }
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         // change menu item if grid is set or not
-        if (Preferences.get(getActivity()).getLayoutPhotoGrid(mPhotoType)) {
+        prepareMenu(menu);
+    }
+
+    private void prepareMenu(Menu menu) {
+        if (mMultiColumn) {
             menu.findItem(R.id.action_layout)
-                    .setTitle(R.string.action_layout_columns)
-                    .setIcon(R.drawable.ic_action_grid);
+                    .setTitle(R.string.action_layout_list)
+                    .setIcon(R.drawable.ic_action_list);
         } else {
             menu.findItem(R.id.action_layout)
-                    .setTitle(R.string.action_layout_column)
-                    .setIcon(R.drawable.ic_action_list);
+                    .setTitle(R.string.action_layout_grid)
+                    .setIcon(R.drawable.ic_action_grid);
         }
     }
 
@@ -180,14 +195,22 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_layout) {
-            if (mMultiColumn) {
-                mMultiColumn = false;
-            } else {
-                mMultiColumn = true;
-            }
-            changeColumnCount();
+            mMultiColumn = !mMultiColumn;
+            Preferences.get(getActivity()).setDisplayGrid(mPhotoType, mMultiColumn);
+            setupLayout();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * With a display width exceeding 1080px true is returned.
+     *
+     * @return answer to use regular photo size
+     */
+    private boolean useRegularPhotoSize() {
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getRealMetrics(displaymetrics);
+        return displaymetrics.widthPixels > 1080;
     }
 
     /**
@@ -230,14 +253,14 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        if (mPhotoType == PHOTO_TYPE_FAVORITES) {
+        if (mPhotoType == FAVORITES) {
             return new CursorLoader(getActivity(),
                     PhotoProvider.Uri.BASE,
                     PHOTO_COLUMNS,
                     PhotoColumns.PHOTO_LIKED_BY_USER + " = ?",
                     new String[] {"1"},
                     null);
-        } else if (mPhotoType == PHOTO_TYPE_OWN) {
+        } else if (mPhotoType == OWN) {
             return new CursorLoader(getActivity(),
                     PhotoProvider.Uri.withUsername(Preferences.get(getActivity()).getUserUsername()),
                     PHOTO_COLUMNS,
@@ -245,6 +268,7 @@ public class PhotoListFragment extends Fragment implements LoaderManager.LoaderC
                     null,
                     null);
         } else {
+            // type new photos
             return new CursorLoader(getActivity(),
                     com.bitsailer.yauc.data.PhotoProvider.Uri.BASE,
                     PHOTO_COLUMNS,

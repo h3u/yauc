@@ -4,7 +4,7 @@
     tools:context="com.bitsailer.yauc.ui.MainActivity">
     <item
         android:id="@+id/action_layout"
-        android:title="@string/action_layout_columns"
+        android:title="@string/action_layout_grid"
         android:icon="@drawable/ic_action_grid"
         app:showAsAction="ifRoom" />
 </menu>

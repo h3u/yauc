@@ -29,11 +29,10 @@ public class RefreshPhotoListFragment extends PhotoListFragment {
     public RefreshPhotoListFragment() {
     }
 
-    public static PhotoListFragment newInstance(int photoType) {
+    public static RefreshPhotoListFragment newInstance(PhotoType photoType) {
         RefreshPhotoListFragment fragment = new RefreshPhotoListFragment();
         Bundle args = new Bundle();
-        args.putInt(ARG_PHOTO_TYPE, photoType);
-        fragment.setHasOptionsMenu(true);
+        args.putSerializable(ARG_PHOTO_TYPE, photoType);
         fragment.setArguments(args);
         return fragment;
     }

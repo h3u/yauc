@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <integer name="photo_grid_columns">2</integer>
-    <integer name="reduced_photo_columns">1</integer>
 </resources>
