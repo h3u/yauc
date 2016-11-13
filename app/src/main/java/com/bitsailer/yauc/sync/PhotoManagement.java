@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 
@@ -32,6 +33,7 @@ import com.bitsailer.yauc.event.UserDataLoadedEvent;
 import com.bitsailer.yauc.event.UserDataRemovedEvent;
 import com.bitsailer.yauc.event.UserLoadedEvent;
 import com.bitsailer.yauc.provider.values.PhotosValuesBuilder;
+import com.bitsailer.yauc.ui.PhotoType;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.orhanobut.logger.Logger;
 
@@ -46,7 +48,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static com.bitsailer.yauc.sync.PhotoManagement.ItemType.FAVORITES;
+import static com.bitsailer.yauc.ui.PhotoType.FAVORITES;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous actions that
@@ -55,7 +57,7 @@ import static com.bitsailer.yauc.sync.PhotoManagement.ItemType.FAVORITES;
  */
 public class PhotoManagement extends IntentService {
 
-    private static final int PHOTO_AMOUNT_TO_KEEP = 200;
+    private static final int PHOTO_AMOUNT_TO_KEEP = 400;
 
     private static final String ACTION_INIT_USERS_PHOTOS = "com.bitsailer.yauc.sync.action.init_users_photos";
     private static final String ACTION_SYNC_USERS_PHOTOS = "com.bitsailer.yauc.sync.action.sync_users_photos";
@@ -72,10 +74,6 @@ public class PhotoManagement extends IntentService {
     private static final String EXTRA_PHOTO_ID = "com.bitsailer.yauc.sync.extra.photo_id";
     private static final String EXTRA_PHOTO = "com.bitsailer.yauc.sync.extra.photo";
     private static final String EXTRA_FORCE = "com.bitsailer.yauc.sync.extra.force";
-
-    enum ItemType {
-        FAVORITES, OWN
-    }
 
     public PhotoManagement() {
         super("PhotoManagement");
@@ -308,18 +306,22 @@ public class PhotoManagement extends IntentService {
     }
 
     /**
-     * Iterate the list and delete these items.
+     * Iterate the list and delete (own) or unlike (favorites) these items.
      *
+     * @param  type switch type and behavior
      * @param list list of photos
      * @return number of inserted items
      */
-    private int deleteList(List<SimplePhoto> list) {
+    private int deleteList(PhotoType type, List<SimplePhoto> list) {
         int deleted = 0;
         if (list != null && !list.isEmpty()) {
-
             for (SimplePhoto item : list) {
-                deleted += getContentResolver()
-                        .delete(PhotoProvider.Uri.withId(item.getId()), null, null);
+                if (type == PhotoType.OWN) {
+                    deleted += getContentResolver()
+                            .delete(PhotoProvider.Uri.withId(item.getId()), null, null);
+                } else if (type == PhotoType.FAVORITES) {
+                    deleted += unlike(item.getId());
+                }
             }
         }
         return deleted;
@@ -333,13 +335,13 @@ public class PhotoManagement extends IntentService {
     private void initUsersPhotos(String username) {
         List<SimplePhoto> list;
         // get list of favorites
-        list = fetchUserItems(FAVORITES, username);
+        list = fetchUserItems(PhotoType.FAVORITES, username);
         int favorites = insertList(list);
         Logger.i("%d favorites inserted", favorites);
 
         // get list of own photos
         list.clear();
-        list = fetchUserItems(ItemType.OWN, username);
+        list = fetchUserItems(PhotoType.OWN, username);
         int own = insertList(list);
         Logger.i("%d own photos inserted", own);
         EventBus.getDefault().post(new UserDataLoadedEvent());
@@ -354,14 +356,17 @@ public class PhotoManagement extends IntentService {
     private void handleSyncUsersPhotos(String username) {
         if (!TextUtils.isEmpty(username)) {
             List<SimplePhoto> itemsToDelete = new ArrayList<>();
+            List<SimplePhoto> itemsToUnlike = new ArrayList<>();
+
             // process favorites
-            itemsToDelete.addAll(syncLocalItems(ItemType.FAVORITES, username));
+            itemsToUnlike.addAll(replaceLocalItems(PhotoType.FAVORITES, username));
 
             // process own photos
-            itemsToDelete.addAll(syncLocalItems(ItemType.OWN, username));
+            itemsToDelete.addAll(replaceLocalItems(PhotoType.OWN, username));
 
-            int deleted = deleteList(itemsToDelete);
-            Logger.i("%d photos deleted during sync", deleted);
+            int unliked = deleteList(PhotoType.FAVORITES, itemsToUnlike);
+            int deleted = deleteList(PhotoType.OWN, itemsToDelete);
+            Logger.i("%d deleted, %d unliked during sync", deleted, unliked);
             EventBus.getDefault().post(new UserDataLoadedEvent());
         }
     }
@@ -374,24 +379,36 @@ public class PhotoManagement extends IntentService {
      * @param username username of given user
      * @return list of photos that should be deleted
      */
-    private List<SimplePhoto> syncLocalItems(ItemType type, String username) {
+    private List<SimplePhoto> replaceLocalItems(PhotoType type, String username) {
         PhotoArrayList<SimplePhoto> remoteItems;
         PhotoArrayList<SimplePhoto> localItems;
 
         // process favorites
         remoteItems = fetchUserItems(type, username);
         localItems = readUserItems(type, username);
-        for (SimplePhoto photo : remoteItems) {
-            SimplePhoto localItem = localItems.getByIdentifier(photo.getId());
-            if (localItem != null) {
-                if (type == FAVORITES) {
-                    like(photo.getId());
+        if (remoteItems.size() > 0) {
+            for (SimplePhoto photo : remoteItems) {
+                SimplePhoto localItem = localItems.getByIdentifier(photo.getId());
+                if (localItem != null) {
+                    // item exists local
+                    if (type == FAVORITES) {
+                        // add it to favorites
+                        like(photo.getId());
+                    }
+                    // remove from list to deletable items
+                    localItems.removeByIdentifier(photo.getId());
+                } else {
+                    // item does not exist in user items
+                    ContentValues values = ContentValuesBuilder.from(photo);
+                    // be sure item does not exist in new photos
+                    if (hasPhoto(photo.getId())) {
+                        // update it's data
+                        getContentResolver().update(PhotoProvider.Uri.withId(photo.getId()), values, null, null);
+                    } else {
+                        // insert item
+                        getContentResolver().insert(PhotoProvider.Uri.BASE, values);
+                    }
                 }
-                localItems.removeByIdentifier(photo.getId());
-            } else {
-                ContentValues values = ContentValuesBuilder.from(photo);
-                getContentResolver().insert(PhotoProvider.Uri.BASE, values);
-                Logger.i("add photo %s", photo.getId());
             }
         }
         return localItems;
@@ -406,19 +423,30 @@ public class PhotoManagement extends IntentService {
         int deletedFavorites;
         int deletedOwn = 0;
         // delete favorites
-        deletedFavorites = getContentResolver()
-                .delete(PhotoProvider.Uri.BASE,
-                        PhotoColumns.PHOTO_LIKED_BY_USER + " = ?",
-                        new String[] {"1"});
-
-        if (username != null && !TextUtils.isEmpty(username)) {
-            // delete own photos
-            deletedOwn = getContentResolver()
-                    .delete(PhotoProvider.Uri.withUsername(username),
-                            null, null);
-        }
+        deletedFavorites = deleteUserPhotos(PhotoType.FAVORITES, username);
+        deletedOwn = deleteUserPhotos(PhotoType.OWN, username);
         Logger.i("deleted %d favorites and %d own photos", deletedFavorites, deletedOwn);
         EventBus.getDefault().post(new UserDataRemovedEvent(deletedFavorites, deletedOwn));
+    }
+
+    private int deleteUserPhotos(PhotoType type, @Nullable String username) {
+        int deleted = 0;
+        if (type == PhotoType.FAVORITES) {
+            deleted = getContentResolver()
+                    .delete(PhotoProvider.Uri.BASE,
+                            PhotoColumns.PHOTO_LIKED_BY_USER + " = ?",
+                            new String[] {"1"});
+            Logger.i("deleted favorites: %d", deleted);
+        } else if (type == PhotoType.OWN) {
+            if (username != null && !TextUtils.isEmpty(username)) {
+                // delete own photos
+                deleted = getContentResolver()
+                        .delete(PhotoProvider.Uri.withUsername(username),
+                                null, null);
+                Logger.i("deleted own: %d", deleted);
+            }
+        }
+        return deleted;
     }
 
     /**
@@ -729,7 +757,7 @@ public class PhotoManagement extends IntentService {
      * @param username username of user
      * @return list of requested photos
      */
-    private PhotoArrayList<SimplePhoto> fetchUserItems(ItemType type, String username) {
+    private PhotoArrayList<SimplePhoto> fetchUserItems(PhotoType type, String username) {
         UnsplashAPI api = UnsplashService.create(UnsplashAPI.class, this);
         PhotoArrayList<SimplePhoto> list = new PhotoArrayList<>();
         int fetched = UnsplashAPI.MAX_PER_PAGE;
@@ -764,12 +792,12 @@ public class PhotoManagement extends IntentService {
      * @param username username of user
      * @return list of read photos
      */
-    private PhotoArrayList<SimplePhoto> readUserItems(ItemType type, String username) {
+    private PhotoArrayList<SimplePhoto> readUserItems(PhotoType type, String username) {
         PhotoArrayList<SimplePhoto> list = new PhotoArrayList<>();
         Cursor cursor;
 
         if (username != null) {
-            if (type == FAVORITES) {
+            if (type == PhotoType.FAVORITES) {
                 cursor = getContentResolver().query(
                         PhotoProvider.Uri.BASE,
                         Util.getAllPhotoColumns(),
