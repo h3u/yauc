@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import com.bitsailer.yauc.R;
 import com.bitsailer.yauc.Util;
 import com.bitsailer.yauc.api.model.SimplePhoto;
+import com.bumptech.glide.DrawableRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
@@ -68,19 +69,31 @@ class PhotoListAdapter extends CursorRecyclerViewAdapter<PhotoListAdapter.PhotoL
     @Override
     public void onBindViewHolder(PhotoListItemViewHolder viewHolder, Cursor cursor) {
         SimplePhoto photo = SimplePhoto.fromCursor(cursor);
-        String url = photo.getUrls().getSmall();
-        // for bigger screens using the list layout prevent blurry photos
-        if (mUseRegularPhotoSize && mColumnCount == 1) {
-            url = photo.getUrls().getRegular();
-        }
         viewHolder.setPhotoId(photo.getId());
         viewHolder.imageViewPhoto.setBackgroundColor(Util.getBackgroundColor(photo.getColor()));
         viewHolder.imageViewPhoto.setAspectRatio((photo.getWidth() / (float) photo.getHeight()));
-        Glide.with(getContext())
-                .load(url)
-                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                .fitCenter()
-                .into(viewHolder.imageViewPhoto);
+
+        // for bigger screens using the list layout prevent blurry photos
+        String url = photo.getUrls().getSmall();
+        if (mUseRegularPhotoSize && mColumnCount == 1) {
+            DrawableRequestBuilder thumbnailRequest = Glide.with(getContext())
+                    .load(url) // small photo
+                    .fitCenter();
+            url = photo.getUrls().getRegular();
+            Glide.with(getContext())
+                    .load(url)
+                    .thumbnail(thumbnailRequest)
+                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                    .fitCenter()
+                    .dontAnimate()
+                    .into(viewHolder.imageViewPhoto);
+        } else {
+            Glide.with(getContext())
+                    .load(url)
+                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                    .fitCenter()
+                    .into(viewHolder.imageViewPhoto);
+        }
     }
 
     @SuppressWarnings("unused")
