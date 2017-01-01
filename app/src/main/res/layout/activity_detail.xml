@@ -4,11 +4,7 @@
     android:layout_height="fill_parent"
     tools:context="com.bitsailer.yauc.ui.DetailActivity">
 
-    <ImageView
-        android:id="@+id/fullscreenPhoto"
-        android:contentDescription="@string/content_description_photo"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+    <include layout="@layout/detail_photo" />
 
     <ProgressBar
         android:id="@+id/progressBar"

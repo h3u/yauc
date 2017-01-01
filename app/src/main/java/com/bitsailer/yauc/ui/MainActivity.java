@@ -42,7 +42,9 @@ import butterknife.ButterKnife;
 
 import static android.content.Intent.ACTION_SENDTO;
 import static com.bitsailer.yauc.Util.AppStart.FIRST_TIME;
-import static com.bitsailer.yauc.ui.PhotoType.*;
+import static com.bitsailer.yauc.ui.PhotoType.FAVORITES;
+import static com.bitsailer.yauc.ui.PhotoType.NEW;
+import static com.bitsailer.yauc.ui.PhotoType.OWN;
 import static com.bitsailer.yauc.widget.NewPhotosWidget.EXTRA_NUM_PHOTOS;
 
 /**
@@ -373,14 +375,12 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private String getTabName(int tabPosition) {
-        if (tabPosition == NEW.getTabPosition()) {
-            return getString(R.string.ga_name_tab_new);
-        } if (tabPosition == FAVORITES.getTabPosition()) {
+        if (tabPosition == FAVORITES.getTabPosition()) {
             return getString(R.string.ga_name_tab_favorite);
         } else if (tabPosition == OWN.getTabPosition()) {
             return getString(R.string.ga_name_tab_own);
         } else {
-            return "";
+            return getString(R.string.ga_name_tab_new);
         }
     }
 
@@ -390,6 +390,12 @@ public class MainActivity extends AppCompatActivity implements
                 .setData(uri);
         //noinspection unchecked
         Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle();
+        // use shared element transition for newer devices
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(this,
+                    vh.imageViewPhoto,
+                    getString(R.string.photo_transition_name)).toBundle();
+        }
         startActivity(intent, bundle);
     }
 

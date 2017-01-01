@@ -112,17 +112,7 @@ public class DetailActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        // send analytics event
-        // id of photo can be null (photo not found)
-        int orientation = getResources().getConfiguration().orientation;
-        Bundle bundle = new Bundle();
-        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "image");
-        bundle.putString(FirebaseAnalytics.Param.ITEM_ID, mPhotoId);
-        bundle.putString(YaucApplication.FB_PARAM_ORIENTATION,
-                orientation == Configuration.ORIENTATION_LANDSCAPE ?
-                        YaucApplication.FB_PARAM_ORIENTATION_LANDSCAPE :
-                        YaucApplication.FB_PARAM_ORIENTATION_PORTRAIT);
-        mTracker.logEvent(FirebaseAnalytics.Event.VIEW_ITEM, bundle);
+        mProgressBar.setVisibility(View.GONE);
     }
 
     @Override
@@ -148,6 +138,7 @@ public class DetailActivity extends AppCompatActivity implements
             mLikes = photo.getLikes();
             toggleLikeButton(mFavorite, mLikes);
             mAuthor.setText(getString(R.string.text_author, photo.getUser().getName()));
+            sendAnalyticsEvent();
             mProgressBar.setVisibility(View.VISIBLE);
             // request to load thumbnail as preview
             DrawableRequestBuilder thumbnailRequest = Glide.with(this)
@@ -181,6 +172,21 @@ public class DetailActivity extends AppCompatActivity implements
             mControlsView.setVisibility(View.GONE);
             mTextViewEmptyMessage.setVisibility(View.VISIBLE);
         }
+    }
+
+    private void sendAnalyticsEvent() {
+        // send analytics event
+        // id of photo can be null (photo not found)
+        int orientation = getResources().getConfiguration().orientation;
+        Bundle bundle = new Bundle();
+        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "image");
+        bundle.putString(FirebaseAnalytics.Param.ITEM_ID, mPhotoId == null
+                ? "unknown" : mPhotoId);
+        bundle.putString(YaucApplication.FB_PARAM_ORIENTATION,
+                orientation == Configuration.ORIENTATION_LANDSCAPE ?
+                        YaucApplication.FB_PARAM_ORIENTATION_LANDSCAPE :
+                        YaucApplication.FB_PARAM_ORIENTATION_PORTRAIT);
+        mTracker.logEvent(FirebaseAnalytics.Event.VIEW_ITEM, bundle);
     }
 
     private void toggleLikeButton(boolean liked, int likes) {

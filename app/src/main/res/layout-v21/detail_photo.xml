@@ -1,0 +1,7 @@
+<ImageView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/fullscreenPhoto"
+    android:contentDescription="@string/content_description_photo"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:transitionName="@string/photo_transition_name"/>

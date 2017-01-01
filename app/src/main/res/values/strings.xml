@@ -57,6 +57,7 @@
     <string name="text_anonymous_photo_list">Please sign in to see photos.</string>
     <string name="text_empty_photo_list">Cannot find any photos.</string>
     <string name="text_empty_photo_list_swipe_to_refresh">No photos found, swipe down to refresh.</string>
+    <string name="photo_transition_name" translatable="false">sharedElementPhoto</string>
 
     <string name="title_activity_information">About Photo</string>
 

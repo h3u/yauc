@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent">
+    <com.bitsailer.yauc.ui.DynamicImageView
+        android:id="@+id/photo"
+        android:layout_width="match_parent"
+        android:layout_height="270dp"
+        android:layout_marginTop="4dp"
+        android:background="@color/colorPrimary"
+        android:transitionName="@string/photo_transition_name"/>
+</RelativeLayout>

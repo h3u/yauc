@@ -6,7 +6,11 @@
         <item name="android:statusBarColor">@android:color/background_dark</item>
     </style>
     <style name="AppTheme.NoActionBar.PhotoList" parent="AppTheme.NoActionBar">
-        <item name="android:windowExitTransition">@transition/photo_list_exit</item>
+        <item name="android:windowContentTransitions">true</item>
+    </style>
+    <style name="FullscreenTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="alertDialogTheme">@style/AppCompatAlertDialogStyle</item>
+        <item name="android:windowContentTransitions">true</item>
     </style>
 
     <style name="AppTheme.TransparentBars">
